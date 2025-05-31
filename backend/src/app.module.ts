@@ -7,6 +7,7 @@ import { FuncionarioModule } from './funcionario/funcionario.module';
 import { ChatModule } from './chat/chat.module';
 import { MensagemModule } from './mensagem/mensagem.module';
 import { IaHelperModule } from './ia-helper/ia-helper.module';
+import { EquipeModule } from './equipes/equipe.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { IaHelperModule } from './ia-helper/ia-helper.module';
     ChatModule,
     MensagemModule,
     IaHelperModule,
+    EquipeModule,
   ],
 })
 export class AppModule {}

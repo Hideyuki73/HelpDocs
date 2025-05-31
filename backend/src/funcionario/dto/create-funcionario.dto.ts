@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateFuncionarioDto {
   @IsString()
@@ -16,7 +16,7 @@ export class CreateFuncionarioDto {
   @IsNotEmpty()
   senha: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  empresaId: string;
+  empresaId?: string;
 }
