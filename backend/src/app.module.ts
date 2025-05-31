@@ -1,10 +1,23 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { FirebaseModule } from './firebase/firebase.module';
+import { EmpresaModule } from './empresa/empresa.module';
+import { DocumentoModule } from './documento/documento.module';
+import { VersaoDocumentoModule } from './versao-documento/versao-documento.module';
+import { FuncionarioModule } from './funcionario/funcionario.module';
+import { ChatModule } from './chat/chat.module';
+import { MensagemModule } from './mensagem/mensagem.module';
+import { IaHelperModule } from './ia-helper/ia-helper.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    FirebaseModule,
+    EmpresaModule,
+    DocumentoModule,
+    VersaoDocumentoModule,
+    FuncionarioModule,
+    ChatModule,
+    MensagemModule,
+    IaHelperModule,
+  ],
 })
 export class AppModule {}

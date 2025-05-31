@@ -23,7 +23,7 @@ pnpm-debug.log*
 backend/.env
 frontend/.env
 
-# Firebase keys and rules (não subir essas se forem sensíveis)
+# Firebase keys and rules
 backend/firebase-service-account.json
 frontend/firebase-service-account.json
 
