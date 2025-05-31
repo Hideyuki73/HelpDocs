@@ -8,4 +8,12 @@ export class UpdateDocumentoDto {
   @IsOptional()
   @IsString()
   descricao?: string;
+
+  @IsString()
+  @IsOptional()
+  empresaId?: string;
+
+  @IsString()
+  @IsOptional()
+  criadoPor?: string;
 }

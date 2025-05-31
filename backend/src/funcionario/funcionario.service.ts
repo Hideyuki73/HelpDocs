@@ -14,7 +14,7 @@ export class FuncionarioService {
   }
 
   async create(data: CreateFuncionarioDto) {
-    // Se um empresaId foi enviado, validamos a existência da empresa
+    let empresaRef = null;
     if (data.empresaId) {
       const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
       if (!empresaDoc.exists) {
@@ -22,19 +22,21 @@ export class FuncionarioService {
           'Empresa não encontrada para o funcionário.',
         );
       }
+      empresaRef = this.empresaCollection.doc(data.empresaId);
     }
 
     const docRef = await this.funcionarioCollection.add({
       ...data,
+      empresaId: empresaRef,
       dataCadastro: new Date(),
     });
     const doc = await docRef.get();
-    return { id: doc.id, ...doc.data() };
+    return this.mapFuncionario(doc);
   }
 
   async findAll() {
     const snapshot = await this.funcionarioCollection.get();
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc) => this.mapFuncionario(doc));
   }
 
   async findOne(id: string) {
@@ -42,27 +44,28 @@ export class FuncionarioService {
     if (!doc.exists) {
       throw new NotFoundException('Funcionário não encontrado');
     }
-    return { id: doc.id, ...doc.data() };
+    return this.mapFuncionario(doc);
   }
 
   async update(id: string, data: UpdateFuncionarioDto) {
-    if (data.hasOwnProperty('empresaId') && data.empresaId) {
+    const docRef = this.funcionarioCollection.doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      throw new NotFoundException('Funcionário não encontrado');
+    }
+    const updateData: any = { ...data };
+    if (data.empresaId) {
       const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
       if (!empresaDoc.exists) {
         throw new NotFoundException(
           'Empresa não encontrada para o funcionário.',
         );
       }
+      updateData.empresaId = this.empresaCollection.doc(data.empresaId);
     }
-
-    const docRef = this.funcionarioCollection.doc(id);
-    const doc = await docRef.get();
-    if (!doc.exists) {
-      throw new NotFoundException('Funcionário não encontrado');
-    }
-    await docRef.update({ ...data } as any);
+    await docRef.update(updateData as any);
     const updated = await docRef.get();
-    return { id: updated.id, ...updated.data() };
+    return this.mapFuncionario(updated);
   }
 
   async remove(id: string) {
@@ -73,5 +76,18 @@ export class FuncionarioService {
     }
     await docRef.delete();
     return { message: 'Funcionário deletado com sucesso' };
+  }
+
+  private mapFuncionario(doc: FirebaseFirestore.DocumentSnapshot) {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      nome: data?.nome,
+      email: data?.email,
+      cargo: data?.cargo,
+      senha: data?.senha,
+      empresaId: data?.empresaId?.id || null,
+      dataCadastro: data?.dataCadastro,
+    };
   }
 }

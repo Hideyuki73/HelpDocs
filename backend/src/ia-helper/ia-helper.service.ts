@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateIaHelperDto } from './dto/create-ia-helper.dto';
 
@@ -11,12 +11,20 @@ export class IaHelperService {
   }
 
   async create(data: CreateIaHelperDto) {
+    const funcionarioDoc = await this.firestore
+      .collection('funcionarios')
+      .doc(data.criadoPor)
+      .get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário criador não encontrado.');
+    }
     const docRef = await this.collection.add({
       ...data,
+      criadoPor: this.firestore.collection('funcionarios').doc(data.criadoPor),
       dataCriacao: new Date(),
     });
     const doc = await docRef.get();
-    return { id: doc.id, ...doc.data() };
+    return { id: doc.id, ...doc.data(), criadoPor: data.criadoPor };
   }
 
   async findAll() {
