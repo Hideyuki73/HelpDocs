@@ -39,4 +39,12 @@ export class EquipeController {
   remove(@Param('id') id: string) {
     return this.equipeService.remove(id);
   }
+
+  @Post(':id/adicionar-membros')
+  addMembros(
+    @Param('id') equipeId: string,
+    @Body('membros') membros: string[],
+  ) {
+    return this.equipeService.addMembros(equipeId, membros);
+  }
 }

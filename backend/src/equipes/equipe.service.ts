@@ -64,6 +64,35 @@ export class EquipeService {
     const docSnap = await docRef.get();
     return this.mapEquipe(docSnap);
   }
+  async addMembros(equipeId: string, membros: string[]) {
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    if (!equipeDoc.exists) {
+      throw new NotFoundException('Equipe não encontrada.');
+    }
+
+    // Valida se todos os membros existem
+    for (const memberId of membros) {
+      const memberDoc = await this.funcionarioCollection.doc(memberId).get();
+      if (!memberDoc.exists) {
+        throw new NotFoundException(`Membro com id ${memberId} não encontrado.`);
+      }
+    }
+
+    // Recupera membros atuais e adiciona os novos (sem duplicar)
+    const data = equipeDoc.data();
+    const membrosAtuais: DocumentReference[] = Array.isArray(data?.membros) ? data.membros : [];
+    const membrosAtuaisIds = membrosAtuais.map((ref) => ref.id);
+
+    const novosMembrosRefs = membros
+      .filter((id) => !membrosAtuaisIds.includes(id))
+      .map((id) => this.funcionarioCollection.doc(id));
+
+    const membrosAtualizados = [...membrosAtuais, ...novosMembrosRefs];
+
+    await this.equipeCollection.doc(equipeId).update({ membros: membrosAtualizados });
+    const updatedDoc = await this.equipeCollection.doc(equipeId).get();
+    return this.mapEquipe(updatedDoc);
+  }
 
   async findAll() {
     const snapshot = await this.equipeCollection.get();
