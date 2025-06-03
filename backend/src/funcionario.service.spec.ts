@@ -127,4 +127,27 @@ describe('FuncionarioService', () => {
     const result = await service.remove('func1');
     expect(result).toHaveProperty('message');
   });
+
+  it('deve lançar erro se código de convite for inválido ao associar', async () => {
+    mockFirestore.get.mockResolvedValueOnce({ exists: false }); // Empresa não encontrada
+    await expect(service.associateWithEmpresa('func1', 'codigoInvalido')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('deve lançar erro se funcionário não existir ao associar', async () => {
+    mockFirestore.get.mockResolvedValueOnce({ exists: true }); // Empresa encontrada
+    mockFirestore.get.mockResolvedValueOnce({ exists: false }); // Funcionário não encontrado
+    await expect(service.associateWithEmpresa('naoexiste', 'codigoValido')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('deve associar funcionário à empresa com sucesso', async () => {
+    mockFirestore.get.mockResolvedValueOnce({ exists: true }); // Empresa encontrada
+    mockFirestore.get.mockResolvedValueOnce({ exists: true }); // Funcionário encontrado
+    mockFirestore.update.mockResolvedValueOnce(undefined); // Atualização bem-sucedida
+    const result = await service.associateWithEmpresa('func1', 'codigoValido');
+    expect(result).toHaveProperty('empresaId', 'codigoValido');
+  });
 });

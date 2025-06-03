@@ -34,6 +34,25 @@ export class FuncionarioService {
     return this.mapFuncionario(doc);
   }
 
+  async associateWithEmpresa(funcionarioId: string, empresaId: string) {
+    // Verificar se a empresa existe
+    const empresaDoc = await this.empresaCollection.doc(empresaId).get();
+    if (!empresaDoc.exists) {
+      throw new NotFoundException('Código de convite inválido: Empresa não encontrada');
+    }
+
+    // Verificar se o funcionário existe
+    const funcionarioDoc = await this.funcionarioCollection.doc(funcionarioId).get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário não encontrado');
+    }
+
+    // Atualizar o funcionário com o código da empresa
+    await this.funcionarioCollection.doc(funcionarioId).update({ empresaId });
+    const updatedFuncionario = await this.funcionarioCollection.doc(funcionarioId).get();
+    return this.mapFuncionario(updatedFuncionario);
+  }
+
   async findAll() {
     const snapshot = await this.funcionarioCollection.get();
     return snapshot.docs.map((doc) => this.mapFuncionario(doc));
