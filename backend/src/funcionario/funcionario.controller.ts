@@ -19,7 +19,13 @@ export class FuncionarioController {
   ) {
     return this.funcionarioService.associateWithEmpresa(funcionarioId, empresaId);
   }
-
+  @Post(':id/criar-empresa')
+  createEmpresa(
+    @Param('id') funcionarioId: string,
+    @Body() empresaData: any,
+  ) {
+    return this.funcionarioService.createEmpresa(funcionarioId, empresaData);
+  }
   @Get()
   findAll() {
     return this.funcionarioService.findAll();

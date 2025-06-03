@@ -33,6 +33,31 @@ export class FuncionarioService {
     const doc = await docRef.get();
     return this.mapFuncionario(doc);
   }
+  async createEmpresa(funcionarioId: string, empresaData: any) {
+    // Verifica se o funcionário existe
+    const funcionarioDoc = await this.funcionarioCollection.doc(funcionarioId).get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário não encontrado');
+    }
+
+    // Cria a empresa
+    const empresaRef = await this.empresaCollection.add({
+      ...empresaData,
+      criadorId: this.funcionarioCollection.doc(funcionarioId),
+      dataCadastro: new Date(),
+    });
+
+    // Atualiza o funcionário para associar à nova empresa
+    await this.funcionarioCollection.doc(funcionarioId).update({
+      empresaId: empresaRef,
+    });
+
+    const empresaDoc = await empresaRef.get();
+    return {
+      id: empresaDoc.id,
+      ...empresaDoc.data(),
+    };
+  }
 
   async associateWithEmpresa(funcionarioId: string, empresaId: string) {
     // Verificar se a empresa existe
