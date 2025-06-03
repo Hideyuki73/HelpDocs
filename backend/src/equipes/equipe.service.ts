@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Firestore, DocumentReference } from 'firebase-admin/firestore';
 import { CreateEquipeDto } from './dto/create-equipe.dto';
 import { UpdateEquipeDto } from './dto/update-equipe.dto';
@@ -28,6 +28,15 @@ export class EquipeService {
       .get();
     if (!criadorDoc.exists) {
       throw new NotFoundException('Funcionário criador não encontrado.');
+    }
+
+    // Validação de cargo do criador
+    const criadorData = criadorDoc.data();
+    if (
+      criadorData.cargo !== 'Gerente de projetos' &&
+      criadorData.cargo !== 'Desenvolvedor'
+    ) {
+      throw new ForbiddenException('Apenas Gerente de projetos ou Desenvolvedor podem criar equipes.');
     }
 
     // Validação opcional: Verifica se cada membro informado existe
