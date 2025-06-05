@@ -72,11 +72,13 @@ describe('EquipeService', () => {
       };
 
       const docDocMock = createDocMock({ id: 'doc1' });
-      const criadorDocMock = createDocMock({ id: 'func1', cargo: 'Outro Cargo' });
+      const criadorDocMock = createDocMock({
+        id: 'func1',
+        cargo: 'Outro Cargo',
+      });
 
       documentoCollectionMock.doc.mockReturnValue(docDocMock);
-      funcionarioCollectionMock.doc
-        .mockReturnValueOnce(criadorDocMock);
+      funcionarioCollectionMock.doc.mockReturnValueOnce(criadorDocMock);
 
       await expect(service.create(dto)).rejects.toThrow(ForbiddenException);
     });
@@ -90,7 +92,10 @@ describe('EquipeService', () => {
       };
 
       const docDocMock = createDocMock({ id: 'doc1' });
-      const criadorDocMock = createDocMock({ id: 'func1', cargo: 'Gerente de projetos' });
+      const criadorDocMock = createDocMock({
+        id: 'func1',
+        cargo: 'Gerente de projetos',
+      });
       const membroDocMock = createDocMock({ id: 'func2' });
       const membro2DocMock = createDocMock({ id: 'func3' });
 
@@ -139,11 +144,13 @@ describe('EquipeService', () => {
       };
 
       const docDocMock = createDocMock({ id: 'doc2' });
-      const criadorDocMock = createDocMock({ id: 'func2', cargo: 'Desenvolvedor' });
+      const criadorDocMock = createDocMock({
+        id: 'func2',
+        cargo: 'Desenvolvedor',
+      });
 
       documentoCollectionMock.doc.mockReturnValue(docDocMock);
-      funcionarioCollectionMock.doc
-        .mockReturnValueOnce(criadorDocMock);
+      funcionarioCollectionMock.doc.mockReturnValueOnce(criadorDocMock);
 
       const equipeDocRef = {
         get: jest.fn().mockResolvedValue({
@@ -220,11 +227,11 @@ describe('EquipeService', () => {
         get: jest.fn().mockResolvedValue({ exists: false }),
       });
 
-      await expect(service.addMembros('equipe1', ['m2'])).rejects.toThrow(NotFoundException);
+      await expect(service.addMembros('equipe1', ['m2'])).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
-
-  // --- TESTES ORIGINAIS MANTIDOS ABAIXO ---
 
   describe('findAll', () => {
     it('deve retornar todas as equipes', async () => {
