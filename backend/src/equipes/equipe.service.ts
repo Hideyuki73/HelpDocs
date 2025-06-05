@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Firestore, DocumentReference } from 'firebase-admin/firestore';
 import { CreateEquipeDto } from './dto/create-equipe.dto';
 import { UpdateEquipeDto } from './dto/update-equipe.dto';
@@ -30,6 +30,15 @@ export class EquipeService {
       throw new NotFoundException('Funcionário criador não encontrado.');
     }
 
+    // Validação de cargo do criador
+    const criadorData = criadorDoc.data();
+    if (
+      criadorData.cargo !== 'Gerente de projetos' &&
+      criadorData.cargo !== 'Desenvolvedor'
+    ) {
+      throw new ForbiddenException('Apenas Gerente de projetos ou Desenvolvedor podem criar equipes.');
+    }
+
     // Validação opcional: Verifica se cada membro informado existe
     if (data.membros && data.membros.length > 0) {
       for (const memberId of data.membros) {
@@ -54,6 +63,35 @@ export class EquipeService {
     const docRef = await this.equipeCollection.add(equipeData);
     const docSnap = await docRef.get();
     return this.mapEquipe(docSnap);
+  }
+  async addMembros(equipeId: string, membros: string[]) {
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    if (!equipeDoc.exists) {
+      throw new NotFoundException('Equipe não encontrada.');
+    }
+
+    // Valida se todos os membros existem
+    for (const memberId of membros) {
+      const memberDoc = await this.funcionarioCollection.doc(memberId).get();
+      if (!memberDoc.exists) {
+        throw new NotFoundException(`Membro com id ${memberId} não encontrado.`);
+      }
+    }
+
+    // Recupera membros atuais e adiciona os novos (sem duplicar)
+    const data = equipeDoc.data();
+    const membrosAtuais: DocumentReference[] = Array.isArray(data?.membros) ? data.membros : [];
+    const membrosAtuaisIds = membrosAtuais.map((ref) => ref.id);
+
+    const novosMembrosRefs = membros
+      .filter((id) => !membrosAtuaisIds.includes(id))
+      .map((id) => this.funcionarioCollection.doc(id));
+
+    const membrosAtualizados = [...membrosAtuais, ...novosMembrosRefs];
+
+    await this.equipeCollection.doc(equipeId).update({ membros: membrosAtualizados });
+    const updatedDoc = await this.equipeCollection.doc(equipeId).get();
+    return this.mapEquipe(updatedDoc);
   }
 
   async findAll() {

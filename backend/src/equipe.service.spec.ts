@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { EquipeService } from './equipes/equipe.service';
 
 const createDocMock = (data: any = {}, exists = true) => {
@@ -63,7 +63,27 @@ describe('EquipeService', () => {
   });
 
   describe('create', () => {
-    it('deve criar uma equipe com sucesso', async () => {
+    it('deve lançar ForbiddenException se o cargo não for permitido', async () => {
+      const dto = {
+        nome: 'Equipe A',
+        documentoId: 'doc1',
+        criadorId: 'func1',
+        membros: [],
+      };
+
+      const docDocMock = createDocMock({ id: 'doc1' });
+      const criadorDocMock = createDocMock({
+        id: 'func1',
+        cargo: 'Outro Cargo',
+      });
+
+      documentoCollectionMock.doc.mockReturnValue(docDocMock);
+      funcionarioCollectionMock.doc.mockReturnValueOnce(criadorDocMock);
+
+      await expect(service.create(dto)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('deve criar uma equipe se o cargo for Gerente de projetos', async () => {
       const dto = {
         nome: 'Equipe A',
         documentoId: 'doc1',
@@ -72,7 +92,10 @@ describe('EquipeService', () => {
       };
 
       const docDocMock = createDocMock({ id: 'doc1' });
-      const criadorDocMock = createDocMock({ id: 'func1' });
+      const criadorDocMock = createDocMock({
+        id: 'func1',
+        cargo: 'Gerente de projetos',
+      });
       const membroDocMock = createDocMock({ id: 'func2' });
       const membro2DocMock = createDocMock({ id: 'func3' });
 
@@ -110,6 +133,103 @@ describe('EquipeService', () => {
       });
 
       expect(equipeCollectionMock.add).toHaveBeenCalled();
+    });
+
+    it('deve criar uma equipe se o cargo for Desenvolvedor', async () => {
+      const dto = {
+        nome: 'Equipe B',
+        documentoId: 'doc2',
+        criadorId: 'func2',
+        membros: [],
+      };
+
+      const docDocMock = createDocMock({ id: 'doc2' });
+      const criadorDocMock = createDocMock({
+        id: 'func2',
+        cargo: 'Desenvolvedor',
+      });
+
+      documentoCollectionMock.doc.mockReturnValue(docDocMock);
+      funcionarioCollectionMock.doc.mockReturnValueOnce(criadorDocMock);
+
+      const equipeDocRef = {
+        get: jest.fn().mockResolvedValue({
+          exists: true,
+          id: 'equipe2',
+          data: () => ({
+            nome: dto.nome,
+            documentoId: { id: 'doc2' },
+            criadorId: { id: 'func2' },
+            membros: [],
+            dataCadastro: expect.any(Date),
+          }),
+        }),
+      };
+
+      equipeCollectionMock.add.mockResolvedValue(equipeDocRef);
+
+      const result = await service.create(dto);
+
+      expect(result).toEqual({
+        id: 'equipe2',
+        nome: 'Equipe B',
+        documentoId: 'doc2',
+        criadorId: 'func2',
+        membros: [],
+        dataCadastro: expect.any(Date),
+      });
+
+      expect(equipeCollectionMock.add).toHaveBeenCalled();
+    });
+  });
+
+  describe('addMembros', () => {
+    it('deve adicionar membros novos à equipe', async () => {
+      const equipeDocMock = createDocMock({
+        membros: [{ id: 'm1' }],
+        nome: 'Equipe X',
+        documentoId: { id: 'doc1' },
+        criadorId: { id: 'func1' },
+        dataCadastro: new Date(),
+      });
+
+      equipeCollectionMock.doc.mockReturnValue(equipeDocMock);
+      funcionarioCollectionMock.doc.mockReturnValue({
+        get: jest.fn().mockResolvedValue({ exists: true }),
+      });
+      equipeDocMock.get.mockResolvedValue({
+        id: 'equipe1',
+        data: () => ({
+          nome: 'Equipe X',
+          documentoId: { id: 'doc1' },
+          criadorId: { id: 'func1' },
+          membros: [{ id: 'm1' }, { id: 'm2' }],
+          dataCadastro: new Date(),
+        }),
+      });
+
+      const result = await service.addMembros('equipe1', ['m2']);
+      expect(result.membros).toContain('m1');
+      expect(result.membros).toContain('m2');
+    });
+
+    it('deve lançar NotFoundException se algum membro não existir', async () => {
+      const equipeDocMock = createDocMock({
+        membros: [],
+        nome: 'Equipe X',
+        documentoId: { id: 'doc1' },
+        criadorId: { id: 'func1' },
+        dataCadastro: new Date(),
+      });
+
+      equipeCollectionMock.doc.mockReturnValue(equipeDocMock);
+      funcionarioCollectionMock.doc.mockReturnValue({
+        get: jest.fn().mockResolvedValue({ exists: false }),
+      });
+
+      await expect(service.addMembros('equipe1', ['m2'])).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

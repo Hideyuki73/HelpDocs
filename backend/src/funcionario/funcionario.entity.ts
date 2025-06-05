@@ -6,6 +6,6 @@ export class Funcionario {
   email: string;
   cargo: string;
   senha: string;
-  empresaId: string; // Referência à Empresa
+  empresaId: string;
   dataCadastro: Date;
 }

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Patch,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { FuncionarioService } from './funcionario.service';
 import { CreateFuncionarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
@@ -20,6 +12,20 @@ export class FuncionarioController {
     return this.funcionarioService.create(createFuncionarioDto);
   }
 
+  @Post(':id/associar')
+  async associateWithEmpresa(
+    @Param('id') funcionarioId: string,
+    @Body('empresaId') empresaId: string,
+  ) {
+    return this.funcionarioService.associateWithEmpresa(funcionarioId, empresaId);
+  }
+  @Post(':id/criar-empresa')
+  createEmpresa(
+    @Param('id') funcionarioId: string,
+    @Body() empresaData: any,
+  ) {
+    return this.funcionarioService.createEmpresa(funcionarioId, empresaData);
+  }
   @Get()
   findAll() {
     return this.funcionarioService.findAll();
@@ -31,10 +37,7 @@ export class FuncionarioController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFuncionarioDto: UpdateFuncionarioDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateFuncionarioDto: UpdateFuncionarioDto) {
     return this.funcionarioService.update(id, updateFuncionarioDto);
   }
 
