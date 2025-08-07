@@ -1,12 +1,30 @@
 'use client'
 
-import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button } from '@chakra-ui/react'
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
+import {
+  Box,
+  Stack,
+  Spinner,
+  Text,
+  FormControl,
+  FormLabel,
+  Input,
+  Flex,
+  Button,
+} from '@chakra-ui/react'
+import {
+  Formik,
+  Form,
+  Field,
+  ErrorMessage,
+  FormikHelpers,
+} from 'formik'
 import { object, string, InferType } from 'yup'
-import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
-import { updateProfile } from 'firebase/auth'
+import {
+  auth,
+  createUserWithEmailAndPassword,
+} from '../../../config/firebase'
+import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore, doc, setDoc } from 'firebase/firestore'
-import { setPersistence, browserLocalPersistence } from 'firebase/auth'
 
 // ---- Validação ----
 const RegistroSchema = object({
@@ -21,26 +39,24 @@ export type FormRegisterValues = InferType<typeof RegistroSchema>
 
 interface FormRegistroProps {
   trocarTela: () => void
+  onSubmit?: (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => void
 }
 
-export default function FormRegistro({ trocarTela }: FormRegistroProps) {
+export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps) {
   const firestore = getFirestore()
 
-  const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
+  const handleRegistro = async (
+    values: FormRegisterValues,
+    actions: FormikHelpers<FormRegisterValues>
+  ) => {
     actions.setSubmitting(true)
     try {
-      // Persistência local antes de criar usuário
       await setPersistence(auth, browserLocalPersistence)
-
-      // Criar usuário no Auth
       const cred = await createUserWithEmailAndPassword(auth, values.email, values.senha)
       const user = cred.user
 
-      // Atualizar displayName
       await updateProfile(user, { displayName: values.nome })
 
-      // Salvar dados extras no Firestore
-      // Coleções e documentos são criados automaticamente no Firestore
       await setDoc(doc(firestore, 'users', user.uid), {
         nome: values.nome,
         email: values.email,
@@ -50,7 +66,7 @@ export default function FormRegistro({ trocarTela }: FormRegistroProps) {
 
       console.log('Usuário registrado e perfil atualizado:', user)
       actions.resetForm()
-      trocarTela() // volta para login
+      trocarTela()
     } catch (error: any) {
       console.error('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
@@ -67,111 +83,67 @@ export default function FormRegistro({ trocarTela }: FormRegistroProps) {
   }
 
   return (
-    <Box
-      p={8}
-      bg="gray.500"
-      w="100%"
-      mt="5%"
-      mx="auto"
-    >
-      <Text
-        color="white"
-        fontSize="2xl"
-        mb={4}
-        textAlign="center"
-      >
+    <Box p={8} bg="gray.500" w="100%" mt="5%" mx="auto">
+      <Text color="white" fontSize="2xl" mb={4} textAlign="center">
         Registro
       </Text>
 
       <Formik
         initialValues={initialValues}
         validationSchema={RegistroSchema}
-        onSubmit={handleRegistro}
+        onSubmit={onSubmit ?? handleRegistro}
       >
         {({ isSubmitting }) => (
           <Form>
             <Stack spacing={4}>
-              {/* E-mail */}
               <Field name="email">
                 {({ field }: any) => (
-                  <FormControl
-                    isInvalid={!!(field.name && ErrorMessage)}
-                    isRequired
-                  >
+                  <FormControl isRequired>
                     <FormLabel color="white">E-mail</FormLabel>
-                    <Input
-                      {...field}
-                      type="email"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Input {...field} type="email" bg="white" />
+                    <Text color="red.300" fontSize="sm">
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              {/* Nome */}
               <Field name="nome">
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Nome</FormLabel>
-                    <Input
-                      {...field}
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Input {...field} bg="white" />
+                    <Text color="red.300" fontSize="sm">
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              {/* Senha */}
               <Field name="senha">
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Senha</FormLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Input {...field} type="password" bg="white" />
+                    <Text color="red.300" fontSize="sm">
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              {/* Celular */}
               <Field name="celular">
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Celular</FormLabel>
-                    <Input
-                      {...field}
-                      type="tel"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Input {...field} type="tel" bg="white" />
+                    <Text color="red.300" fontSize="sm">
                       <ErrorMessage name="celular" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
+
               <Flex justify="space-between">
                 <Button
                   type="submit"
