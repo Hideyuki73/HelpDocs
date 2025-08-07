@@ -1,9 +1,29 @@
 'use client'
 
-import { Spinner, Box, Stack, FormControl, FormLabel, Input, Text, Flex, Button } from '@chakra-ui/react'
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
+import {
+  Spinner,
+  Box,
+  Stack,
+  FormControl,
+  FormLabel,
+  Input,
+  Text,
+  Flex,
+  Button,
+} from '@chakra-ui/react'
+import {
+  Formik,
+  Form,
+  Field,
+  ErrorMessage,
+  FormikHelpers,
+} from 'formik'
 import { object, string, InferType } from 'yup'
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+} from 'firebase/auth'
 import { auth } from '../../../config/firebase'
 import { useRouter } from 'next/navigation'
 
@@ -11,24 +31,26 @@ const LoginSchema = object({
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   senha: string().required('Senha é obrigatória'),
 })
+
 export type FormLoginValues = InferType<typeof LoginSchema>
 
 interface FormLoginProps {
   trocarTela: () => void
+  onSubmit?: (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => void
 }
 
-export default function FormLogin({ trocarTela }: FormLoginProps) {
+export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
   const router = useRouter()
-  const handleLogin = async (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => {
+
+  const handleLogin = async (
+    values: FormLoginValues,
+    actions: FormikHelpers<FormLoginValues>
+  ) => {
     actions.setSubmitting(true)
     try {
-      // configura persistência local
       await setPersistence(auth, browserLocalPersistence)
-
-      // faz login
       const cred = await signInWithEmailAndPassword(auth, values.email, values.senha)
       console.log('Login realizado:', cred.user)
-      // redirecionar ou trocar tela
       router.push('/home')
     } catch (error: any) {
       console.error('Erro no login:', error.message)
@@ -42,18 +64,13 @@ export default function FormLogin({ trocarTela }: FormLoginProps) {
 
   return (
     <Box w="100%">
-      <Text
-        mt={4}
-        color="white"
-        fontSize="xl"
-        textAlign="center"
-      >
+      <Text mt={4} fontSize="xl" textAlign="center" fontWeight="bold">
         Login
       </Text>
       <Formik
         initialValues={initialValues}
         validationSchema={LoginSchema}
-        onSubmit={handleLogin}
+        onSubmit={onSubmit ?? handleLogin}
       >
         {({ isSubmitting }) => (
           <Form>
@@ -61,16 +78,9 @@ export default function FormLogin({ trocarTela }: FormLoginProps) {
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">E-mail</FormLabel>
-                    <Input
-                      {...field}
-                      type="email"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <FormLabel>E-mail</FormLabel>
+                    <Input {...field} type="email" bg="white" />
+                    <Text color="red.500" fontSize="sm">
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -80,16 +90,9 @@ export default function FormLogin({ trocarTela }: FormLoginProps) {
               <Field name="senha">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">Senha</FormLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <FormLabel>Senha</FormLabel>
+                    <Input {...field} type="password" bg="white" />
+                    <Text color="red.500" fontSize="sm">
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
@@ -110,8 +113,8 @@ export default function FormLogin({ trocarTela }: FormLoginProps) {
                 <Button
                   w="45%"
                   onClick={trocarTela}
-                  bg="blue.900"
-                  _hover={{ bg: 'blue.700' }}
+                  bg="gray.600"
+                  _hover={{ bg: 'gray.500' }}
                   color="white"
                 >
                   Registrar

@@ -1,5 +1,16 @@
 {
   "dependencies": {
-    "@nestjs/cli": "^11.0.7"
+    "@chakra-ui/layout": "^2.3.1",
+    "@chakra-ui/react": "^3.24.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@nestjs/cli": "^11.0.7",
+    "framer-motion": "^12.23.12",
+    "next": "^15.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "typescript": "^5.9.2"
   }
 }
