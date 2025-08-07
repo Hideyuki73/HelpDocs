@@ -1,36 +1,63 @@
 'use client'
 
-import { Box, Button, Heading, Stack, Text, VStack, SimpleGrid, Icon } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Heading,
+  Stack,
+  Text,
+  VStack,
+  SimpleGrid,
+  Icon,
+  useColorModeValue,
+  HStack,
+} from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
-import { PageLayout } from './components/layout/PageLayout'
-import { FaRobot, FaLock, FaUsers, FaComments, FaChartLine } from 'react-icons/fa'
+import { FaRobot, FaLock, FaUsers, FaComments, FaChartLine, FaBuilding } from 'react-icons/fa'
 
 export default function HomePage() {
   const router = useRouter()
+  const bg = useColorModeValue('white', 'gray.800')
+  const border = useColorModeValue('gray.200', 'gray.700')
 
   return (
-    <PageLayout title="Bem-vindo ao HelpDocs">
-      <VStack spacing={10} align="center" mt={8}>
-        <Text fontSize="xl" textAlign="center" maxW="800px">
+    <Box
+      maxW="900px"
+      mx="auto"
+      mt={16}
+      p={8}
+      borderWidth={1}
+      borderRadius="lg"
+      boxShadow="lg"
+      bg={bg}
+      borderColor={border}
+    >
+      <VStack spacing={10} align="center">
+        <Heading textAlign="center">Bem-vindo ao HelpDocs</Heading>
+
+        <Text fontSize="lg" textAlign="center" maxW="700px" color="gray.600">
           Uma plataforma inteligente para documentação de software. Com suporte de IA, colaboração em equipe e segurança, você nunca mais vai esquecer uma etapa.
         </Text>
 
-        <Stack direction={{ base: 'column', md: 'row' }} spacing={6}>
-          <Button colorScheme="teal" size="lg" onClick={() => router.push('user/login')}>
+        <Stack direction={{ base: 'column', md: 'row' }} spacing={6} justify="center" w="100%">
+          <Button colorScheme="teal" size="lg" onClick={() => router.push('/user/login')}>
             Entrar
           </Button>
+          <Button variant="outline" colorScheme="teal" size="lg" onClick={() => router.push('/user/register')}>
+            Criar Conta
+          </Button>
           <Button
-  variant="outline"
-  colorScheme="teal"
-  size="lg"
-  onClick={() => router.push('/user/register')}
->
-  Criar Conta
-</Button>
-
+            leftIcon={<Icon as={FaBuilding} />}
+            colorScheme="blue"
+            size="lg"
+            onClick={() => router.push('/empresa/register')}
+            _hover={{ bg: 'blue.600' }}
+          >
+            Criar Empresa
+          </Button>
         </Stack>
 
-        <Box mt={10} w="100%">
+        <Box w="100%" mt={10}>
           <Heading size="md" mb={6} textAlign="center">
             Funcionalidades Principais
           </Heading>
@@ -64,20 +91,24 @@ export default function HomePage() {
         </Box>
 
         <Box mt={16} textAlign="center">
-          <Heading size="md" mb={4}>Para quem é o HelpDocs?</Heading>
-          <Text maxW="700px" mx="auto">
+          <Heading size="md" mb={4}>
+            Para quem é o HelpDocs?
+          </Heading>
+          <Text maxW="700px" mx="auto" color="gray.600">
             Desenvolvedores, gerentes de projeto, analistas de requisitos, product owners e profissionais de UX que desejam uma documentação mais eficiente, organizada e colaborativa.
           </Text>
         </Box>
 
         <Box mt={16} textAlign="center">
-          <Heading size="md" mb={4}>Como funciona?</Heading>
-          <Text maxW="700px" mx="auto">
+          <Heading size="md" mb={4}>
+            Como funciona?
+          </Heading>
+          <Text maxW="700px" mx="auto" color="gray.600">
             Após criar sua conta, você pode cadastrar sua empresa, montar sua equipe, criar documentos e deixar que a IA te ajude a manter tudo claro, completo e bem estruturado.
           </Text>
         </Box>
       </VStack>
-    </PageLayout>
+    </Box>
   )
 }
 
@@ -93,7 +124,7 @@ function Feature({ icon, title, description }: FeatureProps) {
       <Icon as={icon} boxSize={6} color="teal.500" />
       <Box>
         <Text fontWeight="bold">{title}</Text>
-        <Text>{description}</Text>
+        <Text color="gray.600">{description}</Text>
       </Box>
     </Stack>
   )
