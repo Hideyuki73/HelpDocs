@@ -1,42 +1,34 @@
+// empresa.controller.ts
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Param,
-  Delete,
-  Patch,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
+import * as admin from 'firebase-admin';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 
 @Controller('empresas')
 export class EmpresaController {
   constructor(private readonly empresaService: EmpresaService) {}
 
   @Post()
-  create(@Body() createEmpresaDto: CreateEmpresaDto) {
-    return this.empresaService.create(createEmpresaDto);
-  }
+  async create(
+    @Body() createEmpresaDto: CreateEmpresaDto,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) {
+      throw new UnauthorizedException('Token não fornecido');
+    }
+    const token = authorization.split(' ')[1];
+    if (!token) throw new UnauthorizedException('Token mal formatado');
 
-  @Get()
-  findAll() {
-    return this.empresaService.findAll();
-  }
+    const decoded = await admin.auth().verifyIdToken(token); // verifica token
+    const uid = decoded.uid;
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.empresaService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmpresaDto: UpdateEmpresaDto) {
-    return this.empresaService.update(id, updateEmpresaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.empresaService.remove(id);
+    // agora chama o serviço passando o UID verificado
+    return this.empresaService.create(createEmpresaDto, uid);
   }
 }

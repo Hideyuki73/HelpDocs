@@ -15,11 +15,10 @@ const LoginSchema = object({
 export type FormLoginValues = InferType<typeof LoginSchema>
 
 interface FormLoginProps {
-  trocarTela: () => void
   onSubmit?: (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => void
 }
 
-export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
+export default function FormLogin({ onSubmit }: FormLoginProps) {
   const router = useRouter()
 
   const handleLogin = async (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => {
@@ -108,7 +107,8 @@ export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
                 </Button>
                 <Button
                   w="45%"
-                  onClick={trocarTela}
+                  as={'a'}
+                  href="/user/register"
                   bg="gray.600"
                   _hover={{ bg: 'gray.500' }}
                   color="white"

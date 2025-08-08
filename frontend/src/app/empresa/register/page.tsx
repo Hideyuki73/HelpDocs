@@ -1,7 +1,6 @@
 'use client'
 
 import { Box, Heading, Text, Toast, useToast } from '@chakra-ui/react'
-import FormRegistroEmpresa from '../../components/form/FormRegistroEmpresa'
 import FormEmpresa from '../../components/form/FormRegistroEmpresa'
 import { criarEmpresaClient } from '@/action/empresa'
 
@@ -32,10 +31,13 @@ export default function RegisterEmpresaPage() {
 
       <FormEmpresa
         onSubmit={async (values) => {
-          const response = await criarEmpresaClient(values)
-
-          if (response) {
-            console.log(response)
+          try {
+            const response = await criarEmpresaClient(values)
+            console.log('Empresa criada:', response)
+            // aqui pode redirecionar ou mostrar toast
+          } catch (err: any) {
+            console.error(err)
+            // mostrar toast de erro
           }
         }}
       />

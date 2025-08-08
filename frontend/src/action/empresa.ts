@@ -1,3 +1,4 @@
+import { auth } from '@/config/firebase'
 import { api } from './api'
 
 export interface EmpresaParams {
@@ -9,7 +10,11 @@ export interface EmpresaParams {
 }
 
 export async function criarEmpresaClient(body: EmpresaParams) {
-  const response = await api.post('/empresas', body)
-  console.log('Empresa criada:', response.data)
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+  const response = await api.post('/empresas', body, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   return response.data
 }

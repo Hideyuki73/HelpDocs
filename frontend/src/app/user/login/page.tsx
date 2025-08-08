@@ -14,7 +14,11 @@ export default function Page() {
       mt={'5%'}
     >
       <Stack alignItems={'center'}>
-        <FormLogin trocarTela={() => redirect('/home')} />
+        <FormLogin
+          onSubmit={async (values) => {
+            redirect('/home')
+          }}
+        />
       </Stack>
     </Box>
   )

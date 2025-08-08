@@ -7,6 +7,8 @@ import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
 import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore, doc, setDoc } from 'firebase/firestore'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { api } from '@/action/api'
 
 // ---- Validação ----
 const RegistroSchema = object({
@@ -20,11 +22,10 @@ const RegistroSchema = object({
 export type FormRegisterValues = InferType<typeof RegistroSchema>
 
 interface FormRegistroProps {
-  trocarTela: () => void
   onSubmit?: (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => void
 }
 
-export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps) {
+export default function FormRegistro({ onSubmit }: FormRegistroProps) {
   const firestore = getFirestore()
 
   const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
@@ -33,18 +34,26 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
       await setPersistence(auth, browserLocalPersistence)
       const cred = await createUserWithEmailAndPassword(auth, values.email, values.senha)
       const user = cred.user
-
       await updateProfile(user, { displayName: values.nome })
 
-      await setDoc(doc(firestore, 'users', user.uid), {
-        nome: values.nome,
-        email: values.email,
-        celular: values.celular,
-        createdAt: new Date(),
-      })
+      // obter idToken e enviar para backend para criar 'funcionario' com o mesmo uid
+      const token = await user.getIdToken()
+      await api.post(
+        '/funcionarios',
+        {
+          nome: values.nome,
+          email: values.email,
+          celular: values.celular,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
 
       actions.resetForm()
-      trocarTela()
+      redirect('/user/login')
     } catch (error: any) {
       console.error('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
@@ -172,7 +181,8 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                   {isSubmitting ? <Spinner size="sm" /> : 'Registrar'}
                 </Button>
                 <Button
-                  onClick={trocarTela}
+                  as={'a'}
+                  href="/user/login"
                   w="45%"
                   bg="blue.900"
                   _hover={{ bg: 'blue.700' }}

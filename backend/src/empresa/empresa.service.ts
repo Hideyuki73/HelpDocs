@@ -6,14 +6,20 @@ import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 @Injectable()
 export class EmpresaService {
   private readonly empresaCollection;
+  private readonly funcionarioCollection;
 
   constructor(@Inject('FIRESTORE') private readonly firestore: Firestore) {
     this.empresaCollection = this.firestore.collection('empresas');
+    this.funcionarioCollection = this.firestore.collection('funcionarios');
   }
 
-  async create(createEmpresaDto: CreateEmpresaDto) {
+  async create(createEmpresaDto: CreateEmpresaDto, criadorUid: string) {
+    // armazena criadorId como ref para o documento do funcionário (ou apenas o uid)
+    const criadorRef = this.funcionarioCollection.doc(criadorUid); // se seus funcionários tiverem doc com id = uid
     const docRef = await this.empresaCollection.add({
       ...createEmpresaDto,
+      criadorUid,
+      criadorRef,
       dataCadastro: new Date(),
     });
     const doc = await docRef.get();

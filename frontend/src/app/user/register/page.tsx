@@ -2,7 +2,7 @@
 
 import { Box, Heading, Text } from '@chakra-ui/react'
 import FormRegistro from '../../components/form/FormRegistro'
-import { redirect } from 'next/navigation'
+import { criarFuncionarioClient } from '@/action/funcionario'
 
 export default function RegisterPage() {
   return (
@@ -30,8 +30,11 @@ export default function RegisterPage() {
       </Text>
 
       <FormRegistro
-        trocarTela={() => {
-          redirect('/user/login')
+        onSubmit={async (values) => {
+          const response = await criarFuncionarioClient(values)
+          if (response) {
+            console.log(response)
+          }
         }}
       />
     </Box>

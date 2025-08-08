@@ -57,7 +57,7 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
         onSubmit={(values, { resetForm }) => {
           if (values) {
             onSubmit(values)
-            //resetForm()
+            resetForm()
           }
         }}
       >
