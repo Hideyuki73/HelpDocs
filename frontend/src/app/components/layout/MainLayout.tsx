@@ -27,7 +27,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       const isProtected = protectedRoutes.some((route) => pathname?.startsWith(route))
       if (!u && isProtected) {
-        router.replace('/login')
+        router.replace('/user/register')
       }
     })
     return unsubscribe
@@ -47,7 +47,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         user={user}
         onLogout={() => {
           signOut(auth)
-          router.push('/login')
+          router.push('/')
         }}
       />
       {children}

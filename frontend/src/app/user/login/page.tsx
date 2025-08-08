@@ -1,29 +1,10 @@
 'use client'
 
 import { Box, Stack } from '@chakra-ui/react'
-import { useState } from 'react'
-import FormLogin from '../../components/form/FormLogin' 
-import FormRegistro from '../../components/form/FormRegistro' 
-import { createUserWithEmailAndPassword, auth } from '../../../config/firebase'
-
-const handleRegistro = async (values: any) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.senha)
-
-    const user = userCredential.user
-    console.log('Usuário registrado:', user)
-  } catch (error: any) {
-    console.error('Erro ao registrar:', error.message)
-  }
-}
+import FormLogin from '../../components/form/FormLogin'
+import { redirect } from 'next/navigation'
 
 export default function Page() {
-  const [possuiConta, setPossuiConta] = useState(true)
-
-  const handleLogin = (values: any) => {
-    console.log('Login:', values)
-  }
-
   return (
     <Box
       p={8}
@@ -33,11 +14,7 @@ export default function Page() {
       mt={'5%'}
     >
       <Stack alignItems={'center'}>
-        {possuiConta ? (
-          <FormLogin trocarTela={() => setPossuiConta(false)} />
-        ) : (
-          <FormRegistro trocarTela={() => setPossuiConta(true)} />
-        )}
+        <FormLogin trocarTela={() => redirect('/home')} />
       </Stack>
     </Box>
   )

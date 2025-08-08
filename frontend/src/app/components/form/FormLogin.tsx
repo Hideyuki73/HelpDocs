@@ -1,29 +1,9 @@
 'use client'
 
-import {
-  Spinner,
-  Box,
-  Stack,
-  FormControl,
-  FormLabel,
-  Input,
-  Text,
-  Flex,
-  Button,
-} from '@chakra-ui/react'
-import {
-  Formik,
-  Form,
-  Field,
-  ErrorMessage,
-  FormikHelpers,
-} from 'formik'
+import { Spinner, Box, Stack, FormControl, FormLabel, Input, Text, Flex, Button } from '@chakra-ui/react'
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
-import {
-  signInWithEmailAndPassword,
-  setPersistence,
-  browserLocalPersistence,
-} from 'firebase/auth'
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { auth } from '../../../config/firebase'
 import { useRouter } from 'next/navigation'
 
@@ -42,10 +22,7 @@ interface FormLoginProps {
 export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
   const router = useRouter()
 
-  const handleLogin = async (
-    values: FormLoginValues,
-    actions: FormikHelpers<FormLoginValues>
-  ) => {
+  const handleLogin = async (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => {
     actions.setSubmitting(true)
     try {
       await setPersistence(auth, browserLocalPersistence)
@@ -64,7 +41,12 @@ export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
 
   return (
     <Box w="100%">
-      <Text mt={4} fontSize="xl" textAlign="center" fontWeight="bold">
+      <Text
+        mt={4}
+        fontSize="xl"
+        textAlign="center"
+        fontWeight="bold"
+      >
         Login
       </Text>
       <Formik
@@ -79,8 +61,15 @@ export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel>E-mail</FormLabel>
-                    <Input {...field} type="email" bg="white" />
-                    <Text color="red.500" fontSize="sm">
+                    <Input
+                      {...field}
+                      type="email"
+                      bg="white"
+                    />
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -91,8 +80,15 @@ export default function FormLogin({ trocarTela, onSubmit }: FormLoginProps) {
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel>Senha</FormLabel>
-                    <Input {...field} type="password" bg="white" />
-                    <Text color="red.500" fontSize="sm">
+                    <Input
+                      {...field}
+                      type="password"
+                      bg="white"
+                    />
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
