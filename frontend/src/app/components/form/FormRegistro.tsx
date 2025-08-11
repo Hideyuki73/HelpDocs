@@ -89,7 +89,7 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
       <Formik
         initialValues={initialValues}
         validationSchema={RegistroSchema}
-        onSubmit={onSubmit ?? handleRegistro}
+        onSubmit={handleRegistro}
       >
         {({ isSubmitting }) => (
           <Form>
@@ -188,7 +188,7 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
                   _hover={{ bg: 'blue.700' }}
                   color="white"
                 >
-                  <Link href={'/user/login'}>Já tenho conta</Link>
+                  <Text>Já tenho conta</Text>
                 </Button>
               </Flex>
             </Stack>
