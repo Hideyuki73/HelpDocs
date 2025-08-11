@@ -1,5 +1,16 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+  UnauthorizedException,
+  Headers,
+} from '@nestjs/common';
 import { FuncionarioService } from './funcionario.service';
+import * as admin from 'firebase-admin';
 import { CreateFuncionarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
 
@@ -8,8 +19,17 @@ export class FuncionarioController {
   constructor(private readonly funcionarioService: FuncionarioService) {}
 
   @Post()
-  create(@Body() createFuncionarioDto: CreateFuncionarioDto) {
-    return this.funcionarioService.create(createFuncionarioDto);
+  async create(
+    @Body() createFuncionarioDto: CreateFuncionarioDto,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) throw new UnauthorizedException('Token não fornecido');
+    const token = authorization.split(' ')[1];
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    // chama o serviço com o uid verificado
+    return this.funcionarioService.createWithUid(uid, createFuncionarioDto);
   }
 
   @Post(':id/associar')
@@ -17,13 +37,13 @@ export class FuncionarioController {
     @Param('id') funcionarioId: string,
     @Body('empresaId') empresaId: string,
   ) {
-    return this.funcionarioService.associateWithEmpresa(funcionarioId, empresaId);
+    return this.funcionarioService.associateWithEmpresa(
+      funcionarioId,
+      empresaId,
+    );
   }
   @Post(':id/criar-empresa')
-  createEmpresa(
-    @Param('id') funcionarioId: string,
-    @Body() empresaData: any,
-  ) {
+  createEmpresa(@Param('id') funcionarioId: string, @Body() empresaData: any) {
     return this.funcionarioService.createEmpresa(funcionarioId, empresaData);
   }
   @Get()
@@ -37,7 +57,10 @@ export class FuncionarioController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFuncionarioDto: UpdateFuncionarioDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateFuncionarioDto: UpdateFuncionarioDto,
+  ) {
     return this.funcionarioService.update(id, updateFuncionarioDto);
   }
 

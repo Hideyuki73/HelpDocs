@@ -1,10 +1,10 @@
 'use client'
 
-import { Flex, Box, Text, Button } from '@chakra-ui/react'
+import { Flex, Text, Button, MenuItem, MenuList, Avatar, MenuButton, Menu, Grid, GridItem } from '@chakra-ui/react'
 import Link from 'next/link'
-import { FaRegCircleUser } from 'react-icons/fa6'
 import { User } from 'firebase/auth'
 import { FaSignOutAlt } from 'react-icons/fa'
+import { IoChevronDownCircleOutline } from 'react-icons/io5'
 
 interface HeaderProps {
   user: User | null
@@ -16,20 +16,16 @@ export function Header({ user, onLogout }: HeaderProps) {
     <Flex
       bg="gray.500"
       h={20}
-      align="center"
     >
-      <Box
-        mx="auto"
-        textAlign="center"
-        w="100%"
-      >
-        {user ? (
-          <Flex
-            justify="space-between"
-            align="center"
-            maxW="1140px"
-            mx="auto"
-          >
+      {user?.displayName ? (
+        <Grid
+          maxW="1140px"
+          mx={'auto'}
+          alignItems={'center'}
+          templateColumns="repeat(18, 1fr)"
+          gap={3}
+        >
+          <GridItem colSpan={4}>
             <Link href="/">
               <Text
                 fontSize="xl"
@@ -38,36 +34,64 @@ export function Header({ user, onLogout }: HeaderProps) {
                 HelpDocs
               </Text>
             </Link>
-            <Flex
-              align="center"
-              gap={4}
-            >
-              <Text
-                color="white"
-                fontWeight="bold"
+          </GridItem>
+          <GridItem colSpan={4}>
+            <Button bg={'none'}>
+              <Link href={'empresa/register'}>Empresa</Link>
+            </Button>
+          </GridItem>
+          <GridItem colSpan={4}>
+            <Button bg={'none'}>
+              <Link href={'empresa/register'}>Equipes</Link>
+            </Button>
+          </GridItem>
+          <GridItem colSpan={4}>
+            <Button bg={'none'}>Documentação</Button>
+          </GridItem>
+          <GridItem colSpan={2}>
+            <Menu>
+              <MenuButton
+                as={Button}
+                variant="ghost"
+                display="flex"
+                alignItems="center"
+                gap={2}
+                _hover={{ bg: 'none' }}
               >
-                Olá, {user.displayName || user.email}
-              </Text>
-              <Button
-                size="sm"
-                bg="red.600"
-                _hover={{ bg: 'red.500' }}
-                color="white"
-                onClick={onLogout}
-              >
-                <FaSignOutAlt />
-              </Button>
-            </Flex>
-          </Flex>
-        ) : (
-          <Text
-            fontSize="2xl"
-            color="white"
-          >
-            HelpDocs
-          </Text>
-        )}
-      </Box>
+                <Avatar
+                  size="sm"
+                  name={user.displayName.charAt(0)}
+                />
+              </MenuButton>
+
+              <MenuList>
+                <MenuItem>
+                  <Text fontWeight="bold">{user.displayName}</Text>
+                </MenuItem>
+
+                <MenuItem
+                  onClick={onLogout}
+                  color="red.500"
+                  _hover={{ bg: 'red.50' }}
+                  alignItems={'center'}
+                  justifyItems={'center'}
+                  gap={2}
+                >
+                  Sair
+                  <FaSignOutAlt />
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </GridItem>
+        </Grid>
+      ) : (
+        <Text
+          fontSize="2xl"
+          color="white"
+        >
+          HelpDocs
+        </Text>
+      )}
     </Flex>
   )
 }

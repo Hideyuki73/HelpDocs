@@ -1,30 +1,14 @@
 'use client'
 
-import {
-  Box,
-  Stack,
-  Spinner,
-  Text,
-  FormControl,
-  FormLabel,
-  Input,
-  Flex,
-  Button,
-} from '@chakra-ui/react'
-import {
-  Formik,
-  Form,
-  Field,
-  ErrorMessage,
-  FormikHelpers,
-} from 'formik'
+import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button } from '@chakra-ui/react'
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
-import {
-  auth,
-  createUserWithEmailAndPassword,
-} from '../../../config/firebase'
+import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
 import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore, doc, setDoc } from 'firebase/firestore'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { api } from '@/action/api'
 
 // ---- Validação ----
 const RegistroSchema = object({
@@ -38,35 +22,38 @@ const RegistroSchema = object({
 export type FormRegisterValues = InferType<typeof RegistroSchema>
 
 interface FormRegistroProps {
-  trocarTela: () => void
   onSubmit?: (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => void
 }
 
-export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps) {
+export default function FormRegistro({ onSubmit }: FormRegistroProps) {
   const firestore = getFirestore()
 
-  const handleRegistro = async (
-    values: FormRegisterValues,
-    actions: FormikHelpers<FormRegisterValues>
-  ) => {
+  const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
     actions.setSubmitting(true)
     try {
       await setPersistence(auth, browserLocalPersistence)
       const cred = await createUserWithEmailAndPassword(auth, values.email, values.senha)
       const user = cred.user
-
       await updateProfile(user, { displayName: values.nome })
 
-      await setDoc(doc(firestore, 'users', user.uid), {
-        nome: values.nome,
-        email: values.email,
-        celular: values.celular,
-        createdAt: new Date(),
-      })
+      // obter idToken e enviar para backend para criar 'funcionario' com o mesmo uid
+      const token = await user.getIdToken()
+      await api.post(
+        '/funcionarios',
+        {
+          nome: values.nome,
+          email: values.email,
+          celular: values.celular,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
 
-      console.log('Usuário registrado e perfil atualizado:', user)
       actions.resetForm()
-      trocarTela()
+      redirect('/user/login')
     } catch (error: any) {
       console.error('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
@@ -83,8 +70,19 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
   }
 
   return (
-    <Box p={8} bg="gray.500" w="100%" mt="5%" mx="auto">
-      <Text color="white" fontSize="2xl" mb={4} textAlign="center">
+    <Box
+      p={8}
+      bg="gray.500"
+      w="100%"
+      mt="5%"
+      mx="auto"
+    >
+      <Text
+        color="white"
+        fontSize="2xl"
+        mb={4}
+        textAlign="center"
+      >
         Registro
       </Text>
 
@@ -100,8 +98,15 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">E-mail</FormLabel>
-                    <Input {...field} type="email" bg="white" />
-                    <Text color="red.300" fontSize="sm">
+                    <Input
+                      {...field}
+                      type="email"
+                      bg="white"
+                    />
+                    <Text
+                      color="red.300"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -112,8 +117,14 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Nome</FormLabel>
-                    <Input {...field} bg="white" />
-                    <Text color="red.300" fontSize="sm">
+                    <Input
+                      {...field}
+                      bg="white"
+                    />
+                    <Text
+                      color="red.300"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
@@ -124,8 +135,15 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Senha</FormLabel>
-                    <Input {...field} type="password" bg="white" />
-                    <Text color="red.300" fontSize="sm">
+                    <Input
+                      {...field}
+                      type="password"
+                      bg="white"
+                    />
+                    <Text
+                      color="red.300"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
@@ -136,8 +154,15 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel color="white">Celular</FormLabel>
-                    <Input {...field} type="tel" bg="white" />
-                    <Text color="red.300" fontSize="sm">
+                    <Input
+                      {...field}
+                      type="tel"
+                      bg="white"
+                    />
+                    <Text
+                      color="red.300"
+                      fontSize="sm"
+                    >
                       <ErrorMessage name="celular" />
                     </Text>
                   </FormControl>
@@ -156,13 +181,14 @@ export default function FormRegistro({ trocarTela, onSubmit }: FormRegistroProps
                   {isSubmitting ? <Spinner size="sm" /> : 'Registrar'}
                 </Button>
                 <Button
-                  onClick={trocarTela}
+                  as={'a'}
+                  href="/user/login"
                   w="45%"
                   bg="blue.900"
                   _hover={{ bg: 'blue.700' }}
                   color="white"
                 >
-                  Já tenho conta
+                  <Link href={'/user/login'}>Já tenho conta</Link>
                 </Button>
               </Flex>
             </Stack>

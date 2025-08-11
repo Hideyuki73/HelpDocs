@@ -11,8 +11,6 @@ interface MainLayoutProps {
   children: ReactNode
 }
 
-const protectedRoutes = ['/user']
-
 export default function MainLayout({ children }: MainLayoutProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,9 +23,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
       setUser(u)
       setLoading(false)
 
-      const isProtected = protectedRoutes.some((route) => pathname?.startsWith(route))
+      const isProtected = pathname?.startsWith('/user') && pathname !== '/user/login' && pathname !== '/user/register'
+
       if (!u && isProtected) {
-        router.replace('/login')
+        router.replace('/user/login')
       }
     })
     return unsubscribe
@@ -47,7 +46,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         user={user}
         onLogout={() => {
           signOut(auth)
-          router.push('/login')
+          router.push('/')
         }}
       />
       {children}

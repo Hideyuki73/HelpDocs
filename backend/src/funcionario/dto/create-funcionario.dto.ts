@@ -8,8 +8,7 @@ export class CreateFuncionarioDto {
   @IsEmail()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   cargo: string;
 
   @IsString()
@@ -17,6 +16,5 @@ export class CreateFuncionarioDto {
   senha: string;
 
   @IsOptional()
-  @IsString()
   empresaId?: string;
 }

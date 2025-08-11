@@ -1,7 +1,5 @@
-import { Box, Grid, GridItem, Text } from '@chakra-ui/react'
-import { UnorderedList, ListItem } from '@chakra-ui/layout'
+import { Box, Grid, GridItem, ListItem, Text, UnorderedList } from '@chakra-ui/react'
 import { PageLayout } from '../components/layout/PageLayout'
-
 
 export default function HomePage() {
   return (

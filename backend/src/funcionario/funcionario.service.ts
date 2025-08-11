@@ -13,6 +13,18 @@ export class FuncionarioService {
     this.empresaCollection = this.firestore.collection('empresas');
   }
 
+  async createWithUid(uid: string, data: CreateFuncionarioDto) {
+    // grava o documento de funcionario com id = uid
+    const docRef = this.funcionarioCollection.doc(uid);
+    await docRef.set({
+      nome: data.nome,
+      email: data.email,
+      dataCadastro: new Date(),
+    });
+    const doc = await docRef.get();
+    return this.mapFuncionario(doc);
+  }
+
   async create(data: CreateFuncionarioDto) {
     let empresaRef = null;
     if (data.empresaId) {
