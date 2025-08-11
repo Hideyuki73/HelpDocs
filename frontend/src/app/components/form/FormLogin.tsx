@@ -51,7 +51,7 @@ export default function FormLogin({ onSubmit }: FormLoginProps) {
       <Formik
         initialValues={initialValues}
         validationSchema={LoginSchema}
-        onSubmit={onSubmit ?? handleLogin}
+        onSubmit={handleLogin}
       >
         {({ isSubmitting }) => (
           <Form>
