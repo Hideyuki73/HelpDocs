@@ -5,8 +5,8 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
 import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
 import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
-import { redirect } from 'next/navigation'
 import { criarFuncionarioClient, FuncionarioParams } from '@/action/funcionario'
+import { useRouter } from 'next/navigation'
 
 // ---- Validação ----
 const RegistroSchema = object({
@@ -17,6 +17,7 @@ const RegistroSchema = object({
 export type FormRegisterValues = InferType<typeof RegistroSchema>
 
 export default function FormRegistro() {
+  const router = useRouter()
   const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
     actions.setSubmitting(true)
     try {
@@ -38,7 +39,7 @@ export default function FormRegistro() {
 
       if (response) {
         actions.resetForm()
-        redirect('/user/login')
+        router.push('/home')
       }
     } catch (error: any) {
       console.error('Erro ao registrar:', error.message)
