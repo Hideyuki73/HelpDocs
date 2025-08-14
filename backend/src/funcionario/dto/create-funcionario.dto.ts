@@ -11,10 +11,6 @@ export class CreateFuncionarioDto {
   @IsOptional()
   cargo: string;
 
-  @IsString()
-  @IsNotEmpty()
-  senha: string;
-
   @IsOptional()
   empresaId?: string;
 }

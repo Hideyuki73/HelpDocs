@@ -29,14 +29,7 @@ export default function RegisterPage() {
         Preencha os dados abaixo para começar a usar o HelpDocs.
       </Text>
 
-      <FormRegistro
-        onSubmit={async (values) => {
-          const response = await criarFuncionarioClient(values)
-          if (response) {
-            console.log(response)
-          }
-        }}
-      />
+      <FormRegistro />
     </Box>
   )
 }

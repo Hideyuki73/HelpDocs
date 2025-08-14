@@ -150,7 +150,6 @@ export class FuncionarioService {
       nome: data?.nome,
       email: data?.email,
       cargo: data?.cargo,
-      senha: data?.senha,
       empresaId: data?.empresaId?.id || null,
       dataCadastro: data?.dataCadastro,
     };

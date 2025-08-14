@@ -14,11 +14,7 @@ const LoginSchema = object({
 
 export type FormLoginValues = InferType<typeof LoginSchema>
 
-interface FormLoginProps {
-  onSubmit?: (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => void
-}
-
-export default function FormLogin({ onSubmit }: FormLoginProps) {
+export default function FormLogin() {
   const router = useRouter()
 
   const handleLogin = async (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => {

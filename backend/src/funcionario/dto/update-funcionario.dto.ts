@@ -15,9 +15,5 @@ export class UpdateFuncionarioDto {
 
   @IsOptional()
   @IsString()
-  senha?: string;
-
-  @IsOptional()
-  @IsString()
   empresaId?: string;
 }

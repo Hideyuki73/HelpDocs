@@ -5,29 +5,18 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
 import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
 import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
-import { getFirestore, doc, setDoc } from 'firebase/firestore'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { api } from '@/action/api'
+import { criarFuncionarioClient, FuncionarioParams } from '@/action/funcionario'
 
 // ---- Validação ----
 const RegistroSchema = object({
   nome: string().required('Nome é obrigatório'),
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   senha: string().min(6, 'Mínimo de 6 caracteres').required('Senha é obrigatória'),
-  celular: string()
-    .matches(/^[0-9]{10,11}$/, 'Celular inválido')
-    .required('Celular é obrigatório'),
 })
 export type FormRegisterValues = InferType<typeof RegistroSchema>
 
-interface FormRegistroProps {
-  onSubmit?: (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => void
-}
-
-export default function FormRegistro({ onSubmit }: FormRegistroProps) {
-  const firestore = getFirestore()
-
+export default function FormRegistro() {
   const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
     actions.setSubmitting(true)
     try {
@@ -36,24 +25,21 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
       const user = cred.user
       await updateProfile(user, { displayName: values.nome })
 
-      // obter idToken e enviar para backend para criar 'funcionario' com o mesmo uid
+      const account: FuncionarioParams = {
+        nome: values.nome,
+        email: values.email,
+      }
       const token = await user.getIdToken()
-      await api.post(
-        '/funcionarios',
-        {
-          nome: values.nome,
-          email: values.email,
-          celular: values.celular,
+      const response = await criarFuncionarioClient(account, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
+      })
 
-      actions.resetForm()
-      redirect('/user/login')
+      if (response) {
+        actions.resetForm()
+        redirect('/user/login')
+      }
     } catch (error: any) {
       console.error('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
@@ -66,7 +52,6 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
     nome: '',
     email: '',
     senha: '',
-    celular: '',
   }
 
   return (
@@ -150,25 +135,6 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
                 )}
               </Field>
 
-              <Field name="celular">
-                {({ field }: any) => (
-                  <FormControl isRequired>
-                    <FormLabel color="white">Celular</FormLabel>
-                    <Input
-                      {...field}
-                      type="tel"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
-                      <ErrorMessage name="celular" />
-                    </Text>
-                  </FormControl>
-                )}
-              </Field>
-
               <Flex justify="space-between">
                 <Button
                   type="submit"
@@ -188,7 +154,7 @@ export default function FormRegistro({ onSubmit }: FormRegistroProps) {
                   _hover={{ bg: 'blue.700' }}
                   color="white"
                 >
-                  <Text>Já tenho conta</Text>
+                  Já tenho conta
                 </Button>
               </Flex>
             </Stack>
