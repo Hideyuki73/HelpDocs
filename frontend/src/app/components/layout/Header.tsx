@@ -4,7 +4,8 @@ import { Flex, Text, Button, MenuItem, MenuList, Avatar, MenuButton, Menu, Grid,
 import Link from 'next/link'
 import { User } from 'firebase/auth'
 import { FaSignOutAlt } from 'react-icons/fa'
-import { IoChevronDownCircleOutline } from 'react-icons/io5'
+import { useRouter } from 'next/navigation'
+import { getMinhaEmpresa } from '@/action/empresa'
 
 interface HeaderProps {
   user: User | null
@@ -12,6 +13,22 @@ interface HeaderProps {
 }
 
 export function Header({ user, onLogout }: HeaderProps) {
+  const router = useRouter()
+
+  const handleEmpresaClick = async () => {
+    try {
+      const empresa = await getMinhaEmpresa()
+      if (empresa) {
+        router.push('/empresa')
+      } else {
+        router.push('/empresa/register')
+      }
+    } catch (err) {
+      // se não encontrou, redireciona para register
+      router.push('/empresa/register')
+    }
+  }
+
   return (
     <Flex
       bg="gray.500"
@@ -35,14 +52,19 @@ export function Header({ user, onLogout }: HeaderProps) {
               </Text>
             </Link>
           </GridItem>
+
           <GridItem colSpan={4}>
-            <Button bg={'none'}>
-              <Link href={'empresa/register'}>Empresa</Link>
+            <Button
+              bg={'none'}
+              onClick={handleEmpresaClick}
+            >
+              Empresa
             </Button>
           </GridItem>
+
           <GridItem colSpan={4}>
             <Button bg={'none'}>
-              <Link href={'empresa/register'}>Equipes</Link>
+              <Link href={'/empresa/register'}>Equipes</Link>
             </Button>
           </GridItem>
           <GridItem colSpan={4}>

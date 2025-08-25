@@ -6,6 +6,7 @@ import { Header } from './Header'
 import { onAuthStateChanged, User, signOut } from 'firebase/auth'
 import { auth } from '../../../config/firebase'
 import { usePathname, useRouter } from 'next/navigation'
+import { EmpresaParams } from '@/action/empresa'
 
 interface MainLayoutProps {
   children: ReactNode

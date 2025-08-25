@@ -14,11 +14,7 @@ export default function Page() {
       mt={'5%'}
     >
       <Stack alignItems={'center'}>
-        <FormLogin
-          onSubmit={async (values) => {
-            redirect('/home')
-          }}
-        />
+        <FormLogin />
       </Stack>
     </Box>
   )

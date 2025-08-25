@@ -1,9 +1,8 @@
 'use client'
 
 import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button } from '@chakra-ui/react'
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { object, string, InferType } from 'yup'
-import { getFirestore, doc, setDoc } from 'firebase/firestore'
 
 // Validação do CNPJ simples (14 dígitos numéricos)
 const cnpjRegex = /^\d{14}$/

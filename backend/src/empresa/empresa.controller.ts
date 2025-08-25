@@ -5,6 +5,8 @@ import {
   Body,
   Headers,
   UnauthorizedException,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
 import * as admin from 'firebase-admin';
@@ -30,5 +32,23 @@ export class EmpresaController {
 
     // agora chama o serviço passando o UID verificado
     return this.empresaService.create(createEmpresaDto, uid);
+  }
+
+  @Get('findByIdFuncionario/:id')
+  findByFuncionario(@Param('id') funcionarioId: string) {
+    return this.empresaService.findByFuncionarioId(funcionarioId);
+  }
+
+  @Post(':id/gerar-convite')
+  gerarConvite(@Param('id') empresaId: string) {
+    return this.empresaService.gerarConvite(empresaId);
+  }
+
+  @Post('entrar-empresa')
+  entrarEmpresa(
+    @Body('funcionarioId') funcionarioId: string,
+    @Body('codigo') codigo: string,
+  ) {
+    return this.empresaService.entrarPorConvite(funcionarioId, codigo);
   }
 }
