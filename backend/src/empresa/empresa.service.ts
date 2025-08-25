@@ -1,19 +1,18 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import { Firestore } from 'firebase-admin/firestore';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import * as admin from 'firebase-admin';
 
+@Injectable()
 export class EmpresaService {
   private empresaCollection = admin.firestore().collection('empresas');
   private funcionarioCollection = admin.firestore().collection('funcionarios');
 
+  // Criação de empresa
   async create(createEmpresaDto: CreateEmpresaDto, criadorUid: string) {
-    // cria referência ao criador (se os funcionários estão em uma coleção separada)
     const criadorRef = this.funcionarioCollection.doc(criadorUid);
 
-    // gera um código de convite único (pode customizar formato se quiser)
     const conviteCodigo = Math.random()
       .toString(36)
       .substring(2, 10)
@@ -24,7 +23,7 @@ export class EmpresaService {
       criadorUid,
       criadorRef,
       conviteCodigo,
-      membros: [criadorUid], // adiciona o criador como membro inicial
+      membros: [criadorUid], // adiciona criador como membro inicial
       dataCadastro: new Date(),
     });
 
@@ -32,24 +31,23 @@ export class EmpresaService {
     return { id: doc.id, ...doc.data() };
   }
 
+  // Entrar em empresa via convite
   async entrarPorConvite(conviteCodigo: string, userUid: string) {
-    // procura empresa pelo código de convite
     const snapshot = await this.empresaCollection
       .where('conviteCodigo', '==', conviteCodigo)
       .get();
+
     if (snapshot.empty) {
-      throw new Error('Código de convite inválido');
+      throw new NotFoundException('Código de convite inválido');
     }
 
     const empresaDoc = snapshot.docs[0];
     const empresaData = empresaDoc.data();
 
-    // se já é membro, não adiciona de novo
     if (empresaData.membros.includes(userUid)) {
       return { id: empresaDoc.id, ...empresaData };
     }
 
-    // adiciona usuário à lista de membros
     await empresaDoc.ref.update({
       membros: admin.firestore.FieldValue.arrayUnion(userUid),
     });
@@ -58,11 +56,13 @@ export class EmpresaService {
     return { id: atualizado.id, ...atualizado.data() };
   }
 
+  // Buscar todas empresas
   async findAll() {
     const snapshot = await this.empresaCollection.get();
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
 
+  // Buscar empresa por ID
   async findOne(id: string) {
     const doc = await this.empresaCollection.doc(id).get();
     if (!doc.exists) {
@@ -71,6 +71,7 @@ export class EmpresaService {
     return { id: doc.id, ...doc.data() };
   }
 
+  // Atualizar empresa
   async update(id: string, updateEmpresaDto: UpdateEmpresaDto) {
     const docRef = this.empresaCollection.doc(id);
     const doc = await docRef.get();
@@ -82,6 +83,7 @@ export class EmpresaService {
     return { id: updated.id, ...updated.data() };
   }
 
+  // Remover empresa
   async remove(id: string) {
     const docRef = this.empresaCollection.doc(id);
     const doc = await docRef.get();
@@ -92,9 +94,10 @@ export class EmpresaService {
     return { message: 'Empresa removida com sucesso' };
   }
 
+  // Buscar empresa por UID do funcionário (corrigido para array-contains)
   async findByFuncionarioId(funcionarioId: string) {
     const snapshot = await this.empresaCollection
-      .where('criadorUid', '==', funcionarioId)
+      .where('membros', 'array-contains', funcionarioId)
       .get();
 
     if (snapshot.empty) {
@@ -117,6 +120,7 @@ export class EmpresaService {
     };
   }
 
+  // Gerar código de convite
   async gerarConvite(empresaId: string) {
     const codigo = randomBytes(4).toString('hex'); // ex: "a3f9b1c2"
     await this.empresaCollection.doc(empresaId).update({

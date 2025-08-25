@@ -25,7 +25,8 @@ export async function getMinhaEmpresa() {
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.get(`/findByIdFuncionario/${user.uid}`, {
+  // 🔹 Rota corrigida com /empresas
+  const response = await api.get(`/empresas/findByIdFuncionario/${user.uid}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   return response.data
