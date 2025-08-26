@@ -1,3 +1,6 @@
+// Conteúdo completo de FormLogin.tsx
+// Certifique-se de que este é o conteúdo EXATO do seu arquivo
+
 'use client'
 
 import { Spinner, Box, Stack, FormControl, FormLabel, Input, Text, Flex, Button } from '@chakra-ui/react'
@@ -22,11 +25,11 @@ export default function FormLogin() {
     try {
       await setPersistence(auth, browserLocalPersistence)
       const cred = await signInWithEmailAndPassword(auth, values.email, values.senha)
-      console.log('Login realizado:', cred.user)
-      router.push('/home')
+      console.log('Login bem-sucedido:', cred.user.uid)
+      router.push('/empresa-selection') // Redireciona para a página de seleção de empresa
     } catch (error: any) {
-      console.error('Erro no login:', error.message)
-      actions.setErrors({ email: error.message })
+      console.error('Erro de login:', error.message)
+      actions.setErrors({ senha: 'E-mail ou senha inválidos' })
     } finally {
       actions.setSubmitting(false)
     }
@@ -35,15 +38,7 @@ export default function FormLogin() {
   const initialValues: FormLoginValues = { email: '', senha: '' }
 
   return (
-    <Box w="100%">
-      <Text
-        mt={4}
-        fontSize="xl"
-        textAlign="center"
-        fontWeight="bold"
-      >
-        Login
-      </Text>
+    <Box p={8} borderWidth={1} borderRadius="lg" boxShadow="lg" bg="white">
       <Formik
         initialValues={initialValues}
         validationSchema={LoginSchema}
@@ -56,15 +51,8 @@ export default function FormLogin() {
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel>E-mail</FormLabel>
-                    <Input
-                      {...field}
-                      type="email"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.500"
-                      fontSize="sm"
-                    >
+                    <Input {...field} type="email" placeholder="Seu e-mail" />
+                    <Text color="red.500" fontSize="sm">
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -75,47 +63,36 @@ export default function FormLogin() {
                 {({ field }: any) => (
                   <FormControl isRequired>
                     <FormLabel>Senha</FormLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      bg="white"
-                    />
-                    <Text
-                      color="red.500"
-                      fontSize="sm"
-                    >
+                    <Input {...field} type="password" placeholder="Sua senha" />
+                    <Text color="red.500" fontSize="sm">
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              <Flex justify="space-between">
-                <Button
-                  w="45%"
-                  type="submit"
-                  bg="blue.900"
-                  _hover={{ bg: 'blue.700' }}
-                  color="white"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? <Spinner size="sm" /> : 'Logar'}
-                </Button>
-                <Button
-                  w="45%"
-                  as={'a'}
-                  href="/user/register"
-                  bg="gray.600"
-                  _hover={{ bg: 'gray.500' }}
-                  color="white"
-                >
-                  Registrar
-                </Button>
-              </Flex>
+              <Button
+                colorScheme="teal"
+                size="lg"
+                type="submit"
+                isLoading={isSubmitting}
+                mt={4}
+              >
+                Entrar
+              </Button>
             </Stack>
           </Form>
         )}
       </Formik>
+
+      <Flex mt={4} justifyContent="center">
+        <Text fontSize="sm">
+          Não tem uma conta?{' '}
+          <Text as="a" color="teal.500" href="/user/register" fontWeight="bold">
+            Cadastre-se
+          </Text>
+        </Text>
+      </Flex>
     </Box>
   )
 }

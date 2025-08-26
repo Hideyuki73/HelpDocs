@@ -1,3 +1,6 @@
+// Conteúdo completo de empresa.service.ts
+// Certifique-se de que este é o conteúdo EXATO do seu arquivo
+
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
@@ -27,14 +30,19 @@ export class EmpresaService {
       dataCadastro: new Date(),
     });
 
+    // NOVO CÓDIGO: Atualizar o campo empresaId no documento do funcionário criador
+    await this.funcionarioCollection.doc(criadorUid).update({
+      empresaId: docRef.id,
+    });
+
     const doc = await docRef.get();
     return { id: doc.id, ...doc.data() };
   }
 
   // Entrar em empresa via convite
-  async entrarPorConvite(conviteCodigo: string, userUid: string) {
+  async entrarPorConvite(funcionarioId: string, codigo: string) {
     const snapshot = await this.empresaCollection
-      .where('conviteCodigo', '==', conviteCodigo)
+      .where('conviteCodigo', '==', codigo)
       .get();
 
     if (snapshot.empty) {
@@ -44,12 +52,17 @@ export class EmpresaService {
     const empresaDoc = snapshot.docs[0];
     const empresaData = empresaDoc.data();
 
-    if (empresaData.membros.includes(userUid)) {
+    if (empresaData.membros.includes(funcionarioId)) {
       return { id: empresaDoc.id, ...empresaData };
     }
 
     await empresaDoc.ref.update({
-      membros: admin.firestore.FieldValue.arrayUnion(userUid),
+      membros: admin.firestore.FieldValue.arrayUnion(funcionarioId),
+    });
+
+    // Atualizar o campo empresaId no documento do funcionário
+    await this.funcionarioCollection.doc(funcionarioId).update({
+      empresaId: empresaDoc.id,
     });
 
     const atualizado = await empresaDoc.ref.get();
@@ -122,7 +135,10 @@ export class EmpresaService {
 
   // Gerar código de convite
   async gerarConvite(empresaId: string) {
-    const codigo = randomBytes(4).toString('hex'); // ex: "a3f9b1c2"
+    const codigo = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
     await this.empresaCollection.doc(empresaId).update({
       conviteCodigo: codigo,
     });
