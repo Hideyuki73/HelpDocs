@@ -14,8 +14,18 @@ export default function RegisterEmpresaPage() {
       const response = await criarEmpresaClient(values)
       console.log('Empresa criada:', response)
 
-      // redireciona para a página correta
-      router.push('/empresa')
+      toast({
+        title: 'Empresa registrada!',
+        description: 'Sua empresa foi criada e você é o administrador.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+
+      // Redireciona para a página de dashboard da empresa recém-criada
+      // Assumindo que 'response' contém o ID da empresa (ex: response.id)
+      router.push(`/empresa/${response.id}`)
+
     } catch (err: any) {
       console.error(err)
       toast({

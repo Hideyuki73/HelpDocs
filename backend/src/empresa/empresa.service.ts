@@ -1,68 +1,58 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomBytes } from 'crypto';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Firestore } from 'firebase-admin/firestore';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import * as admin from 'firebase-admin';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class EmpresaService {
-  private empresaCollection = admin.firestore().collection('empresas');
-  private funcionarioCollection = admin.firestore().collection('funcionarios');
+  private readonly empresaCollection;
+  private readonly funcionarioCollection;
+  private readonly empresaUsuarioRoleCollection; // Nova coleção para roles
+  private readonly conviteCollection; // Nova coleção para convites
 
-  // Criação de empresa
+  constructor(
+    @Inject('FIRESTORE') private readonly firestore: Firestore,
+  ) {
+    this.empresaCollection = this.firestore.collection('empresas');
+    this.funcionarioCollection = this.firestore.collection('funcionarios');
+    this.empresaUsuarioRoleCollection = this.firestore.collection('empresa_usuarios_roles');
+    this.conviteCollection = this.firestore.collection('convites');
+  }
+
   async create(createEmpresaDto: CreateEmpresaDto, criadorUid: string) {
+    // 1. Verificar se já existe uma empresa com o mesmo nome para este criador
+    const existingCompanySnapshot = await this.empresaCollection
+      .where("nome", "==", createEmpresaDto.nome)
+      .where("criadorUid", "==", criadorUid) // Opcional: verificar apenas para o mesmo criador
+      .limit(1)
+      .get();
+
+    if (!existingCompanySnapshot.empty) {
+      throw new BadRequestException("Você já possui uma empresa com este nome.");
+    }
+
     const criadorRef = this.funcionarioCollection.doc(criadorUid);
-
-    const conviteCodigo = Math.random()
-      .toString(36)
-      .substring(2, 10)
-      .toUpperCase();
-
     const docRef = await this.empresaCollection.add({
       ...createEmpresaDto,
       criadorUid,
       criadorRef,
-      conviteCodigo,
-      membros: [criadorUid], // adiciona criador como membro inicial
       dataCadastro: new Date(),
     });
-
     const doc = await docRef.get();
-    return { id: doc.id, ...doc.data() };
+    const empresaCriada = { id: doc.id, ...doc.data() };
+
+    // Atribui o papel de administrador ao usuário que criou a empresa
+    await this.assignRole(empresaCriada.id, criadorUid, 'admin');
+
+    return empresaCriada;
   }
 
-  // Entrar em empresa via convite
-  async entrarPorConvite(conviteCodigo: string, userUid: string) {
-    const snapshot = await this.empresaCollection
-      .where('conviteCodigo', '==', conviteCodigo)
-      .get();
-
-    if (snapshot.empty) {
-      throw new NotFoundException('Código de convite inválido');
-    }
-
-    const empresaDoc = snapshot.docs[0];
-    const empresaData = empresaDoc.data();
-
-    if (empresaData.membros.includes(userUid)) {
-      return { id: empresaDoc.id, ...empresaData };
-    }
-
-    await empresaDoc.ref.update({
-      membros: admin.firestore.FieldValue.arrayUnion(userUid),
-    });
-
-    const atualizado = await empresaDoc.ref.get();
-    return { id: atualizado.id, ...atualizado.data() };
-  }
-
-  // Buscar todas empresas
   async findAll() {
     const snapshot = await this.empresaCollection.get();
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
 
-  // Buscar empresa por ID
   async findOne(id: string) {
     const doc = await this.empresaCollection.doc(id).get();
     if (!doc.exists) {
@@ -71,7 +61,6 @@ export class EmpresaService {
     return { id: doc.id, ...doc.data() };
   }
 
-  // Atualizar empresa
   async update(id: string, updateEmpresaDto: UpdateEmpresaDto) {
     const docRef = this.empresaCollection.doc(id);
     const doc = await docRef.get();
@@ -83,7 +72,6 @@ export class EmpresaService {
     return { id: updated.id, ...updated.data() };
   }
 
-  // Remover empresa
   async remove(id: string) {
     const docRef = this.empresaCollection.doc(id);
     const doc = await docRef.get();
@@ -94,38 +82,142 @@ export class EmpresaService {
     return { message: 'Empresa removida com sucesso' };
   }
 
-  // Buscar empresa por UID do funcionário (corrigido para array-contains)
-  async findByFuncionarioId(funcionarioId: string) {
-    const snapshot = await this.empresaCollection
-      .where('membros', 'array-contains', funcionarioId)
+  async findByUserId(userId: string) {
+    const snapshot = await this.empresaCollection.where('criadorUid', '==', userId).get();
+    if (snapshot.empty) {
+      throw new NotFoundException('Nenhuma empresa encontrada para este usuário.');
+    }
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
+
+  async addEmployee(empresaId: string, employeeId: string) {
+    const empresaRef = this.empresaCollection.doc(empresaId);
+    const empresaDoc = await empresaRef.get();
+
+    if (!empresaDoc.exists) {
+      throw new NotFoundException('Empresa não encontrada.');
+    }
+
+    const currentEmployees = empresaDoc.data().funcionarios || [];
+    if (currentEmployees.includes(employeeId)) {
+      throw new BadRequestException('Funcionário já adicionado a esta empresa.');
+    }
+
+    await empresaRef.update({
+      funcionarios: [...currentEmployees, employeeId],
+    });
+
+    return { message: 'Funcionário adicionado com sucesso.' };
+  }
+
+  async removeEmployee(empresaId: string, employeeId: string) {
+    const empresaRef = this.empresaCollection.doc(empresaId);
+    const empresaDoc = await empresaRef.get();
+
+    if (!empresaDoc.exists) {
+      throw new NotFoundException('Empresa não encontrada.');
+    }
+
+    const currentEmployees = empresaDoc.data().funcionarios || [];
+    const updatedEmployees = currentEmployees.filter((id: string) => id !== employeeId);
+
+    if (updatedEmployees.length === currentEmployees.length) {
+      throw new NotFoundException('Funcionário não encontrado nesta empresa.');
+    }
+
+    await empresaRef.update({
+      funcionarios: updatedEmployees,
+    });
+
+    return { message: 'Funcionário removido com sucesso.' };
+  }
+
+  async getEmployees(empresaId: string) {
+    const empresaDoc = await this.empresaCollection.doc(empresaId).get();
+
+    if (!empresaDoc.exists) {
+      throw new NotFoundException('Empresa não encontrada.');
+    }
+
+    return empresaDoc.data().funcionarios || [];
+  }
+
+  // Métodos de gerenciamento de papéis
+  async assignRole(empresaId: string, usuarioId: string, role: string) {
+    const docRef = await this.empresaUsuarioRoleCollection.add({
+      empresaId,
+      usuarioId,
+      role,
+      dataAtribuicao: new Date(),
+    });
+    const doc = await docRef.get();
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async getRole(empresaId: string, usuarioId: string): Promise<string | null> {
+    const snapshot = await this.empresaUsuarioRoleCollection
+      .where('empresaId', '==', empresaId)
+      .where('usuarioId', '==', usuarioId)
+      .limit(1)
       .get();
 
     if (snapshot.empty) {
-      throw new NotFoundException(
-        'Empresa não encontrada para este funcionário',
-      );
+      return null;
     }
 
-    const doc = snapshot.docs[0];
-    const data = doc.data();
-
-    return {
-      id: doc.id,
-      nome: data.nome,
-      cnpj: data.cnpj,
-      email: data.email,
-      telefone: data.telefone,
-      endereco: data.endereco,
-      membros: data.membros ?? [],
-    };
+    return snapshot.docs[0].data().role;
   }
 
-  // Gerar código de convite
-  async gerarConvite(empresaId: string) {
-    const codigo = randomBytes(4).toString('hex'); // ex: "a3f9b1c2"
-    await this.empresaCollection.doc(empresaId).update({
-      conviteCodigo: codigo,
+  // Métodos de gerenciamento de convites
+  async generateInviteCode(empresaId: string, criadorUid: string) {
+    const code = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const docRef = await this.conviteCollection.add({
+      code,
+      empresaId,
+      criadorUid,
+      expiresAt,
+      usedBy: null,
+      usedAt: null,
+      isActive: true,
+      createdAt: new Date(),
     });
-    return { codigo };
+    const doc = await docRef.get();
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async useInviteCode(code: string, usuarioId: string) {
+    const snapshot = await this.conviteCollection.where('code', '==', code).limit(1).get();
+
+    if (snapshot.empty) {
+      throw new NotFoundException('Código de convite inválido ou não encontrado.');
+    }
+
+    const conviteDoc = snapshot.docs[0];
+    const conviteData = conviteDoc.data();
+
+    if (!conviteData.isActive || conviteData.expiresAt.toDate() < new Date()) {
+      throw new BadRequestException('Código de convite expirado ou inativo.');
+    }
+
+    if (conviteData.usedBy) {
+      throw new BadRequestException('Código de convite já utilizado.');
+    }
+
+    await conviteDoc.ref.update({
+      usedBy: usuarioId,
+      usedAt: new Date(),
+      isActive: false,
+    });
+
+    return { empresaId: conviteData.empresaId };
+  }
+
+  async getInviteCodesByEmpresa(empresaId: string) {
+    const snapshot = await this.conviteCollection.where('empresaId', '==', empresaId).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 }
+
