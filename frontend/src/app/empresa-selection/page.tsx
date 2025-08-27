@@ -1,23 +1,20 @@
-// Conteúdo completo de empresa-selection/page.tsx
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 'use client'
 
 import { useState } from 'react'
-import { 
-  Box, 
-  VStack, 
-  Alert, 
-  AlertIcon, 
-  Text, 
-  Heading, 
-  Stack, 
-  FormControl, 
-  FormLabel, 
-  Input, 
-  Button, 
+import {
+  Box,
+  VStack,
+  Alert,
+  AlertIcon,
+  Text,
+  Heading,
+  Stack,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
   Spinner,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
@@ -33,30 +30,30 @@ export type FormConviteValues = InferType<typeof ConviteSchema>
 export default function EmpresaSelectionPage() {
   const router = useRouter()
   const [showConviteForm, setShowConviteForm] = useState(false)
-  const bg = useColorModeValue("white", "gray.800")
-  const border = useColorModeValue("gray.200", "gray.700")
+  const bg = useColorModeValue('white', 'gray.800')
+  const border = useColorModeValue('gray.200', 'gray.700')
 
   const handleEntrarEmpresa = async (values: FormConviteValues, actions: FormikHelpers<FormConviteValues>) => {
     actions.setSubmitting(true)
     try {
       await entrarEmpresaPorConvite(values.codigo)
-      console.log("Entrou na empresa com sucesso")
-      
+      console.log('Entrou na empresa com sucesso')
+
       // Redirecionar para home após entrar na empresa
-      router.push("/home")
+      router.push('/home')
     } catch (error: any) {
-      console.error("Erro ao validar convite:", error.message)
-      actions.setErrors({ codigo: "Código de convite inválido ou expirado" })
+      console.error('Erro ao validar convite:', error.message)
+      actions.setErrors({ codigo: 'Código de convite inválido ou expirado' })
     } finally {
       actions.setSubmitting(false)
     }
   }
 
   const handleRegistrarEmpresa = () => {
-    router.push("/empresa/register")
+    router.push('/empresa/register')
   }
 
-  const initialValues: FormConviteValues = { codigo: "" }
+  const initialValues: FormConviteValues = { codigo: '' }
 
   return (
     <Box
@@ -70,8 +67,14 @@ export default function EmpresaSelectionPage() {
       bg={bg}
       borderColor={border}
     >
-      <VStack spacing={6} align="center">
-        <Alert status="info" borderRadius="md">
+      <VStack
+        spacing={6}
+        align="center"
+      >
+        <Alert
+          status="info"
+          borderRadius="md"
+        >
           <AlertIcon />
           <Text>Não cadastrado em nenhuma empresa</Text>
         </Alert>
@@ -83,7 +86,11 @@ export default function EmpresaSelectionPage() {
           borderRadius="md"
           textAlign="center"
         >
-          <Heading size="md" mb={4} color="blue.800">
+          <Heading
+            size="md"
+            mb={4}
+            color="blue.800"
+          >
             Como deseja prosseguir?
           </Heading>
 
@@ -100,7 +107,11 @@ export default function EmpresaSelectionPage() {
                 />
               </FormControl>
 
-              <Stack direction={{ base: "column", md: "row" }} spacing={4} justify="center">
+              <Stack
+                direction={{ base: 'column', md: 'row' }}
+                spacing={4}
+                justify="center"
+              >
                 <Button
                   colorScheme="blue"
                   size="lg"
@@ -138,14 +149,21 @@ export default function EmpresaSelectionPage() {
                             bg="white"
                             autoFocus
                           />
-                          <Text color="red.500" fontSize="sm">
+                          <Text
+                            color="red.500"
+                            fontSize="sm"
+                          >
                             <ErrorMessage name="codigo" />
                           </Text>
                         </FormControl>
                       )}
                     </Field>
 
-                    <Stack direction={{ base: "column", md: "row" }} spacing={4} justify="center">
+                    <Stack
+                      direction={{ base: 'column', md: 'row' }}
+                      spacing={4}
+                      justify="center"
+                    >
                       <Button
                         colorScheme="blue"
                         size="lg"
@@ -161,7 +179,7 @@ export default function EmpresaSelectionPage() {
                         disabled={isSubmitting}
                         flex={1}
                       >
-                        {isSubmitting ? <Spinner size="sm" /> : "Entrar em uma empresa"}
+                        {isSubmitting ? <Spinner size="sm" /> : 'Entrar em uma empresa'}
                       </Button>
                     </Stack>
 
