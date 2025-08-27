@@ -66,3 +66,14 @@ export async function entrarEmpresaPorConvite(codigo: string) {
   )
   return response.data
 }
+
+export async function deleteEmpresa(empresaId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.delete(`/empresas/${empresaId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return response.data
+}

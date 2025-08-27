@@ -7,6 +7,8 @@ import {
   UnauthorizedException,
   Get,
   Param,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
 import * as admin from 'firebase-admin';
@@ -50,5 +52,44 @@ export class EmpresaController {
     @Body('codigo') codigo: string,
   ) {
     return this.empresaService.entrarPorConvite(funcionarioId, codigo);
+  }
+
+  @Delete(':id')
+  async deleteEmpresa(
+    @Param('id') empresaId: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) {
+      throw new UnauthorizedException('Token não fornecido');
+    }
+    const token = authorization.split(' ')[1];
+    if (!token) throw new UnauthorizedException('Token mal formatado');
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    return this.empresaService.deleteEmpresa(empresaId, uid);
+  }
+
+  @Patch(':id/remover-funcionario')
+  async removerFuncionario(
+    @Param('id') empresaId: string,
+    @Body('funcionarioId') funcionarioId: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) {
+      throw new UnauthorizedException('Token não fornecido');
+    }
+    const token = authorization.split(' ')[1];
+    if (!token) throw new UnauthorizedException('Token mal formatado');
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    return this.empresaService.removerFuncionario(
+      empresaId,
+      funcionarioId,
+      uid,
+    );
   }
 }

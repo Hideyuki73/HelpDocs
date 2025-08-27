@@ -33,10 +33,8 @@ export async function getFuncionario(funcionarioId: string) {
 
 // Buscar múltiplos funcionários por IDs
 export async function getFuncionarios(funcionarioIds: string[]) {
-  const funcionarios = await Promise.allSettled(
-    funcionarioIds.map(id => getFuncionario(id))
-  )
-  
+  const funcionarios = await Promise.allSettled(funcionarioIds.map((id) => getFuncionario(id)))
+
   return funcionarios.map((result, index) => {
     if (result.status === 'fulfilled') {
       return result.value
@@ -45,7 +43,7 @@ export async function getFuncionarios(funcionarioIds: string[]) {
       return {
         id: funcionarioIds[index],
         nome: `Usuário ${funcionarioIds[index].substring(0, 8)}`,
-        email: 'Email não disponível'
+        email: 'Email não disponível',
       }
     }
   })
@@ -57,11 +55,27 @@ export async function updateCargoFuncionario(funcionarioId: string, cargo: strin
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.patch(`/funcionarios/${funcionarioId}/cargo`, 
+  const response = await api.patch(
+    `/funcionarios/${funcionarioId}/cargo`,
     { cargo },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
+  )
+  return response.data
+}
+
+export async function expulsarFuncionario(funcionarioId: string, empresaId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.patch(
+    `/empresas/${empresaId}/remover-funcionario`,
+    { funcionarioId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   )
   return response.data
 }
