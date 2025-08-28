@@ -1,42 +1,34 @@
-'use client'
-
-import { Spinner, Box, Stack, FormControl, FormLabel, Input, Text, Flex, Button, useColorModeValue } from '@chakra-ui/react'
+import { Box, Stack, FormControl, FormLabel, Input, Text, Button, useColorModeValue } from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
-import { auth } from '../../../config/firebase'
-import { useRouter } from 'next/navigation'
+import { LoginFormData } from '../types'
 
 const LoginSchema = object({
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   senha: string().required('Senha é obrigatória'),
 })
 
-export type FormLoginValues = InferType<typeof LoginSchema>
+interface LoginFormProps {
+  onSubmit: (values: LoginFormData) => Promise<void>
+  isLoading?: boolean
+  error?: string | null
+}
 
-export default function FormLogin() {
-  const router = useRouter()
+export default function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps) {
   const bg = useColorModeValue("white", "gray.800")
   const borderColor = useColorModeValue("gray.200", "gray.600")
   const labelColor = useColorModeValue("gray.700", "gray.200")
   const inputBg = useColorModeValue("white", "gray.700")
 
-  const handleLogin = async (values: FormLoginValues, actions: FormikHelpers<FormLoginValues>) => {
-    actions.setSubmitting(true)
+  const handleSubmit = async (values: LoginFormData, actions: FormikHelpers<LoginFormData>) => {
     try {
-      await setPersistence(auth, browserLocalPersistence)
-      const cred = await signInWithEmailAndPassword(auth, values.email, values.senha)
-      console.log('Login bem-sucedido:', cred.user.uid)
-      router.push('/empresa-selection') // Redireciona para a página de seleção de empresa
+      await onSubmit(values)
     } catch (error: any) {
-      console.error('Erro de login:', error.message)
       actions.setErrors({ senha: 'E-mail ou senha inválidos' })
-    } finally {
-      actions.setSubmitting(false)
     }
   }
 
-  const initialValues: FormLoginValues = { email: '', senha: '' }
+  const initialValues: LoginFormData = { email: '', senha: '' }
 
   return (
     <Box 
@@ -46,6 +38,8 @@ export default function FormLogin() {
       boxShadow="lg" 
       bg={bg}
       borderColor={borderColor}
+      w="100%"
+      maxW="400px"
     >
       <Text
         color={labelColor}
@@ -57,10 +51,16 @@ export default function FormLogin() {
         Entrar na Conta
       </Text>
 
+      {error && (
+        <Text color="red.500" fontSize="sm" mb={4} textAlign="center">
+          {error}
+        </Text>
+      )}
+
       <Formik
         initialValues={initialValues}
         validationSchema={LoginSchema}
-        onSubmit={handleLogin}
+        onSubmit={handleSubmit}
       >
         {({ isSubmitting }) => (
           <Form>
@@ -109,7 +109,7 @@ export default function FormLogin() {
                 colorScheme="teal"
                 size="lg"
                 type="submit"
-                isLoading={isSubmitting}
+                isLoading={isSubmitting || isLoading}
                 mt={4}
                 borderRadius="md"
                 _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
@@ -121,21 +121,6 @@ export default function FormLogin() {
           </Form>
         )}
       </Formik>
-
-      <Flex mt={6} justifyContent="center">
-        <Text fontSize="sm" color={labelColor}>
-          Não tem uma conta?{' '}
-          <Text 
-            as="a" 
-            color="teal.500" 
-            href="/user/register" 
-            fontWeight="bold"
-            _hover={{ textDecoration: "underline" }}
-          >
-            Cadastre-se
-          </Text>
-        </Text>
-      </Flex>
     </Box>
   )
 }

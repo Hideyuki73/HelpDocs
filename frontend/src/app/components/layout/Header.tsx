@@ -1,11 +1,12 @@
 'use client'
 
-import { Flex, Text, Button, MenuItem, MenuList, Avatar, MenuButton, Menu, Grid, GridItem } from '@chakra-ui/react'
+import { Flex, Text, Button, MenuItem, MenuList, MenuButton, Menu, HStack, Spacer } from '@chakra-ui/react'
 import Link from 'next/link'
 import { User } from 'firebase/auth'
 import { FaSignOutAlt } from 'react-icons/fa'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { getMinhaEmpresa } from '@/action/empresa'
+import { HiOutlineMenuAlt3 } from 'react-icons/hi'
 
 interface HeaderProps {
   user: User | null
@@ -24,95 +25,96 @@ export function Header({ user, onLogout }: HeaderProps) {
         router.push('/empresa/register')
       }
     } catch (err) {
-      // se não encontrou, redireciona para register
       router.push('/empresa/register')
     }
   }
 
   return (
     <Flex
-      bg="gray.500"
+      as="header"
+      bgGradient="linear(to-r, blue.600, blue.800)"
+      color="white"
       h={20}
+      px={10}
+      align="center"
+      shadow="md"
     >
-      {user?.displayName ? (
-        <Grid
-          maxW="1140px"
-          mx={'auto'}
-          alignItems={'center'}
-          templateColumns="repeat(18, 1fr)"
-          gap={3}
-        >
-          <GridItem colSpan={4}>
-            <Link href="/">
-              <Text
-                fontSize="xl"
-                color="white"
-              >
-                HelpDocs
-              </Text>
-            </Link>
-          </GridItem>
-
-          <GridItem colSpan={4}>
-            <Button
-              bg={'none'}
-              onClick={handleEmpresaClick}
-            >
-              Empresa
-            </Button>
-          </GridItem>
-
-          <GridItem colSpan={4}>
-            <Button bg={'none'}>
-              <Link href={'/empresa/register'}>Equipes</Link>
-            </Button>
-          </GridItem>
-          <GridItem colSpan={4}>
-            <Button bg={'none'}>Documentação</Button>
-          </GridItem>
-          <GridItem colSpan={2}>
-            <Menu>
-              <MenuButton
-                as={Button}
-                variant="ghost"
-                display="flex"
-                alignItems="center"
-                gap={2}
-                _hover={{ bg: 'none' }}
-              >
-                <Avatar
-                  size="sm"
-                  name={user.displayName.charAt(0)}
-                />
-              </MenuButton>
-
-              <MenuList>
-                <MenuItem>
-                  <Text fontWeight="bold">{user.displayName}</Text>
-                </MenuItem>
-
-                <MenuItem
-                  onClick={onLogout}
-                  color="red.500"
-                  _hover={{ bg: 'red.50' }}
-                  alignItems={'center'}
-                  justifyItems={'center'}
-                  gap={2}
-                >
-                  Sair
-                  <FaSignOutAlt />
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </GridItem>
-        </Grid>
-      ) : (
+      {/* Logo */}
+      <Link href="/">
         <Text
           fontSize="2xl"
-          color="white"
+          fontWeight="bold"
         >
           HelpDocs
         </Text>
+      </Link>
+
+      <Spacer />
+
+      {user?.displayName && (
+        <HStack spacing={8}>
+          <Button
+            variant="ghost"
+            color="white"
+            fontSize="lg"
+            _hover={{ color: 'yellow.300' }}
+            onClick={handleEmpresaClick}
+          >
+            EMPRESA
+          </Button>
+
+          <Button
+            variant="ghost"
+            color="white"
+            fontSize="lg"
+            _hover={{ color: 'yellow.300' }}
+            as={Link}
+            href="/empresa/register"
+          >
+            EQUIPES
+          </Button>
+
+          <Button
+            variant="ghost"
+            color="white"
+            fontSize="lg"
+            _hover={{ color: 'yellow.300' }}
+          >
+            DOCUMENTAÇÃO
+          </Button>
+
+          {/* Menu do usuário */}
+          <Menu>
+            <MenuButton
+              as={Button}
+              variant="ghost"
+              color="white"
+              _hover={{ bg: 'blue.700' }}
+              _active={{ bg: 'blue.900' }}
+            >
+              <HiOutlineMenuAlt3 size={22} />
+            </MenuButton>
+            <MenuList bgColor={'blue.700'}>
+              <MenuItem
+                onClick={() => redirect('/user')}
+                bgColor={'blue.700'}
+                _hover={{ bg: 'blue.500' }}
+              >
+                <Text fontWeight="bold">{user.displayName}</Text>
+              </MenuItem>
+              <MenuItem
+                bgColor={'blue.700'}
+                onClick={onLogout}
+                color="red.500"
+                _hover={{ bg: 'red.300' }}
+                gap={2}
+              >
+                Sair
+                <FaSignOutAlt />
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
       )}
     </Flex>
   )

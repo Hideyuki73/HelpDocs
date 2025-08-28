@@ -1,60 +1,36 @@
-'use client'
-
-import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button, useColorModeValue } from '@chakra-ui/react'
+import { Box, Stack, Text, FormControl, FormLabel, Input, Button, useColorModeValue } from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
-import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
-import { updateProfile, setPersistence, browserLocalPersistence } from 'firebase/auth'
-import { criarFuncionarioClient, FuncionarioParams } from '@/action/funcionario'
-import { useRouter } from 'next/navigation'
+import { RegisterFormData } from '../types'
 
-// ---- Validação ----
-const RegistroSchema = object({
+const RegisterSchema = object({
   nome: string().required('Nome é obrigatório'),
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   senha: string().min(6, 'Mínimo de 6 caracteres').required('Senha é obrigatória'),
 })
-export type FormRegisterValues = InferType<typeof RegistroSchema>
 
-export default function FormRegistro() {
-  const router = useRouter()
+interface RegisterFormProps {
+  onSubmit: (values: RegisterFormData) => Promise<void>
+  isLoading?: boolean
+  error?: string | null
+}
+
+export default function RegisterForm({ onSubmit, isLoading = false, error }: RegisterFormProps) {
   const bg = useColorModeValue("white", "gray.800")
   const borderColor = useColorModeValue("gray.200", "gray.600")
   const labelColor = useColorModeValue("gray.700", "gray.200")
   const inputBg = useColorModeValue("white", "gray.700")
-  
-  const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
-    actions.setSubmitting(true)
+
+  const handleSubmit = async (values: RegisterFormData, actions: FormikHelpers<RegisterFormData>) => {
     try {
-      await setPersistence(auth, browserLocalPersistence)
-      const cred = await createUserWithEmailAndPassword(auth, values.email, values.senha)
-      const user = cred.user
-      await updateProfile(user, { displayName: values.nome })
-
-      const account: FuncionarioParams = {
-        nome: values.nome,
-        email: values.email,
-      }
-      const token = await user.getIdToken()
-      const response = await criarFuncionarioClient(account, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response) {
-        actions.resetForm()
-        router.push('/home')
-      }
+      await onSubmit(values)
+      actions.resetForm()
     } catch (error: any) {
-      console.error('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
-    } finally {
-      actions.setSubmitting(false)
     }
   }
 
-  const initialValues: FormRegisterValues = {
+  const initialValues: RegisterFormData = {
     nome: '',
     email: '',
     senha: '',
@@ -65,6 +41,7 @@ export default function FormRegistro() {
       p={8}
       bg={bg}
       w="100%"
+      maxW="400px"
       mx="auto"
       borderRadius="xl"
       borderWidth={1}
@@ -81,10 +58,16 @@ export default function FormRegistro() {
         Criar Conta
       </Text>
 
+      {error && (
+        <Text color="red.500" fontSize="sm" mb={4} textAlign="center">
+          {error}
+        </Text>
+      )}
+
       <Formik
         initialValues={initialValues}
-        validationSchema={RegistroSchema}
-        onSubmit={handleRegistro}
+        validationSchema={RegisterSchema}
+        onSubmit={handleSubmit}
       >
         {({ isSubmitting }) => (
           <Form>
@@ -148,34 +131,18 @@ export default function FormRegistro() {
                 )}
               </Field>
 
-              <Stack spacing={4} mt={8}>
-                <Button
-                  type="submit"
-                  size="lg"
-                  w="100%"
-                  colorScheme="blue"
-                  borderRadius="md"
-                  disabled={isSubmitting}
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
-                  transition="all 0.2s"
-                >
-                  {isSubmitting ? <Spinner size="sm" /> : 'Criar Conta'}
-                </Button>
-                
-                <Button
-                  as={'a'}
-                  href="/user/login"
-                  size="lg"
-                  w="100%"
-                  variant="outline"
-                  colorScheme="blue"
-                  borderRadius="md"
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
-                  transition="all 0.2s"
-                >
-                  Já tenho conta
-                </Button>
-              </Stack>
+              <Button
+                type="submit"
+                size="lg"
+                w="100%"
+                colorScheme="blue"
+                borderRadius="md"
+                isLoading={isSubmitting || isLoading}
+                _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                transition="all 0.2s"
+              >
+                Criar Conta
+              </Button>
             </Stack>
           </Form>
         )}
