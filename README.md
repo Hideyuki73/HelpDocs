@@ -8,7 +8,7 @@ Uma plataforma inteligente para documentação de software, auxiliando desenvolv
 ## 🏢 **Informações Gerais**
 
 - **Nome do Software:** HelpDocs
-- **Patrocinadores:** Valdson Martins Tenório e Rodrigo Hideyuki Kawakami
+- **Patrocinadores:** Valdson Martins Tenorio e Rodrigo Hideyuki Kawakami
 - **Público-Alvo:** Desenvolvedores de software e gerentes de projeto
 - **Stakeholders:** Clientes e desenvolvedores
 

@@ -42,10 +42,25 @@ export class FuncionarioController {
       empresaId,
     );
   }
+
   @Post(':id/criar-empresa')
   createEmpresa(@Param('id') funcionarioId: string, @Body() empresaData: any) {
     return this.funcionarioService.createEmpresa(funcionarioId, empresaData);
   }
+
+  @Patch(':id/cargo') // NOVO ENDPOINT
+  async updateCargo(
+    @Param('id') funcionarioId: string,
+    @Body('cargo') cargo: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) throw new UnauthorizedException('Token não fornecido');
+    const token = authorization.split(' ')[1];
+    const decoded = await admin.auth().verifyIdToken(token);
+    
+    return this.funcionarioService.updateCargo(funcionarioId, cargo, decoded.uid);
+  }
+
   @Get()
   findAll() {
     return this.funcionarioService.findAll();

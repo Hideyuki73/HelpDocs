@@ -1,25 +1,29 @@
 'use client'
 
-import { Box, Stack } from '@chakra-ui/react'
-import FormLogin from '../../components/form/FormLogin'
-import { redirect } from 'next/navigation'
+import { useAuth } from '../hooks/useAuth'
+import LoginForm from '../components/LoginForm'
+import AuthLayout from '../components/AuthLayout'
+import { LoginFormData } from '../types'
 
-export default function Page() {
+export default function LoginPage() {
+  const { login, loading, error } = useAuth()
+
+  const handleLogin = async (values: LoginFormData) => {
+    await login(values.email, values.senha)
+  }
+
   return (
-    <Box
-      p={8}
-      backgroundColor={'gray.500'}
-      alignSelf={'center'}
-      width={'30%'}
-      mt={'5%'}
+    <AuthLayout
+      title="Bem-vindo de volta!"
+      subtitle="Faça login para acessar sua conta no HelpDocs"
+      showRegisterLink={true}
     >
-      <Stack alignItems={'center'}>
-        <FormLogin
-          onSubmit={async (values) => {
-            redirect('/home')
-          }}
-        />
-      </Stack>
-    </Box>
+      <LoginForm 
+        onSubmit={handleLogin}
+        isLoading={loading}
+        error={error}
+      />
+    </AuthLayout>
   )
 }
+

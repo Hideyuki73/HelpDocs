@@ -1,19 +1,19 @@
 'use client'
 
-import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button } from '@chakra-ui/react'
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
+import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button, useColorModeValue } from '@chakra-ui/react'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { object, string, InferType } from 'yup'
-import { getFirestore, doc, setDoc } from 'firebase/firestore'
+import InputMask from 'react-input-mask'
 
-// Validação do CNPJ simples (14 dígitos numéricos)
-const cnpjRegex = /^\d{14}$/
+// Validação do CNPJ com máscara
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/
 
 const EmpresaSchema = object({
   nome: string().required('Nome é obrigatório'),
-  cnpj: string().matches(cnpjRegex, 'CNPJ inválido. Deve conter 14 números').required('CNPJ é obrigatório'),
+  cnpj: string().matches(cnpjRegex, 'CNPJ inválido. Formato: 00.000.000/0000-00').required('CNPJ é obrigatório'),
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   telefone: string()
-    .matches(/^[0-9]{10,11}$/, 'Telefone inválido')
+    .matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido. Formato: (00) 00000-0000')
     .required('Telefone é obrigatório'),
   endereco: string().required('Endereço é obrigatório'),
 })
@@ -25,6 +25,11 @@ interface FormEmpresaProps {
 }
 
 export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
+  const bg = useColorModeValue("white", "gray.800")
+  const borderColor = useColorModeValue("gray.200", "gray.600")
+  const labelColor = useColorModeValue("gray.700", "gray.200")
+  const inputBg = useColorModeValue("white", "gray.700")
+  
   const initialValues: FormEmpresaValues = {
     nome: '',
     cnpj: '',
@@ -36,16 +41,19 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
   return (
     <Box
       p={8}
-      bg="gray.500"
+      bg={bg}
       w="100%"
-      mt="5%"
       mx="auto"
-      borderRadius="md"
+      borderRadius="xl"
+      borderWidth={1}
+      borderColor={borderColor}
+      boxShadow="lg"
     >
       <Text
-        color="white"
+        color={labelColor}
         fontSize="2xl"
-        mb={4}
+        fontWeight="bold"
+        mb={6}
         textAlign="center"
       >
         Cadastro de Empresa
@@ -56,26 +64,33 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
         validationSchema={EmpresaSchema}
         onSubmit={(values, { resetForm }) => {
           if (values) {
-            onSubmit(values)
+            // Remove máscaras antes de enviar
+            const cleanValues = {
+              ...values,
+              cnpj: values.cnpj.replace(/[^\d]/g, ''),
+              telefone: values.telefone.replace(/[^\d]/g, '')
+            }
+            onSubmit(cleanValues)
             resetForm()
           }
         }}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, setFieldValue, values }) => (
           <Form>
-            <Stack spacing={4}>
+            <Stack spacing={6}>
               <Field name="nome">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">Nome</FormLabel>
+                    <FormLabel color={labelColor} fontWeight="semibold">Nome da Empresa</FormLabel>
                     <Input
                       {...field}
-                      bg="white"
+                      bg={inputBg}
+                      borderRadius="md"
+                      borderWidth={2}
+                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      placeholder="Digite o nome da empresa"
                     />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Text color="red.500" fontSize="sm" mt={1}>
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
@@ -85,17 +100,24 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="cnpj">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">CNPJ</FormLabel>
-                    <Input
-                      {...field}
-                      type="text"
-                      maxLength={14}
-                      bg="white"
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
+                    <FormLabel color={labelColor} fontWeight="semibold">CNPJ</FormLabel>
+                    <InputMask
+                      mask="99.999.999/9999-99"
+                      value={field.value}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('cnpj', e.target.value)}
                     >
+                      {(inputProps: any) => (
+                        <Input
+                          {...inputProps}
+                          bg={inputBg}
+                          borderRadius="md"
+                          borderWidth={2}
+                          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                          placeholder="00.000.000/0000-00"
+                        />
+                      )}
+                    </InputMask>
+                    <Text color="red.500" fontSize="sm" mt={1}>
                       <ErrorMessage name="cnpj" />
                     </Text>
                   </FormControl>
@@ -105,16 +127,17 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">E-mail</FormLabel>
+                    <FormLabel color={labelColor} fontWeight="semibold">E-mail</FormLabel>
                     <Input
                       {...field}
                       type="email"
-                      bg="white"
+                      bg={inputBg}
+                      borderRadius="md"
+                      borderWidth={2}
+                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      placeholder="empresa@exemplo.com"
                     />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Text color="red.500" fontSize="sm" mt={1}>
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -124,17 +147,24 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="telefone">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">Telefone</FormLabel>
-                    <Input
-                      {...field}
-                      type="tel"
-                      bg="white"
-                      maxLength={11}
-                    />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
+                    <FormLabel color={labelColor} fontWeight="semibold">Telefone</FormLabel>
+                    <InputMask
+                      mask="(99) 99999-9999"
+                      value={field.value}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('telefone', e.target.value)}
                     >
+                      {(inputProps: any) => (
+                        <Input
+                          {...inputProps}
+                          bg={inputBg}
+                          borderRadius="md"
+                          borderWidth={2}
+                          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                          placeholder="(00) 00000-0000"
+                        />
+                      )}
+                    </InputMask>
+                    <Text color="red.500" fontSize="sm" mt={1}>
                       <ErrorMessage name="telefone" />
                     </Text>
                   </FormControl>
@@ -144,31 +174,35 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="endereco">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color="white">Endereço</FormLabel>
+                    <FormLabel color={labelColor} fontWeight="semibold">Endereço</FormLabel>
                     <Input
                       {...field}
-                      bg="white"
+                      bg={inputBg}
+                      borderRadius="md"
+                      borderWidth={2}
+                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      placeholder="Rua, número, bairro, cidade - UF"
                     />
-                    <Text
-                      color="red.300"
-                      fontSize="sm"
-                    >
+                    <Text color="red.500" fontSize="sm" mt={1}>
                       <ErrorMessage name="endereco" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              <Flex justify="center">
+              <Flex justify="center" mt={8}>
                 <Button
                   type="submit"
-                  w="50%"
-                  bg="blue.900"
-                  _hover={{ bg: 'blue.700' }}
-                  color="white"
+                  size="lg"
+                  w="100%"
+                  maxW="300px"
+                  colorScheme="blue"
+                  borderRadius="md"
                   disabled={isSubmitting}
+                  _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                  transition="all 0.2s"
                 >
-                  {isSubmitting ? <Spinner size="sm" /> : 'Cadastrar'}
+                  {isSubmitting ? <Spinner size="sm" /> : 'Cadastrar Empresa'}
                 </Button>
               </Flex>
             </Stack>
@@ -178,3 +212,4 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
     </Box>
   )
 }
+
