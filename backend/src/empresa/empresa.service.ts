@@ -171,6 +171,7 @@ export class EmpresaService {
       const funcionarioRef = this.funcionarioCollection.doc(membroId);
       batch.update(funcionarioRef, {
         empresaId: admin.firestore.FieldValue.delete(),
+        cargo: admin.firestore.FieldValue.delete(),
       });
     }
 
