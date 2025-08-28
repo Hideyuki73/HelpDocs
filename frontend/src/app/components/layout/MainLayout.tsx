@@ -59,7 +59,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }
 
   return (
-    <Stack minH="100vh">
+    <Stack
+      minH="100vh"
+      bgGradient="linear(to-b, gray.100, gray.300, gray.400)"
+    >
       <Header
         user={user}
         onLogout={() => {
