@@ -1,6 +1,3 @@
-// Conteúdo completo de MainLayout.tsx
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 'use client'
 
 import { Stack, Center, Spinner } from '@chakra-ui/react'
@@ -25,20 +22,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u)
       setLoading(false)
-      console.log('Auth state changed. User:', u, 'Pathname:', pathname)
 
-      const isProtected = pathname?.startsWith('/user') && pathname !== '/user/login' && pathname !== '/user/register'
-      const isEmpresaSelectionPage = pathname === '/empresa-selection'
+      const publicRoutes = ['/', '/user/login', '/user/register']
+      const isProtected = !publicRoutes.includes(pathname ?? '')
 
+      // Se não está logado e tentou acessar rota protegida
       if (!u && isProtected) {
         router.replace('/user/login')
-      } else if (u && !isEmpresaSelectionPage) {
-        const empresa = await getMinhaEmpresa()
-        if (!empresa) {
-          router.replace('/empresa-selection')
+        return
+      }
+
+      // Se está logado e entrou em rota relacionada à empresa
+      if (u && pathname?.startsWith('/empresa')) {
+        try {
+          const empresa = await getMinhaEmpresa()
+          if (!empresa && pathname !== '/empresa-selection') {
+            router.replace('/empresa-selection')
+          } else if (empresa && pathname === '/empresa') {
+            // já está na página correta, não faz nada
+          }
+        } catch (err) {
+          console.log('Erro ao buscar empresa:', err)
+          if (pathname !== '/empresa-selection') {
+            router.replace('/empresa-selection')
+          }
         }
       }
     })
+
     return unsubscribe
   }, [router, pathname])
 
