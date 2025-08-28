@@ -23,7 +23,7 @@ export function useEmpresaActions() {
       const { codigo } = await gerarConvite(empresaId)
       setConvite(codigo)
     } catch (error) {
-      console.error('Erro ao gerar convite:', error)
+      console.log('Erro ao gerar convite:', error)
       toast({
         title: 'Erro ao gerar convite',
         description: 'Não foi possível gerar o código de convite',
@@ -38,7 +38,7 @@ export function useEmpresaActions() {
     membroSelecionado: Membro | null,
     cargoSelecionado: string,
     setMembros: React.Dispatch<React.SetStateAction<Membro[]>>,
-    onClose: () => void
+    onClose: () => void,
   ) => {
     if (!membroSelecionado || !cargoSelecionado) return
 
@@ -48,11 +48,7 @@ export function useEmpresaActions() {
 
       // Atualizar a lista de membros
       setMembros((prev) =>
-        prev.map((membro) => 
-          membro.id === membroSelecionado.id 
-            ? { ...membro, cargo: cargoSelecionado } 
-            : membro
-        )
+        prev.map((membro) => (membro.id === membroSelecionado.id ? { ...membro, cargo: cargoSelecionado } : membro)),
       )
 
       toast({
@@ -65,7 +61,7 @@ export function useEmpresaActions() {
 
       onClose()
     } catch (error: any) {
-      console.error('Erro ao atualizar cargo:', error)
+      console.log('Erro ao atualizar cargo:', error)
       toast({
         title: 'Erro ao atualizar cargo',
         description: error.response?.data?.message || 'Erro desconhecido',
@@ -82,17 +78,17 @@ export function useEmpresaActions() {
     membroParaExpulsar: Membro | null,
     empresaId: string,
     setMembros: React.Dispatch<React.SetStateAction<Membro[]>>,
-    onClose: () => void
+    onClose: () => void,
   ) => {
     if (!membroParaExpulsar || !empresaId) return
-    
+
     setLoadingExpulsao(true)
     try {
       await expulsarFuncionario(membroParaExpulsar.id, empresaId)
-      
+
       // Remover membro da lista
-      setMembros(prev => prev.filter(membro => membro.id !== membroParaExpulsar.id))
-      
+      setMembros((prev) => prev.filter((membro) => membro.id !== membroParaExpulsar.id))
+
       toast({
         title: 'Funcionário expulso',
         description: `${membroParaExpulsar.nome} foi removido da empresa`,
@@ -100,10 +96,10 @@ export function useEmpresaActions() {
         duration: 3000,
         isClosable: true,
       })
-      
+
       onClose()
     } catch (error: any) {
-      console.error('Erro ao expulsar funcionário:', error)
+      console.log('Erro ao expulsar funcionário:', error)
       toast({
         title: 'Erro ao expulsar funcionário',
         description: error.response?.data?.message || 'Erro desconhecido',
@@ -116,16 +112,13 @@ export function useEmpresaActions() {
     }
   }
 
-  const handleDeleteEmpresa = async (
-    empresaId: string,
-    onClose: () => void
-  ) => {
+  const handleDeleteEmpresa = async (empresaId: string, onClose: () => void) => {
     if (!empresaId) return
-    
+
     setLoadingDeleteEmpresa(true)
     try {
       await deleteEmpresa(empresaId)
-      
+
       toast({
         title: 'Empresa deletada',
         description: 'A empresa foi deletada com sucesso',
@@ -133,12 +126,11 @@ export function useEmpresaActions() {
         duration: 3000,
         isClosable: true,
       })
-      
+
       // Redirecionar ou recarregar a página
       window.location.href = '/empresa-selection'
-      
     } catch (error: any) {
-      console.error('Erro ao deletar empresa:', error)
+      console.log('Erro ao deletar empresa:', error)
       toast({
         title: 'Erro ao deletar empresa',
         description: error.response?.data?.message || 'Erro desconhecido',
@@ -160,7 +152,6 @@ export function useEmpresaActions() {
     handleGerarConvite,
     handleAtualizarCargo,
     handleExpulsarFuncionario,
-    handleDeleteEmpresa
+    handleDeleteEmpresa,
   }
 }
-

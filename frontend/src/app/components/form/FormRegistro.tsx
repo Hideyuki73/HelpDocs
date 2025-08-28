@@ -1,6 +1,17 @@
 'use client'
 
-import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button, useColorModeValue } from '@chakra-ui/react'
+import {
+  Box,
+  Stack,
+  Spinner,
+  Text,
+  FormControl,
+  FormLabel,
+  Input,
+  Flex,
+  Button,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
 import { object, string, InferType } from 'yup'
 import { auth, createUserWithEmailAndPassword } from '../../../config/firebase'
@@ -18,11 +29,11 @@ export type FormRegisterValues = InferType<typeof RegistroSchema>
 
 export default function FormRegistro() {
   const router = useRouter()
-  const bg = useColorModeValue("white", "gray.800")
-  const borderColor = useColorModeValue("gray.200", "gray.600")
-  const labelColor = useColorModeValue("gray.700", "gray.200")
-  const inputBg = useColorModeValue("white", "gray.700")
-  
+  const bg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const labelColor = useColorModeValue('gray.700', 'gray.200')
+  const inputBg = useColorModeValue('white', 'gray.700')
+
   const handleRegistro = async (values: FormRegisterValues, actions: FormikHelpers<FormRegisterValues>) => {
     actions.setSubmitting(true)
     try {
@@ -47,7 +58,7 @@ export default function FormRegistro() {
         router.push('/home')
       }
     } catch (error: any) {
-      console.error('Erro ao registrar:', error.message)
+      console.log('Erro ao registrar:', error.message)
       actions.setErrors({ email: error.message })
     } finally {
       actions.setSubmitting(false)
@@ -92,16 +103,25 @@ export default function FormRegistro() {
               <Field name="nome">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Nome Completo</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Nome Completo
+                    </FormLabel>
                     <Input
                       {...field}
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Digite seu nome completo"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
@@ -111,17 +131,26 @@ export default function FormRegistro() {
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">E-mail</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      E-mail
+                    </FormLabel>
                     <Input
                       {...field}
                       type="email"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="seu@email.com"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -131,24 +160,36 @@ export default function FormRegistro() {
               <Field name="senha">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Senha</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Senha
+                    </FormLabel>
                     <Input
                       {...field}
                       type="password"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Mínimo 6 caracteres"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              <Stack spacing={4} mt={8}>
+              <Stack
+                spacing={4}
+                mt={8}
+              >
                 <Button
                   type="submit"
                   size="lg"
@@ -156,12 +197,12 @@ export default function FormRegistro() {
                   colorScheme="blue"
                   borderRadius="md"
                   disabled={isSubmitting}
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                  _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
                   transition="all 0.2s"
                 >
                   {isSubmitting ? <Spinner size="sm" /> : 'Criar Conta'}
                 </Button>
-                
+
                 <Button
                   as={'a'}
                   href="/user/login"
@@ -170,7 +211,7 @@ export default function FormRegistro() {
                   variant="outline"
                   colorScheme="blue"
                   borderRadius="md"
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
                   transition="all 0.2s"
                 >
                   Já tenho conta
@@ -183,4 +224,3 @@ export default function FormRegistro() {
     </Box>
   )
 }
-

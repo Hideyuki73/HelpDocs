@@ -1,13 +1,13 @@
 'use client'
 
-import { 
-  Box, 
-  VStack, 
-  Heading, 
-  Text, 
-  Button, 
-  Alert, 
-  AlertIcon, 
+import {
+  Box,
+  VStack,
+  Heading,
+  Text,
+  Button,
+  Alert,
+  AlertIcon,
   useColorModeValue,
   Modal,
   ModalOverlay,
@@ -16,7 +16,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/navigation'
@@ -27,8 +27,8 @@ export default function DeleteAccountPage() {
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isDeleting, setIsDeleting] = useState(false)
-  const bg = useColorModeValue("white", "gray.800")
-  const borderColor = useColorModeValue("gray.200", "gray.600")
+  const bg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   if (!user) {
     router.push('/user/login')
@@ -41,17 +41,17 @@ export default function DeleteAccountPage() {
       // Aqui você implementaria a lógica para deletar a conta
       // Por exemplo, chamar uma API para deletar o usuário
       console.log('Deletando conta do usuário:', user.id)
-      
+
       // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
       // Fazer logout após deletar
       await logout()
-      
+
       // Redirecionar para home
       router.push('/')
     } catch (error) {
-      console.error('Erro ao deletar conta:', error)
+      console.log('Erro ao deletar conta:', error)
     } finally {
       setIsDeleting(false)
       onClose()
@@ -70,19 +70,36 @@ export default function DeleteAccountPage() {
       bg={bg}
       borderColor={borderColor}
     >
-      <VStack spacing={6} align="center">
-        <Heading size="lg" color="red.500">Deletar Conta</Heading>
-        
-        <Alert status="warning" borderRadius="md">
+      <VStack
+        spacing={6}
+        align="center"
+      >
+        <Heading
+          size="lg"
+          color="red.500"
+        >
+          Deletar Conta
+        </Heading>
+
+        <Alert
+          status="warning"
+          borderRadius="md"
+        >
           <AlertIcon />
-          <Text>
-            Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.
-          </Text>
+          <Text>Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.</Text>
         </Alert>
 
-        <VStack spacing={4} align="start" w="100%">
+        <VStack
+          spacing={4}
+          align="start"
+          w="100%"
+        >
           <Text fontWeight="bold">Dados que serão removidos:</Text>
-          <VStack align="start" pl={4} spacing={2}>
+          <VStack
+            align="start"
+            pl={4}
+            spacing={2}
+          >
             <Text>• Informações pessoais (nome, email)</Text>
             <Text>• Histórico de atividades</Text>
             <Text>• Associações com empresas</Text>
@@ -90,7 +107,10 @@ export default function DeleteAccountPage() {
           </VStack>
         </VStack>
 
-        <VStack spacing={4} w="100%">
+        <VStack
+          spacing={4}
+          w="100%"
+        >
           <Button
             colorScheme="gray"
             size="lg"
@@ -99,7 +119,7 @@ export default function DeleteAccountPage() {
           >
             Cancelar
           </Button>
-          
+
           <Button
             colorScheme="red"
             size="lg"
@@ -112,21 +132,31 @@ export default function DeleteAccountPage() {
       </VStack>
 
       {/* Modal de confirmação */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Confirmar Deleção</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>
-              Tem certeza que deseja deletar sua conta permanentemente?
-            </Text>
-            <Text mt={2} fontSize="sm" color="red.600" fontWeight="bold">
+            <Text>Tem certeza que deseja deletar sua conta permanentemente?</Text>
+            <Text
+              mt={2}
+              fontSize="sm"
+              color="red.600"
+              fontWeight="bold"
+            >
               Esta ação não pode ser desfeita!
             </Text>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={onClose}
+            >
               Cancelar
             </Button>
             <Button
@@ -142,4 +172,3 @@ export default function DeleteAccountPage() {
     </Box>
   )
 }
-

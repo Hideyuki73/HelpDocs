@@ -34,7 +34,7 @@ export function useAuth() {
         empresaId: funcionarioData.empresaId || undefined,
       }
     } catch (error) {
-      console.error('Erro ao buscar dados do funcionário:', error)
+      console.log('Erro ao buscar dados do funcionário:', error)
       // Fallback para dados básicos do Firebase se não conseguir buscar do backend
       return {
         id: firebaseUser.uid,
@@ -55,7 +55,7 @@ export function useAuth() {
         const userData = await fetchFuncionarioData(firebaseUser)
         setAuthState((prev) => ({ ...prev, user: userData, loading: false }))
       } catch (error) {
-        console.error('Erro ao atualizar dados do usuário:', error)
+        console.log('Erro ao atualizar dados do usuário:', error)
         setAuthState((prev) => ({ ...prev, loading: false, error: 'Erro ao atualizar perfil do usuário.' }))
       }
     }
@@ -68,7 +68,7 @@ export function useAuth() {
           const userData = await fetchFuncionarioData(firebaseUser)
           setAuthState((prev) => ({ ...prev, user: userData, loading: false }))
         } catch (error) {
-          console.error('Erro ao buscar dados do funcionário:', error)
+          console.log('Erro ao buscar dados do funcionário:', error)
           setAuthState((prev) => ({
             ...prev,
             user: null,
@@ -98,7 +98,7 @@ export function useAuth() {
       console.log('Login bem-sucedido:', firebaseUser.uid)
       router.push('/empresa-selection')
     } catch (error: any) {
-      console.error('Erro de login:', error.message)
+      console.log('Erro de login:', error.message)
       setAuthState((prev) => ({
         ...prev,
         loading: false,
@@ -135,7 +135,7 @@ export function useAuth() {
         router.push('/home')
       }
     } catch (error: any) {
-      console.error('Erro ao registrar:', error.message)
+      console.log('Erro ao registrar:', error.message)
       setAuthState((prev) => ({
         ...prev,
         loading: false,
@@ -152,7 +152,7 @@ export function useAuth() {
       setAuthState((prev) => ({ ...prev, user: null, loading: false }))
       router.push('/')
     } catch (error: any) {
-      console.error('Erro ao fazer logout:', error.message)
+      console.log('Erro ao fazer logout:', error.message)
       setAuthState((prev) => ({
         ...prev,
         loading: false,

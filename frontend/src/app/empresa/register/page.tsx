@@ -17,7 +17,7 @@ export default function RegisterEmpresaPage() {
       // redireciona para a página correta
       router.push('/empresa')
     } catch (err: any) {
-      console.error(err)
+      console.log(err)
       toast({
         title: 'Erro ao criar empresa',
         description: err.message || 'Tente novamente.',

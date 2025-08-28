@@ -28,7 +28,7 @@ export async function getUsuarioLogado(): Promise<UsuarioLogado | null> {
       empresaId: response.data.empresaId,
     }
   } catch (error) {
-    console.error('Erro ao buscar dados do usuário:', error)
+    console.log('Erro ao buscar dados do usuário:', error)
     // Fallback com dados básicos do Firebase Auth
     return {
       id: user.uid,

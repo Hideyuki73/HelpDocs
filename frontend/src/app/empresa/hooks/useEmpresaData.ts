@@ -23,7 +23,7 @@ export function useEmpresaData() {
         // Buscar dados do usuário logado
         const usuario = await getUsuarioLogado()
         setUsuarioLogado(usuario)
-        
+
         const data = await getMinhaEmpresa()
         setEmpresa(data)
 
@@ -34,7 +34,7 @@ export function useEmpresaData() {
             const membrosData = await getFuncionarios(data.membros)
             setMembros(membrosData)
           } catch (error) {
-            console.error('Erro ao buscar membros:', error)
+            console.log('Erro ao buscar membros:', error)
             // Fallback: usar UIDs como nomes
             const membrosBasicos = data.membros.map((uid: string) => ({
               id: uid,
@@ -47,7 +47,7 @@ export function useEmpresaData() {
           }
         }
       } catch (err) {
-        console.error(err)
+        console.log(err)
       } finally {
         setLoading(false)
       }
@@ -61,7 +61,6 @@ export function useEmpresaData() {
     setMembros,
     loading,
     loadingMembros,
-    usuarioLogado
+    usuarioLogado,
   }
 }
-

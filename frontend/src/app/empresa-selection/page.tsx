@@ -42,7 +42,7 @@ export default function EmpresaSelectionPage() {
       // Redirecionar para home após entrar na empresa
       router.push('/home')
     } catch (error: any) {
-      console.error('Erro ao validar convite:', error.message)
+      console.log('Erro ao validar convite:', error.message)
       actions.setErrors({ codigo: 'Código de convite inválido ou expirado' })
     } finally {
       actions.setSubmitting(false)

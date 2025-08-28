@@ -1,19 +1,30 @@
 'use client'
 
-import { Box, Stack, Spinner, Text, FormControl, FormLabel, Input, Flex, Button, useColorModeValue } from '@chakra-ui/react'
+import {
+  Box,
+  Stack,
+  Spinner,
+  Text,
+  FormControl,
+  FormLabel,
+  Input,
+  Flex,
+  Button,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { object, string, InferType } from 'yup'
-import InputMask from 'react-input-mask'
 
-// Validação do CNPJ com máscara
-const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/
+// Validação sem máscara (apenas números)
+const cnpjRegex = /^\d{14}$/ // 14 dígitos
+const telefoneRegex = /^\d{10,11}$/ // 10 ou 11 dígitos
 
 const EmpresaSchema = object({
   nome: string().required('Nome é obrigatório'),
-  cnpj: string().matches(cnpjRegex, 'CNPJ inválido. Formato: 00.000.000/0000-00').required('CNPJ é obrigatório'),
+  cnpj: string().matches(cnpjRegex, 'CNPJ inválido. Digite apenas números (14 dígitos)').required('CNPJ é obrigatório'),
   email: string().email('E-mail inválido').required('E-mail é obrigatório'),
   telefone: string()
-    .matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido. Formato: (00) 00000-0000')
+    .matches(telefoneRegex, 'Telefone inválido. Digite apenas números (DDD + número)')
     .required('Telefone é obrigatório'),
   endereco: string().required('Endereço é obrigatório'),
 })
@@ -25,11 +36,11 @@ interface FormEmpresaProps {
 }
 
 export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
-  const bg = useColorModeValue("white", "gray.800")
-  const borderColor = useColorModeValue("gray.200", "gray.600")
-  const labelColor = useColorModeValue("gray.700", "gray.200")
-  const inputBg = useColorModeValue("white", "gray.700")
-  
+  const bg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const labelColor = useColorModeValue('gray.700', 'gray.200')
+  const inputBg = useColorModeValue('white', 'gray.700')
+
   const initialValues: FormEmpresaValues = {
     nome: '',
     cnpj: '',
@@ -64,33 +75,36 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
         validationSchema={EmpresaSchema}
         onSubmit={(values, { resetForm }) => {
           if (values) {
-            // Remove máscaras antes de enviar
-            const cleanValues = {
-              ...values,
-              cnpj: values.cnpj.replace(/[^\d]/g, ''),
-              telefone: values.telefone.replace(/[^\d]/g, '')
-            }
-            onSubmit(cleanValues)
+            onSubmit(values)
             resetForm()
           }
         }}
       >
-        {({ isSubmitting, setFieldValue, values }) => (
+        {({ isSubmitting }) => (
           <Form>
             <Stack spacing={6}>
               <Field name="nome">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Nome da Empresa</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Nome da Empresa
+                    </FormLabel>
                     <Input
                       {...field}
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Digite o nome da empresa"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
@@ -98,26 +112,32 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               </Field>
 
               <Field name="cnpj">
-                {({ field }: any) => (
+                {({ field, form }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">CNPJ</FormLabel>
-                    <InputMask
-                      mask="99.999.999/9999-99"
-                      value={field.value}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('cnpj', e.target.value)}
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
                     >
-                      {(inputProps: any) => (
-                        <Input
-                          {...inputProps}
-                          bg={inputBg}
-                          borderRadius="md"
-                          borderWidth={2}
-                          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
-                          placeholder="00.000.000/0000-00"
-                        />
-                      )}
-                    </InputMask>
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                      CNPJ
+                    </FormLabel>
+                    <Input
+                      {...field}
+                      bg={inputBg}
+                      borderRadius="md"
+                      borderWidth={2}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
+                      placeholder="Digite apenas números (14 dígitos)"
+                      maxLength={14}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/\D/g, '')
+                        form.setFieldValue('cnpj', onlyNums)
+                      }}
+                    />
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="cnpj" />
                     </Text>
                   </FormControl>
@@ -127,17 +147,26 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">E-mail</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      E-mail
+                    </FormLabel>
                     <Input
                       {...field}
                       type="email"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="empresa@exemplo.com"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -145,26 +174,33 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               </Field>
 
               <Field name="telefone">
-                {({ field }: any) => (
+                {({ field, form }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Telefone</FormLabel>
-                    <InputMask
-                      mask="(99) 99999-9999"
-                      value={field.value}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('telefone', e.target.value)}
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
                     >
-                      {(inputProps: any) => (
-                        <Input
-                          {...inputProps}
-                          bg={inputBg}
-                          borderRadius="md"
-                          borderWidth={2}
-                          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
-                          placeholder="(00) 00000-0000"
-                        />
-                      )}
-                    </InputMask>
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                      Telefone
+                    </FormLabel>
+                    <Input
+                      {...field}
+                      bg={inputBg}
+                      borderRadius="md"
+                      borderWidth={2}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
+                      placeholder="Digite apenas números (DDD + número)"
+                      maxLength={11}
+                      onChange={(e) => {
+                        // Permite apenas números
+                        const onlyNums = e.target.value.replace(/\D/g, '')
+                        form.setFieldValue('telefone', onlyNums)
+                      }}
+                    />
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="telefone" />
                     </Text>
                   </FormControl>
@@ -174,23 +210,35 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
               <Field name="endereco">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Endereço</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Endereço
+                    </FormLabel>
                     <Input
                       {...field}
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Rua, número, bairro, cidade - UF"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="endereco" />
                     </Text>
                   </FormControl>
                 )}
               </Field>
 
-              <Flex justify="center" mt={8}>
+              <Flex
+                justify="center"
+                mt={8}
+              >
                 <Button
                   type="submit"
                   size="lg"
@@ -199,7 +247,7 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
                   colorScheme="blue"
                   borderRadius="md"
                   disabled={isSubmitting}
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                  _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
                   transition="all 0.2s"
                 >
                   {isSubmitting ? <Spinner size="sm" /> : 'Cadastrar Empresa'}
@@ -212,4 +260,3 @@ export default function FormEmpresa({ onSubmit }: FormEmpresaProps) {
     </Box>
   )
 }
-
