@@ -22,10 +22,10 @@ export function Header({ user, onLogout }: HeaderProps) {
       if (empresa) {
         router.push('/empresa')
       } else {
-        router.push('/empresa/register')
+        router.push('/empresa-selection')
       }
     } catch (err) {
-      router.push('/empresa/register')
+      router.push('/empresa-selection')
     }
   }
 
@@ -69,7 +69,7 @@ export function Header({ user, onLogout }: HeaderProps) {
             fontSize="lg"
             _hover={{ color: 'yellow.300' }}
             as={Link}
-            href="/empresa/register"
+            href="/equipes"
           >
             EQUIPES
           </Button>

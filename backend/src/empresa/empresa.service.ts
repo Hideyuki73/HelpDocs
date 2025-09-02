@@ -232,4 +232,40 @@ export class EmpresaService {
 
     return { message: 'Funcionário removido da empresa com sucesso' };
   }
+
+  // Sair da empresa (auto-remover funcionário)
+  async sairDaEmpresa(empresaId: string, funcionarioId: string) {
+    const empresaRef = this.empresaCollection.doc(empresaId);
+    const empresaDoc = await empresaRef.get();
+
+    if (!empresaDoc.exists) {
+      throw new NotFoundException('Empresa não encontrada');
+    }
+
+    const empresaData = empresaDoc.data();
+
+    if (!empresaData?.membros?.includes(funcionarioId)) {
+      throw new NotFoundException('Funcionário não faz parte da empresa');
+    }
+
+    // 🚨 Criador não pode sair (ele deve deletar a empresa)
+    if (empresaData.criadorUid === funcionarioId) {
+      throw new UnauthorizedException(
+        'O criador da empresa não pode sair, apenas deletar a empresa',
+      );
+    }
+
+    // Remover funcionário da lista de membros
+    await empresaRef.update({
+      membros: admin.firestore.FieldValue.arrayRemove(funcionarioId),
+    });
+
+    // Remover empresaId e cargo do funcionário
+    await this.funcionarioCollection.doc(funcionarioId).update({
+      empresaId: admin.firestore.FieldValue.delete(),
+      cargo: admin.firestore.FieldValue.delete(),
+    });
+
+    return { message: 'Você saiu da empresa com sucesso' };
+  }
 }

@@ -1,6 +1,3 @@
-// Conteúdo completo de funcionario.ts
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 import { api } from './api'
 import { AxiosRequestConfig } from 'axios'
 import { auth } from '@/config/firebase'
@@ -49,7 +46,7 @@ export async function getFuncionarios(funcionarioIds: string[]) {
   })
 }
 
-// Atualizar cargo do funcionário // NOVA FUNÇÃO
+// Atualizar cargo do funcionário
 export async function updateCargoFuncionario(funcionarioId: string, cargo: string) {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
@@ -65,6 +62,7 @@ export async function updateCargoFuncionario(funcionarioId: string, cargo: strin
   return response.data
 }
 
+// Expulsar funcionário (remover da empresa)
 export async function expulsarFuncionario(funcionarioId: string, empresaId: string) {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
@@ -77,5 +75,17 @@ export async function expulsarFuncionario(funcionarioId: string, empresaId: stri
       headers: { Authorization: `Bearer ${token}` },
     },
   )
+  return response.data
+}
+
+// Listar todos os funcionários da empresa
+export async function listarFuncionarios() {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.get('/funcionarios', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   return response.data
 }

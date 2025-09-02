@@ -31,23 +31,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         router.replace('/user/login')
         return
       }
-
-      // Se está logado e entrou em rota relacionada à empresa
-      if (u && pathname?.startsWith('/empresa')) {
-        try {
-          const empresa = await getMinhaEmpresa()
-          if (!empresa && pathname !== '/empresa-selection') {
-            router.replace('/empresa-selection')
-          } else if (empresa && pathname === '/empresa') {
-            // já está na página correta, não faz nada
-          }
-        } catch (err) {
-          console.log('Erro ao buscar empresa:', err)
-          if (pathname !== '/empresa-selection') {
-            router.replace('/empresa-selection')
-          }
-        }
-      }
     })
 
     return unsubscribe
