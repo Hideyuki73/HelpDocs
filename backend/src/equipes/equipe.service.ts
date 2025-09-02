@@ -362,7 +362,7 @@ export class EquipeService {
       membros: Array.isArray(data?.membros)
         ? data.membros.map((ref: DocumentReference) => ref.id)
         : [],
-      dataCadastro: data?.dataCadastro,
+      dataCadastro: data?.dataCadastro.toDate().toISOString(),
       empresaId: data?.empresaId || null,
     };
   }

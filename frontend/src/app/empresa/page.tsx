@@ -11,6 +11,7 @@ import ModalCargo from './components/ModalCargo'
 import ModalExpulsar from './components/ModalExpulsar'
 import ModalDeleteEmpresa from './components/ModalDeleteEmpresa'
 import EmpresaInfo from './components/EmpresaInfo'
+import ModalSairEmpresa from './components/ModalSairEmpresa'
 
 export default function EmpresaPage() {
   // Estados locais
@@ -25,16 +26,19 @@ export default function EmpresaPage() {
     loadingCargo,
     loadingExpulsao,
     loadingDeleteEmpresa,
+    loadingSair,
     handleGerarConvite,
     handleAtualizarCargo,
     handleExpulsarFuncionario,
     handleDeleteEmpresa,
+    handleSairDaEmpresa,
   } = useEmpresaActions()
 
   // Modais
   const { isOpen: isOpenCargo, onOpen: onOpenCargo, onClose: onCloseCargo } = useDisclosure()
   const { isOpen: isOpenExpulsar, onOpen: onOpenExpulsar, onClose: onCloseExpulsar } = useDisclosure()
   const { isOpen: isOpenDeleteEmpresa, onOpen: onOpenDeleteEmpresa, onClose: onCloseDeleteEmpresa } = useDisclosure()
+  const { isOpen: isOpenSair, onOpen: onOpenSair, onClose: onCloseSair } = useDisclosure()
 
   // Handlers
   const handleAbrirModalCargo = (membro: Membro) => {
@@ -51,6 +55,12 @@ export default function EmpresaPage() {
   const onGerarConvite = () => {
     if (empresa?.id) {
       handleGerarConvite(empresa.id)
+    }
+  }
+
+  const onSairDaEmpresa = () => {
+    if (empresa?.id) {
+      handleSairDaEmpresa(empresa.id, onCloseSair) // função que você cria em useEmpresaActions
     }
   }
 
@@ -135,12 +145,14 @@ export default function EmpresaPage() {
           />
         </SimpleGrid>
 
-        {/* Botão de deletar empresa - apenas para admins */}
-        {isUserAdmin && (
-          <Box
-            mt={8}
-            textAlign="center"
-          >
+        <Box
+          mt={8}
+          textAlign="center"
+          display="flex"
+          justifyContent="center"
+          gap={4}
+        >
+          {isUserAdmin && (
             <Button
               colorScheme="red"
               variant="outline"
@@ -149,8 +161,17 @@ export default function EmpresaPage() {
             >
               Deletar Empresa
             </Button>
-          </Box>
-        )}
+          )}
+
+          <Button
+            colorScheme="red"
+            variant="outline"
+            onClick={onOpenSair}
+            size="lg"
+          >
+            Sair da Empresa
+          </Button>
+        </Box>
       </Box>
 
       {/* Modais */}
@@ -170,6 +191,14 @@ export default function EmpresaPage() {
         membroParaExpulsar={membroParaExpulsar}
         onExpulsarFuncionario={onExpulsarFuncionario}
         loadingExpulsao={loadingExpulsao}
+      />
+
+      <ModalSairEmpresa
+        isOpen={isOpenSair}
+        onClose={onCloseSair}
+        onSair={onSairDaEmpresa}
+        loadingSair={loadingSair}
+        nomeEmpresa={empresa?.nome}
       />
 
       <ModalDeleteEmpresa

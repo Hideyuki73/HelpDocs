@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useToast } from '@chakra-ui/react'
-import { gerarConvite, deleteEmpresa } from '@/action/empresa'
+import { gerarConvite, deleteEmpresa, sairDaEmpresa } from '@/action/empresa'
 import { updateCargoFuncionario, expulsarFuncionario } from '@/action/funcionario'
 
 interface Membro {
@@ -15,6 +15,7 @@ export function useEmpresaActions() {
   const [loadingCargo, setLoadingCargo] = useState(false)
   const [loadingExpulsao, setLoadingExpulsao] = useState(false)
   const [loadingDeleteEmpresa, setLoadingDeleteEmpresa] = useState(false)
+  const [loadingSair, setLoadingSair] = useState(false)
   const toast = useToast()
 
   const handleGerarConvite = async (empresaId: string) => {
@@ -144,14 +145,27 @@ export function useEmpresaActions() {
     }
   }
 
+  const handleSairDaEmpresa = async (empresaId: string, onClose: () => void) => {
+    try {
+      setLoadingSair(true)
+      await sairDaEmpresa(empresaId)
+      onClose()
+      window.location.reload()
+    } finally {
+      setLoadingSair(false)
+    }
+  }
+
   return {
     convite,
     loadingCargo,
     loadingExpulsao,
     loadingDeleteEmpresa,
+    loadingSair,
     handleGerarConvite,
     handleAtualizarCargo,
     handleExpulsarFuncionario,
     handleDeleteEmpresa,
+    handleSairDaEmpresa,
   }
 }

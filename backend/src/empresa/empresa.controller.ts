@@ -92,4 +92,29 @@ export class EmpresaController {
       uid,
     );
   }
+
+  @Patch(':id/sair')
+  async sairDaEmpresa(
+    @Param('id') empresaId: string,
+    @Body('funcionarioId') funcionarioId: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    if (!authorization) {
+      throw new UnauthorizedException('Token não fornecido');
+    }
+    const token = authorization.split(' ')[1];
+    if (!token) throw new UnauthorizedException('Token mal formatado');
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    // funcionário só pode sair da própria empresa
+    if (uid !== funcionarioId) {
+      throw new UnauthorizedException(
+        'Você só pode sair da sua própria conta de empresa',
+      );
+    }
+
+    return this.empresaService.sairDaEmpresa(empresaId, funcionarioId);
+  }
 }

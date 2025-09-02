@@ -4,7 +4,7 @@ export interface Equipe {
   documentoId?: string
   criadorId: string
   membros: string[]
-  dataCadastro: Date
+  dataCadastro: string
   empresaId: string
 }
 

@@ -77,3 +77,18 @@ export async function deleteEmpresa(empresaId: string) {
   })
   return response.data
 }
+
+export async function sairDaEmpresa(empresaId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.patch(
+    `/empresas/${empresaId}/sair`,
+    { funcionarioId: user.uid },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+  return response.data
+}

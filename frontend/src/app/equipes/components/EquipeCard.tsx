@@ -29,7 +29,7 @@ import {
 } from '@chakra-ui/react'
 import { Equipe } from '../types'
 import { useAuth } from '@/app/user/hooks/useAuth'
-import { FaArrowDown, FaBars, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
+import { FaBars, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 
 interface EquipeCardProps {
   equipe: Equipe
@@ -181,8 +181,9 @@ export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetail
               fontSize="sm"
               color={textColor}
             >
-              Criada em: {new Date(equipe.dataCadastro).toLocaleDateString('pt-BR')}
+              Criada em: {new Date(equipe.dataCadastro).toLocaleString('pt-BR')}
             </Text>
+
             {equipe.membros.length > 0 && (
               <Text
                 fontSize="sm"
