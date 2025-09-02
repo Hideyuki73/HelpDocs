@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Patch,
+  Request,
 } from '@nestjs/common';
 import { EquipeService } from './equipe.service';
 import { CreateEquipeDto } from './dto/create-equipe.dto';
@@ -16,35 +17,62 @@ export class EquipeController {
   constructor(private readonly equipeService: EquipeService) {}
 
   @Post()
-  create(@Body() createEquipeDto: CreateEquipeDto) {
-    return this.equipeService.create(createEquipeDto);
+  create(@Body() createEquipeDto: CreateEquipeDto, @Request() req: any) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.create(createEquipeDto, usuarioId);
   }
 
   @Get()
-  findAll() {
-    return this.equipeService.findAll();
+  findAll(@Request() req: any) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.findAll(usuarioId);
+  }
+
+  @Get('stats')
+  getStats(@Request() req: any) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.getEquipeStats(usuarioId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.equipeService.findOne(id);
+  findOne(@Param('id') id: string, @Request() req: any) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.findOne(id, usuarioId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEquipeDto: UpdateEquipeDto) {
-    return this.equipeService.update(id, updateEquipeDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateEquipeDto: UpdateEquipeDto,
+    @Request() req: any,
+  ) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.update(id, updateEquipeDto, usuarioId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.equipeService.remove(id);
+  remove(@Param('id') id: string, @Request() req: any) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.remove(id, usuarioId);
   }
 
   @Post(':id/adicionar-membros')
   addMembros(
     @Param('id') equipeId: string,
     @Body('membros') membros: string[],
+    @Request() req: any,
   ) {
-    return this.equipeService.addMembros(equipeId, membros);
+    const usuarioId = req.user.uid;
+    return this.equipeService.addMembros(equipeId, membros, usuarioId);
+  }
+
+  @Delete(':id/remover-membro/:membroId')
+  removeMembro(
+    @Param('id') equipeId: string,
+    @Param('membroId') membroId: string,
+    @Request() req: any,
+  ) {
+    const usuarioId = req.user.uid;
+    return this.equipeService.removeMembro(equipeId, membroId, usuarioId);
   }
 }
