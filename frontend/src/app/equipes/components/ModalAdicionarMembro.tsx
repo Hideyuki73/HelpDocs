@@ -20,10 +20,11 @@ import {
   CheckboxGroup,
   Spinner,
   Alert,
-  AlertIcon
+  AlertIcon,
 } from '@chakra-ui/react'
 import { Equipe } from '../types'
-import { listarFuncionarios } from '@/action/funcionario'
+import { getFuncionarios, listarFuncionarios } from '@/action/funcionario'
+import { getMinhaEmpresa } from '@/action/empresa'
 
 interface Funcionario {
   id: string
@@ -55,11 +56,10 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
   const carregarFuncionarios = async () => {
     setIsLoading(true)
     try {
-      const funcionariosList = await listarFuncionarios()
+      const data = await getMinhaEmpresa()
+      const funcionariosList = await getFuncionarios(data.membros)
       // Filtra funcionários que não são membros da equipe atual
-      const funcionariosDisponiveis = funcionariosList.filter(
-        (func: Funcionario) => !equipe?.membros.includes(func.id)
-      )
+      const funcionariosDisponiveis = funcionariosList.filter((func: Funcionario) => !equipe?.membros.includes(func.id))
       setFuncionarios(funcionariosDisponiveis)
     } catch (error: any) {
       console.error('Erro ao carregar funcionários:', error)
@@ -77,9 +77,9 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!equipe) return
-    
+
     if (selectedMembros.length === 0) {
       toast({
         title: 'Selecione pelo menos um membro',
@@ -121,30 +121,50 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="lg"
+    >
       <ModalOverlay />
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader>Adicionar Membros à Equipe</ModalHeader>
           <ModalCloseButton />
-          
+
           <ModalBody>
-            <VStack spacing={4} align="stretch">
-              <Text fontSize="md" fontWeight="medium">
+            <VStack
+              spacing={4}
+              align="stretch"
+            >
+              <Text
+                fontSize="md"
+                fontWeight="medium"
+              >
                 Equipe: <strong>{equipe?.nome}</strong>
               </Text>
-              
-              <Text fontSize="sm" color="gray.600">
+
+              <Text
+                fontSize="sm"
+                color="gray.600"
+              >
                 Membros atuais: {equipe?.membros.length || 0}
               </Text>
 
               <FormControl>
                 <FormLabel>Selecione os funcionários para adicionar:</FormLabel>
-                
+
                 {isLoading ? (
-                  <Box textAlign="center" py={4}>
+                  <Box
+                    textAlign="center"
+                    py={4}
+                  >
                     <Spinner size="md" />
-                    <Text mt={2} fontSize="sm" color="gray.500">
+                    <Text
+                      mt={2}
+                      fontSize="sm"
+                      color="gray.500"
+                    >
                       Carregando funcionários...
                     </Text>
                   </Box>
@@ -158,7 +178,12 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
                     value={selectedMembros}
                     onChange={(values) => setSelectedMembros(values as string[])}
                   >
-                    <VStack align="stretch" spacing={2} maxH="300px" overflowY="auto">
+                    <VStack
+                      align="stretch"
+                      spacing={2}
+                      maxH="300px"
+                      overflowY="auto"
+                    >
                       {funcionarios.map((funcionario) => (
                         <Box
                           key={funcionario.id}
@@ -168,9 +193,15 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
                           _hover={{ bg: 'gray.50' }}
                         >
                           <Checkbox value={funcionario.id}>
-                            <VStack align="start" spacing={0}>
+                            <VStack
+                              align="start"
+                              spacing={0}
+                            >
                               <Text fontWeight="medium">{funcionario.nome}</Text>
-                              <Text fontSize="sm" color="gray.600">
+                              <Text
+                                fontSize="sm"
+                                color="gray.600"
+                              >
                                 {funcionario.email} • {funcionario.cargo}
                               </Text>
                             </VStack>
@@ -183,8 +214,17 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
               </FormControl>
 
               {selectedMembros.length > 0 && (
-                <Box p={3} bg="blue.50" borderRadius="md" borderLeft="4px solid" borderLeftColor="blue.500">
-                  <Text fontSize="sm" color="blue.700">
+                <Box
+                  p={3}
+                  bg="blue.50"
+                  borderRadius="md"
+                  borderLeft="4px solid"
+                  borderLeftColor="blue.500"
+                >
+                  <Text
+                    fontSize="sm"
+                    color="blue.700"
+                  >
                     <strong>{selectedMembros.length}</strong> membro(s) selecionado(s) para adicionar à equipe.
                   </Text>
                 </Box>
@@ -193,11 +233,16 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button 
-              colorScheme="blue" 
+            <Button
+              colorScheme="blue"
               type="submit"
               isLoading={isSubmitting}
               loadingText="Adicionando..."
@@ -211,4 +256,3 @@ export function ModalAdicionarMembro({ isOpen, onClose, onSubmit, equipe }: Moda
     </Modal>
   )
 }
-

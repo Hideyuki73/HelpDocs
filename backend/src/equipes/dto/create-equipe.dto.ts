@@ -12,12 +12,8 @@ export class CreateEquipeDto {
   nome: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   documentoId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  criadorId: string;
 
   @IsOptional()
   @IsArray()

@@ -29,7 +29,7 @@ import {
 } from '@chakra-ui/react'
 import { Equipe } from '../types'
 import { useAuth } from '@/app/user/hooks/useAuth'
-import { FaArrowDown, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
+import { FaArrowDown, FaBars, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 
 interface EquipeCardProps {
   equipe: Equipe
@@ -130,7 +130,7 @@ export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetail
               <Menu>
                 <MenuButton
                   as={IconButton}
-                  icon={<FaArrowDown />}
+                  icon={<FaBars />}
                   variant="ghost"
                   size="sm"
                   onClick={(e) => e.stopPropagation()}

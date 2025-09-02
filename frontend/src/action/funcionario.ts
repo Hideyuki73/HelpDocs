@@ -65,19 +65,18 @@ export async function updateCargoFuncionario(funcionarioId: string, cargo: strin
 // Expulsar funcionário (remover da empresa)
 export async function expulsarFuncionario(funcionarioId: string, empresaId: string) {
   const user = auth.currentUser
-  if (!user) throw new Error("Usuário não autenticado")
+  if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.patch(`/empresas/${empresaId}/remover-funcionario`, 
+  const response = await api.patch(
+    `/empresas/${empresaId}/remover-funcionario`,
     { funcionarioId },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   )
   return response.data
 }
-
-
 
 // Listar todos os funcionários da empresa
 export async function listarFuncionarios() {
@@ -90,4 +89,3 @@ export async function listarFuncionarios() {
   })
   return response.data
 }
-

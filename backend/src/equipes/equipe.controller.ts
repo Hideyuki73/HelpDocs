@@ -6,73 +6,93 @@ import {
   Param,
   Delete,
   Patch,
-  Request,
+  UnauthorizedException,
+  Headers,
 } from '@nestjs/common';
 import { EquipeService } from './equipe.service';
 import { CreateEquipeDto } from './dto/create-equipe.dto';
 import { UpdateEquipeDto } from './dto/update-equipe.dto';
+import * as admin from 'firebase-admin';
 
 @Controller('equipes')
 export class EquipeController {
   constructor(private readonly equipeService: EquipeService) {}
 
+  private async getUidFromAuthHeader(authorization: string): Promise<string> {
+    if (!authorization) throw new UnauthorizedException('Token não fornecido');
+    const token = authorization.split(' ')[1];
+    if (!token) throw new UnauthorizedException('Token mal formatado');
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    return decoded.uid;
+  }
+
   @Post()
-  create(@Body() createEquipeDto: CreateEquipeDto, @Request() req: any) {
-    const usuarioId = req.user.uid;
+  async create(
+    @Body() createEquipeDto: CreateEquipeDto,
+    @Headers('authorization') authorization: string,
+  ) {
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.create(createEquipeDto, usuarioId);
   }
 
   @Get()
-  findAll(@Request() req: any) {
-    const usuarioId = req.user.uid;
+  async findAll(@Headers('authorization') authorization: string) {
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.findAll(usuarioId);
   }
 
   @Get('stats')
-  getStats(@Request() req: any) {
-    const usuarioId = req.user.uid;
+  async getStats(@Headers('authorization') authorization: string) {
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.getEquipeStats(usuarioId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req: any) {
-    const usuarioId = req.user.uid;
+  async findOne(
+    @Param('id') id: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.findOne(id, usuarioId);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateEquipeDto: UpdateEquipeDto,
-    @Request() req: any,
+    @Headers('authorization') authorization: string,
   ) {
-    const usuarioId = req.user.uid;
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.update(id, updateEquipeDto, usuarioId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req: any) {
-    const usuarioId = req.user.uid;
+  async remove(
+    @Param('id') id: string,
+    @Headers('authorization') authorization: string,
+  ) {
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.remove(id, usuarioId);
   }
 
   @Post(':id/adicionar-membros')
-  addMembros(
+  async addMembros(
     @Param('id') equipeId: string,
     @Body('membros') membros: string[],
-    @Request() req: any,
+    @Headers('authorization') authorization: string,
   ) {
-    const usuarioId = req.user.uid;
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.addMembros(equipeId, membros, usuarioId);
   }
 
   @Delete(':id/remover-membro/:membroId')
-  removeMembro(
+  async removeMembro(
     @Param('id') equipeId: string,
     @Param('membroId') membroId: string,
-    @Request() req: any,
+    @Headers('authorization') authorization: string,
   ) {
-    const usuarioId = req.user.uid;
+    const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.removeMembro(equipeId, membroId, usuarioId);
   }
 }
