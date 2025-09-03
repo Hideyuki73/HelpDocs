@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Heading, Text, useToast } from '@chakra-ui/react'
-import FormEmpresa from '../../components/form/FormRegistroEmpresa'
+import FormEmpresa from '../components/FormRegistroEmpresa'
 import { criarEmpresaClient } from '@/action/empresa'
 import { useRouter } from 'next/navigation'
 
@@ -13,8 +13,6 @@ export default function RegisterEmpresaPage() {
     try {
       const response = await criarEmpresaClient(values)
       console.log('Empresa criada:', response)
-
-      // redireciona para a página correta
       router.push('/empresa')
     } catch (err: any) {
       console.log(err)
