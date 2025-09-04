@@ -79,8 +79,10 @@ export function Header({ user, onLogout }: HeaderProps) {
             color="white"
             fontSize="lg"
             _hover={{ color: 'yellow.300' }}
+            as={Link}
+            href="/documentos"
           >
-            DOCUMENTAÇÃO
+            DOCUMENTOS
           </Button>
 
           {/* Menu do usuário */}
