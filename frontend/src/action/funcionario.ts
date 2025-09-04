@@ -28,7 +28,19 @@ export async function getFuncionario(funcionarioId: string) {
   return response.data
 }
 
-// Buscar múltiplos funcionários por IDs
+// Buscar funcionários por empresaId (otimizado)
+export async function getFuncionariosByEmpresaId(empresaId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.get(`/funcionarios?empresaId=${empresaId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return response.data
+}
+
+// Buscar múltiplos funcionários por IDs (mantido para compatibilidade)
 export async function getFuncionarios(funcionarioIds: string[]) {
   const funcionarios = await Promise.allSettled(funcionarioIds.map((id) => getFuncionario(id)))
 
@@ -78,7 +90,7 @@ export async function expulsarFuncionario(funcionarioId: string, empresaId: stri
   return response.data
 }
 
-// Listar todos os funcionários da empresa
+// Listar todos os funcionários (sem filtro)
 export async function listarFuncionarios() {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')

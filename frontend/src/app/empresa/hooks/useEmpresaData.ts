@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getMinhaEmpresa } from '@/action/empresa'
-import { getFuncionarios } from '@/action/funcionario'
+import { getFuncionariosByEmpresaId } from '@/action/funcionario'
 import { getUsuarioLogado, UsuarioLogado } from '@/action/auth'
 
 interface Membro {
@@ -27,16 +27,16 @@ export function useEmpresaData() {
         const data = await getMinhaEmpresa()
         setEmpresa(data)
 
-        // Buscar informações dos membros
-        if (data.membros && data.membros.length > 0) {
+        // Buscar informações dos membros usando a função otimizada
+        if (data.id) {
           setLoadingMembros(true)
           try {
-            const membrosData = await getFuncionarios(data.membros)
+            const membrosData = await getFuncionariosByEmpresaId(data.id)
             setMembros(membrosData)
           } catch (error) {
             console.log('Erro ao buscar membros:', error)
-            // Fallback: usar UIDs como nomes
-            const membrosBasicos = data.membros.map((uid: string) => ({
+            // Fallback: usar UIDs como nomes se a busca otimizada falhar
+            const membrosBasicos = (data.membros || []).map((uid: string) => ({
               id: uid,
               nome: `Usuário ${uid.substring(0, 8)}`,
               email: 'Email não disponível',

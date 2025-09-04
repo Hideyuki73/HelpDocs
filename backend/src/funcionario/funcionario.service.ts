@@ -1,6 +1,3 @@
-// Conteúdo completo de funcionario.service.ts
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 import {
   Injectable,
   Inject,
@@ -112,6 +109,13 @@ export class FuncionarioService {
     return snapshot.docs.map((doc) => this.mapFuncionario(doc));
   }
 
+  async findByEmpresaId(empresaId: string) {
+    const snapshot = await this.funcionarioCollection
+      .where('empresaId', '==', empresaId)
+      .get();
+    return snapshot.docs.map((doc) => this.mapFuncionario(doc));
+  }
+
   async findOne(id: string) {
     const doc = await this.funcionarioCollection.doc(id).get();
     if (!doc.exists) {
@@ -153,38 +157,48 @@ export class FuncionarioService {
 
   // Atualizar cargo do funcionário
   async updateCargo(funcionarioId: string, cargo: string, requesterId: string) {
-    // Verificar se o funcionário existe
+    // Verificar se o funcionário alvo existe
     const funcionarioDoc = await this.funcionarioCollection
       .doc(funcionarioId)
       .get();
     if (!funcionarioDoc.exists) {
-      throw new NotFoundException('Funcionário não encontrado');
+      throw new NotFoundException('Funcionário alvo não encontrado');
     }
-
-    // Verificar se o usuário que está fazendo a requisição é o criador da empresa
     const funcionarioData = funcionarioDoc.data();
-    if (!funcionarioData?.empresaId) {
-      throw new NotFoundException(
-        'Funcionário não está associado a nenhuma empresa',
-      );
-    }
 
-    // CORREÇÃO AQUI: Buscar a empresa diretamente pelo empresaId do funcionário
-    const empresaDoc = await this.empresaCollection
-      .doc(funcionarioData.empresaId)
+    // Verificar se o usuário que está fazendo a requisição (requesterId) tem permissão
+    const requesterDoc = await this.funcionarioCollection
+      .doc(requesterId)
       .get();
+    if (!requesterDoc.exists) {
+      throw new UnauthorizedException('Requisitante não encontrado');
+    }
+    const requesterData = requesterDoc.data();
 
-    if (!empresaDoc.exists) {
-      throw new NotFoundException(
-        'Empresa não encontrada para este funcionário',
+    const isAdmin = requesterData?.cargo === 'Administrador';
+    const isGerente = requesterData?.cargo === 'Gerente de Projetos';
+
+    if (!isAdmin && !isGerente) {
+      throw new UnauthorizedException(
+        'Apenas Administradores e Gerentes de Projetos podem atribuir cargos',
       );
     }
 
-    // Verificar se o usuário que está fazendo a requisição é o criador da empresa
-    if (funcionarioData.cargo !== 'Administrador') {
-      throw new UnauthorizedException(
-        'Apenas o Administrador da empresa pode atribuir cargos',
-      );
+    // Se o funcionário alvo é o criador da empresa, apenas o criador pode alterar seu cargo
+    if (funcionarioData.empresaId) {
+      const empresaDoc = await this.empresaCollection
+        .doc(funcionarioData.empresaId)
+        .get();
+      const empresaData = empresaDoc.data();
+      if (
+        empresaData &&
+        empresaData.criadorUid === funcionarioId &&
+        funcionarioId !== requesterId
+      ) {
+        throw new UnauthorizedException(
+          'O cargo do criador da empresa só pode ser alterado por ele mesmo.',
+        );
+      }
     }
 
     // Validar cargo

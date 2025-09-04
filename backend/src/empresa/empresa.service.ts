@@ -1,6 +1,3 @@
-// Conteúdo completo de empresa.service.ts
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 import {
   Injectable,
   NotFoundException,
@@ -57,17 +54,33 @@ export class EmpresaService {
     const empresaDoc = snapshot.docs[0];
     const empresaData = empresaDoc.data();
 
+    // Verificar se o funcionário já é membro da empresa
     if (empresaData.membros.includes(funcionarioId)) {
+      // Se já for membro, apenas atualiza o empresaId e cargo do funcionário se necessário
+      const funcionarioDoc = await this.funcionarioCollection
+        .doc(funcionarioId)
+        .get();
+      if (
+        funcionarioDoc.exists &&
+        funcionarioDoc.data()?.empresaId !== empresaDoc.id
+      ) {
+        await this.funcionarioCollection.doc(funcionarioId).update({
+          empresaId: empresaDoc.id,
+          cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
+        });
+      }
       return { id: empresaDoc.id, ...empresaData };
     }
 
+    // Adicionar funcionário à lista de membros da empresa
     await empresaDoc.ref.update({
       membros: admin.firestore.FieldValue.arrayUnion(funcionarioId),
     });
 
-    // Atualizar o campo empresaId no documento do funcionário
+    // Atualizar o campo empresaId e cargo no documento do funcionário
     await this.funcionarioCollection.doc(funcionarioId).update({
       empresaId: empresaDoc.id,
+      cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
     });
 
     const atualizado = await empresaDoc.ref.get();
