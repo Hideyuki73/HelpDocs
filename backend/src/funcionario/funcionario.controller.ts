@@ -8,6 +8,7 @@ import {
   Patch,
   UnauthorizedException,
   Headers,
+  Query,
 } from '@nestjs/common';
 import { FuncionarioService } from './funcionario.service';
 import * as admin from 'firebase-admin';
@@ -57,12 +58,19 @@ export class FuncionarioController {
     if (!authorization) throw new UnauthorizedException('Token não fornecido');
     const token = authorization.split(' ')[1];
     const decoded = await admin.auth().verifyIdToken(token);
-    
-    return this.funcionarioService.updateCargo(funcionarioId, cargo, decoded.uid);
+
+    return this.funcionarioService.updateCargo(
+      funcionarioId,
+      cargo,
+      decoded.uid,
+    );
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('empresaId') empresaId?: string) {
+    if (empresaId) {
+      return this.funcionarioService.findByEmpresaId(empresaId);
+    }
     return this.funcionarioService.findAll();
   }
 
