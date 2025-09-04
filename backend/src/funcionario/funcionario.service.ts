@@ -203,11 +203,26 @@ export class FuncionarioService {
     if (
       alvoCargo &&
       requesterCargo.grau >= alvoCargo.grau &&
-      requesterId !== funcionarioId
+      funcionarioId !== requesterId
     ) {
-      throw new UnauthorizedException(
-        `Você não tem permissão para alterar o cargo de alguém com mesmo ou maior nível que ${requesterCargo.nome}.`,
-      );
+      const empresaDoc = await this.empresaCollection
+        .doc(funcionarioData.empresaId)
+        .get();
+      const empresaData = empresaDoc.data();
+
+      const requesterEhCriador = empresaData?.criadorUid === requesterId;
+
+      if (
+        !(
+          requesterEhCriador &&
+          requesterCargo.nome === 'Administrador' &&
+          alvoCargo.nome === 'Administrador'
+        )
+      ) {
+        throw new UnauthorizedException(
+          `Você não tem permissão para alterar o cargo de alguém com mesmo ou maior nível que ${requesterCargo.nome}.`,
+        );
+      }
     }
 
     // Bloquear auto-promoção para cargo superior
