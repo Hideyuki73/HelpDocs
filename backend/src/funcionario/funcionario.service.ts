@@ -203,7 +203,7 @@ export class FuncionarioService {
     if (
       alvoCargo &&
       requesterCargo.grau >= alvoCargo.grau &&
-      requesterData.id !== funcionarioData.id
+      requesterId !== funcionarioId
     ) {
       throw new UnauthorizedException(
         `Você não tem permissão para alterar o cargo de alguém com mesmo ou maior nível que ${requesterCargo.nome}.`,
