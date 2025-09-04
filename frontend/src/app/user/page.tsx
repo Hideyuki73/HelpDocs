@@ -77,7 +77,7 @@ export default function UserPage() {
             colorScheme="blue"
             size="lg"
             w="100%"
-            onClick={() => router.push('/empresa-selection')}
+            onClick={() => router.push(user.empresaId ? '/empresa' : '/empresa-selection')}
           >
             Ir para Empresas
           </Button>
