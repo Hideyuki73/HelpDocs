@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Container,
@@ -9,330 +9,236 @@ import {
   VStack,
   HStack,
   Text,
-  Card,
-  CardBody,
-  Badge,
-  useDisclosure,
+  Grid,
   Spinner,
-  Center,
   Alert,
   AlertIcon,
-  Select,
-  Input,
-  InputGroup,
-  InputLeftElement,
+  useDisclosure,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { FaPlus, FaUpload, FaSearch, FaFile, FaEdit, FaTrash } from 'react-icons/fa'
-import { useRouter } from 'next/navigation'
-import { auth } from '@/config/firebase'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { FaPlus, FaUpload } from 'react-icons/fa'
+import { useAuth } from '@/app/user/hooks/useAuth'
+import { useDocumentos } from './hooks/useDocumentos'
 import { CriarDocumentoModal } from './components/CriarDocumentoModal'
 import { UploadDocumentoModal } from './components/UploadDocumentoModal'
-import { listarDocumentos, atribuirDocumentoAEquipe, listarDocumentosDisponiveisParaEquipe } from '@/action/documento'
-import { listarEquipes, listarEquipesPorUsuario } from '@/action/equipe'
 import { AtribuirDocumentoModal } from './components/AtribuirDocumentoModal'
-
-interface Documento {
-  id: string
-  titulo: string
-  descricao: string
-  tipo: 'criado' | 'upload'
-  status: 'rascunho' | 'publicado' | 'arquivado'
-  equipeId: string
-  criadoPor: string
-  dataCriacao: string
-  dataAtualizacao?: string
-  versao: number
-  nomeArquivo?: string
-}
-
-interface Equipe {
-  id: string
-  nome: string
-}
+import { DocumentoCard } from './components/DocumentoCard'
+import { DashboardDocumentos } from './components/DashboardDocumentos'
+import { Documento } from '@/action/documento'
 
 export default function DocumentosPage() {
-  const [user, loading] = useAuthState(auth)
-  const router = useRouter()
-  const [documentos, setDocumentos] = useState<Documento[]>([])
-  const [equipes, setEquipes] = useState<Equipe[]>([])
-  const [loadingDocs, setLoadingDocs] = useState(true)
-  const [filtroEquipe, setFiltroEquipe] = useState('')
-  const [filtroTipo, setFiltroTipo] = useState('')
-  const [filtroStatus, setFiltroStatus] = useState('')
-  const [busca, setBusca] = useState('')
+  const { user } = useAuth()
+  const { documentos, stats, loading, error, criar, atualizar, deletar, limparErro } = useDocumentos()
 
-  const { isOpen: isOpenCriar, onOpen: onOpenCriar, onClose: onCloseCriar } = useDisclosure()
-  const { isOpen: isOpenUpload, onOpen: onOpenUpload, onClose: onCloseUpload } = useDisclosure()
-  const { isOpen: isOpenAtribuir, onOpen: onOpenAtribuir, onClose: onCloseAtribuir } = useDisclosure()
-  const [documentoSelecionado, setDocumentoSelecionado] = useState<Documento | null>(null)
+  const [documentoParaAtribuir, setDocumentoParaAtribuir] = useState<Documento | null>(null)
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/user/login')
-      return
-    }
+  const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
+  const { isOpen: isUploadModalOpen, onOpen: onUploadModalOpen, onClose: onUploadModalClose } = useDisclosure()
+  const { isOpen: isAtribuirModalOpen, onOpen: onAtribuirModalOpen, onClose: onAtribuirModalClose } = useDisclosure()
 
-    if (user) {
-      carregarDados()
-    }
-  }, [user, loading, router])
+  const bg = useColorModeValue('gray.50', 'gray.900')
+  const isAdmin = user?.cargo === 'Administrador'
+  const isGerente = user?.cargo === 'Gerente de Projetos'
+  const canCreateDocument = isAdmin || isGerente
+  const canViewDashboard = isAdmin || isGerente
 
-  const carregarDados = async () => {
-    try {
-      setLoadingDocs(true)
-
-      if (!user) return
-
-      // Carregar documentos
-      const docs = await listarDocumentos(user.uid)
-      setDocumentos(docs)
-
-      // Carregar equipes
-      const equipesData = await listarEquipesPorUsuario(user.uid)
-      setEquipes(equipesData)
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    } finally {
-      setLoadingDocs(false)
-    }
+  const handleAtribuirDocumento = (documento: Documento) => {
+    setDocumentoParaAtribuir(documento)
+    onAtribuirModalOpen()
   }
 
-  const documentosFiltrados = documentos.filter((doc) => {
-    const matchEquipe = !filtroEquipe || doc.equipeId === filtroEquipe
-    const matchTipo = !filtroTipo || doc.tipo === filtroTipo
-    const matchStatus = !filtroStatus || doc.status === filtroStatus
-    const matchBusca =
-      !busca ||
-      doc.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-      doc.descricao.toLowerCase().includes(busca.toLowerCase())
-
-    return matchEquipe && matchTipo && matchStatus && matchBusca
-  })
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'publicado':
-        return 'green'
-      case 'rascunho':
-        return 'yellow'
-      case 'arquivado':
-        return 'gray'
-      default:
-        return 'blue'
-    }
+  const handleViewDetails = (documento: Documento) => {
+    // TODO: Implementar visualização detalhada do documento
+    console.log('Ver detalhes do documento:', documento)
   }
 
-  const getTipoIcon = (tipo: string) => {
-    return tipo === 'upload' ? <FaFile /> : <FaEdit />
+  const handleCloseAtribuirModal = () => {
+    setDocumentoParaAtribuir(null)
+    onAtribuirModalClose()
   }
 
-  if (loading || loadingDocs) {
+  if (loading && documentos.length === 0) {
     return (
-      <Center h="50vh">
-        <Spinner size="xl" />
-      </Center>
+      <Container
+        maxW="container.xl"
+        py={8}
+      >
+        <VStack spacing={4}>
+          <Spinner size="lg" />
+          <Text>Carregando documentos...</Text>
+        </VStack>
+      </Container>
     )
   }
 
   return (
-    <Container
-      maxW="7xl"
-      py={8}
+    <Box
+      bg={bg}
+      minH="100vh"
     >
-      <VStack
-        spacing={6}
-        align="stretch"
+      <Container
+        maxW="container.xl"
+        py={8}
       >
-        {/* Header */}
-        <Box>
-          <Heading
-            size="lg"
-            mb={4}
+        <VStack
+          spacing={6}
+          align="stretch"
+        >
+          {/* Header */}
+          <HStack
+            justify="space-between"
+            align="center"
           >
-            Documentos
-          </Heading>
-          <HStack spacing={4}>
-            <Button
-              leftIcon={<FaPlus />}
-              colorScheme="blue"
-              onClick={onOpenCriar}
-            >
-              Criar Documento
-            </Button>
-            <Button
-              leftIcon={<FaUpload />}
-              colorScheme="green"
-              onClick={onOpenUpload}
-            >
-              Upload de Arquivo
-            </Button>
-          </HStack>
-        </Box>
-
-        {/* Filtros */}
-        <Card>
-          <CardBody>
-            <VStack spacing={4}>
-              <HStack
-                spacing={4}
-                w="full"
-              >
-                <InputGroup flex={2}>
-                  <InputLeftElement>
-                    <FaSearch />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Buscar documentos..."
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                  />
-                </InputGroup>
-
-                <Select
-                  placeholder="Todas as equipes"
-                  value={filtroEquipe}
-                  onChange={(e) => setFiltroEquipe(e.target.value)}
-                  flex={1}
+            <Box>
+              <Heading size="lg">Documentos</Heading>
+              <Text color="gray.600">{canViewDashboard ? 'Gerencie os documentos da empresa' : 'Seus documentos'}</Text>
+            </Box>
+            {canCreateDocument && (
+              <HStack spacing={4}>
+                <Button
+                  leftIcon={<FaPlus />}
+                  colorScheme="blue"
+                  onClick={onCreateModalOpen}
                 >
-                  {equipes.map((equipe) => (
-                    <option
-                      key={equipe.id}
-                      value={equipe.id}
-                    >
-                      {equipe.nome}
-                    </option>
-                  ))}
-                </Select>
-
-                <Select
-                  placeholder="Todos os tipos"
-                  value={filtroTipo}
-                  onChange={(e) => setFiltroTipo(e.target.value)}
-                  flex={1}
+                  Criar Documento
+                </Button>
+                <Button
+                  leftIcon={<FaUpload />}
+                  colorScheme="green"
+                  onClick={onUploadModalOpen}
                 >
-                  <option value="criado">Criado</option>
-                  <option value="upload">Upload</option>
-                </Select>
-
-                <Select
-                  placeholder="Todos os status"
-                  value={filtroStatus}
-                  onChange={(e) => setFiltroStatus(e.target.value)}
-                  flex={1}
-                >
-                  <option value="rascunho">Rascunho</option>
-                  <option value="publicado">Publicado</option>
-                  <option value="arquivado">Arquivado</option>
-                </Select>
+                  Upload de Arquivo
+                </Button>
               </HStack>
-            </VStack>
-          </CardBody>
-        </Card>
+            )}
+          </HStack>
 
-        {/* Lista de Documentos */}
-        {documentosFiltrados.length === 0 ? (
-          <Alert status="info">
-            <AlertIcon />
-            {documentos.length === 0
-              ? 'Nenhum documento encontrado. Crie seu primeiro documento!'
-              : 'Nenhum documento encontrado com os filtros aplicados.'}
-          </Alert>
-        ) : (
-          <VStack
-            spacing={4}
-            align="stretch"
-          >
-            {documentosFiltrados.map((documento) => (
-              <Card
-                key={documento.id}
-                cursor="pointer"
-                _hover={{ shadow: 'md' }}
+          {/* Error Alert */}
+          {error && (
+            <Alert status="error">
+              <AlertIcon />
+              {error}
+              <Button
+                ml="auto"
+                size="sm"
+                onClick={limparErro}
               >
-                <CardBody>
-                  <HStack justify="space-between">
-                    <VStack
-                      align="start"
-                      spacing={2}
-                      flex={1}
+                Fechar
+              </Button>
+            </Alert>
+          )}
+
+          {/* Tabs */}
+          <Tabs
+            variant="enclosed"
+            colorScheme="blue"
+          >
+            <TabList>
+              <Tab>Meus Documentos</Tab>
+              {canViewDashboard && <Tab>Dashboard</Tab>}
+            </TabList>
+
+            <TabPanels>
+              {/* Tab Documentos */}
+              <TabPanel px={0}>
+                {documentos.length === 0 ? (
+                  <Box
+                    textAlign="center"
+                    py={12}
+                  >
+                    <Text
+                      fontSize="lg"
+                      color="gray.500"
+                      mb={4}
                     >
-                      <HStack>
-                        {getTipoIcon(documento.tipo)}
-                        <Heading size="md">{documento.titulo}</Heading>
-                        <Badge colorScheme={getStatusColor(documento.status)}>{documento.status}</Badge>
-                        {documento.tipo === 'upload' && <Badge colorScheme="purple">{documento.nomeArquivo}</Badge>}
-                      </HStack>
-                      <Text color="gray.600">{documento.descricao}</Text>
+                      {canCreateDocument ? 'Nenhum documento criado ainda' : 'Você não tem acesso a nenhum documento'}
+                    </Text>
+                    {canCreateDocument && (
                       <HStack
                         spacing={4}
-                        fontSize="sm"
-                        color="gray.500"
+                        justify="center"
                       >
-                        <Text>Versão {documento.versao}</Text>
-                        <Text>Criado em {new Date(documento.dataCriacao).toLocaleDateString()}</Text>
-                        {documento.dataAtualizacao && (
-                          <Text>Atualizado em {new Date(documento.dataAtualizacao).toLocaleDateString()}</Text>
-                        )}
+                        <Button
+                          leftIcon={<FaPlus />}
+                          colorScheme="blue"
+                          onClick={onCreateModalOpen}
+                        >
+                          Criar Primeiro Documento
+                        </Button>
+                        <Button
+                          leftIcon={<FaUpload />}
+                          colorScheme="green"
+                          onClick={onUploadModalOpen}
+                        >
+                          Upload de Arquivo
+                        </Button>
                       </HStack>
-                    </VStack>
+                    )}
+                  </Box>
+                ) : (
+                  <Grid
+                    templateColumns={{
+                      base: '1fr',
+                      md: 'repeat(2, 1fr)',
+                      lg: 'repeat(3, 1fr)',
+                      xl: 'repeat(4, 1fr)',
+                    }}
+                    gap={6}
+                  >
+                    {documentos.map((documento) => (
+                      <DocumentoCard
+                        key={documento.id}
+                        documento={documento}
+                        onDelete={deletar}
+                        onEdit={atualizar}
+                        onAtribuir={handleAtribuirDocumento}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+                  </Grid>
+                )}
+              </TabPanel>
 
-                    <HStack>
-                      <Button
-                        size="sm"
-                        leftIcon={<FaEdit />}
-                        onClick={() => router.push(`/documentos/${documento.id}/editar`)}
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorScheme="blue"
-                        variant="outline"
-                        onClick={() => {
-                          setDocumentoSelecionado(documento)
-                          onOpenAtribuir()
-                        }}
-                      >
-                        Atribuir à Equipe
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorScheme="red"
-                        variant="outline"
-                        leftIcon={<FaTrash />}
-                      >
-                        Excluir
-                      </Button>
-                    </HStack>
-                  </HStack>
-                </CardBody>
-              </Card>
-            ))}
-          </VStack>
-        )}
-      </VStack>
+              {/* Tab Dashboard */}
+              {canViewDashboard && (
+                <TabPanel px={0}>
+                  <DashboardDocumentos
+                    stats={stats}
+                    loading={loading}
+                  />
+                </TabPanel>
+              )}
+            </TabPanels>
+          </Tabs>
+        </VStack>
+      </Container>
 
-      {/* Modais */}
+      {/* Modals */}
       <CriarDocumentoModal
-        isOpen={isOpenCriar}
-        onClose={onCloseCriar}
-        equipes={equipes}
-        onSuccess={carregarDados}
+        isOpen={isCreateModalOpen}
+        onClose={onCreateModalClose}
+        onSubmit={criar}
+        equipes={[]}
       />
 
       <UploadDocumentoModal
-        isOpen={isOpenUpload}
-        onClose={onCloseUpload}
-        equipes={equipes}
-        onSuccess={carregarDados}
+        isOpen={isUploadModalOpen}
+        onClose={onUploadModalClose}
+        onSubmit={criar}
+        equipes={[]}
       />
 
       <AtribuirDocumentoModal
-        isOpen={isOpenAtribuir}
-        onClose={onCloseAtribuir}
-        documento={documentoSelecionado}
-        onSuccess={carregarDados}
+        isOpen={isAtribuirModalOpen}
+        onClose={handleCloseAtribuirModal}
+        onSubmit={atualizar}
+        documento={documentoParaAtribuir}
       />
-    </Container>
+    </Box>
   )
 }

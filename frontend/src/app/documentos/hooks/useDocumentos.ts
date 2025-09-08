@@ -119,5 +119,6 @@ export function useDocumentos() {
     deletar,
     carregarDocumentos,
     carregarStats,
+    limparErro: () => setState((prev) => ({ ...prev, error: null })),
   }
 }

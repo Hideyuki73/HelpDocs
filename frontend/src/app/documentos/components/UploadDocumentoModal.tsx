@@ -25,6 +25,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { FaUpload, FaFile } from 'react-icons/fa'
 import { useDocumentos } from '../hooks/useDocumentos'
+import { DocumentoParams } from '@/action/documento'
 
 interface Equipe {
   id: string
@@ -35,10 +36,9 @@ interface UploadDocumentoModalProps {
   isOpen: boolean
   onClose: () => void
   equipes: Equipe[]
-  onSuccess: () => void
+  onSubmit: (formData: DocumentoParams) => Promise<any>
 }
-
-export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: UploadDocumentoModalProps) {
+export function UploadDocumentoModal({ isOpen, onClose, equipes, onSubmit }: UploadDocumentoModalProps) {
   const [user] = useAuthState(auth)
   const toast = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -88,8 +88,16 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
         duration: 3000,
       })
 
+      await onSubmit({
+        ...formData,
+        tipo: 'upload',
+        criadoPor: user?.uid || '',
+        nomeArquivo: selectedFile.name,
+        tamanhoArquivo: selectedFile.size,
+        arquivo: selectedFile,
+      })
+
       handleClose()
-      onSuccess()
     } catch {
       toast({
         title: 'Erro',

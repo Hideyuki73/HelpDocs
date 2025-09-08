@@ -34,10 +34,10 @@ interface AtribuirDocumentoModalProps {
   isOpen: boolean
   onClose: () => void
   documento: Documento | null
-  onSuccess: () => void
+  onSubmit: (documentoId: string, equipeId: string, usuarioId: string) => Promise<any>
 }
 
-export function AtribuirDocumentoModal({ isOpen, onClose, documento, onSuccess }: AtribuirDocumentoModalProps) {
+export function AtribuirDocumentoModal({ isOpen, onClose, documento, onSubmit }: AtribuirDocumentoModalProps) {
   const [user] = useAuthState(auth)
   const toast = useToast()
   const [equipeSelecionada, setEquipeSelecionada] = useState<string>('')
@@ -83,7 +83,7 @@ export function AtribuirDocumentoModal({ isOpen, onClose, documento, onSuccess }
         duration: 5000,
         isClosable: true,
       })
-      onSuccess()
+      await onSubmit(documento.id, equipeSelecionada, user.uid)
       onClose()
     } catch (error) {
       console.error('Erro ao atribuir documento:', error)

@@ -27,7 +27,7 @@ mantenha um tom profissional mas acessível.
     try {
       // Aqui você integraria com a API da OpenAI ou outro serviço de IA
       // Por enquanto, vamos simular uma resposta baseada no contexto
-      
+
       const prompt = `
 ${this.systemPrompt}
 
@@ -39,7 +39,6 @@ Resposta:`;
 
       // Simulação de resposta - substitua pela integração real com IA
       return this.gerarRespostaSimulada(pergunta, contexto);
-      
     } catch (error) {
       console.error('Erro ao gerar resposta da IA:', error);
       return 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.';
@@ -48,7 +47,7 @@ Resposta:`;
 
   private gerarRespostaSimulada(pergunta: string, contexto?: string): string {
     const perguntaLower = pergunta.toLowerCase();
-    
+
     if (perguntaLower.includes('api') || perguntaLower.includes('endpoint')) {
       return `Para documentar APIs, recomendo incluir:
 
@@ -72,8 +71,11 @@ Authorization: Bearer {token}
 }
 \`\`\``;
     }
-    
-    if (perguntaLower.includes('instalação') || perguntaLower.includes('setup')) {
+
+    if (
+      perguntaLower.includes('instalação') ||
+      perguntaLower.includes('setup')
+    ) {
       return `Para criar um guia de instalação eficaz:
 
 1. **Pré-requisitos**: Liste todas as dependências necessárias
@@ -97,8 +99,11 @@ cp .env.example .env
 npm start
 \`\`\``;
     }
-    
-    if (perguntaLower.includes('arquitetura') || perguntaLower.includes('estrutura')) {
+
+    if (
+      perguntaLower.includes('arquitetura') ||
+      perguntaLower.includes('estrutura')
+    ) {
       return `Para documentar arquitetura de software:
 
 1. **Visão geral**: Descrição high-level do sistema
@@ -114,7 +119,7 @@ Considere incluir:
 - Estrutura de pastas
 - Relacionamentos entre módulos`;
     }
-    
+
     if (perguntaLower.includes('teste') || perguntaLower.includes('test')) {
       return `Para documentar testes:
 
@@ -136,7 +141,7 @@ npm run test:coverage
 npm test -- --grep "nome-do-teste"
 \`\`\``;
     }
-    
+
     // Resposta genérica
     return `Baseado na sua pergunta sobre "${pergunta}", aqui estão algumas sugestões:
 
@@ -154,30 +159,34 @@ Precisa de ajuda mais específica? Me conte mais detalhes sobre o que você quer
   async gerarSugestaoTitulo(conteudo: string): Promise<string> {
     // Análise simples do conteúdo para sugerir título
     const palavrasChave = this.extrairPalavrasChave(conteudo);
-    
+
     if (palavrasChave.includes('api') || palavrasChave.includes('endpoint')) {
       return 'Documentação da API';
     }
-    
-    if (palavrasChave.includes('instalação') || palavrasChave.includes('setup')) {
+
+    if (
+      palavrasChave.includes('instalação') ||
+      palavrasChave.includes('setup')
+    ) {
       return 'Guia de Instalação';
     }
-    
+
     if (palavrasChave.includes('arquitetura')) {
       return 'Arquitetura do Sistema';
     }
-    
+
     if (palavrasChave.includes('teste')) {
       return 'Documentação de Testes';
     }
-    
+
     return 'Documento Técnico';
   }
 
   private extrairPalavrasChave(texto: string): string[] {
-    return texto.toLowerCase()
+    return texto
+      .toLowerCase()
       .split(/\s+/)
-      .filter(palavra => palavra.length > 3)
+      .filter((palavra) => palavra.length > 3)
       .slice(0, 10);
   }
 }

@@ -33,9 +33,10 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
     {
       id: '1',
       tipo: 'ia',
-      conteudo: 'Olá! Sou seu assistente de IA especializado em documentação de software. Como posso ajudá-lo a criar um documento melhor?',
+      conteudo:
+        'Olá! Sou seu assistente de IA especializado em documentação de software. Como posso ajudá-lo a criar um documento melhor?',
       timestamp: new Date(),
-    }
+    },
   ])
   const [novaMensagem, setNovaMensagem] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -58,7 +59,7 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
       timestamp: new Date(),
     }
 
-    setMensagens(prev => [...prev, mensagemUsuario])
+    setMensagens((prev) => [...prev, mensagemUsuario])
     setNovaMensagem('')
     setEnviando(true)
 
@@ -76,7 +77,7 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
 
       if (response.ok) {
         const data = await response.json()
-        
+
         const mensagemIA: Mensagem = {
           id: (Date.now() + 1).toString(),
           tipo: 'ia',
@@ -84,7 +85,7 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
           timestamp: new Date(),
         }
 
-        setMensagens(prev => [...prev, mensagemIA])
+        setMensagens((prev) => [...prev, mensagemIA])
       } else {
         throw new Error('Erro ao obter resposta da IA')
       }
@@ -96,7 +97,7 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
         timestamp: new Date(),
       }
 
-      setMensagens(prev => [...prev, mensagemErro])
+      setMensagens((prev) => [...prev, mensagemErro])
     } finally {
       setEnviando(false)
     }
@@ -117,14 +118,26 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
   ]
 
   return (
-    <VStack h="full" spacing={0}>
+    <VStack
+      h="full"
+      spacing={0}
+    >
       {/* Header */}
-      <Box w="full" p={4} bg="blue.50" borderTopRadius="md">
+      <Box
+        w="full"
+        p={4}
+        bg="blue.50"
+        borderTopRadius="md"
+      >
         <HStack>
           <FaRobot color="blue" />
           <Heading size="sm">Assistente IA</Heading>
         </HStack>
-        <Text fontSize="xs" color="gray.600" mt={1}>
+        <Text
+          fontSize="xs"
+          color="gray.600"
+          mt={1}
+        >
           Especialista em documentação de software
         </Text>
       </Box>
@@ -151,7 +164,10 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
           },
         }}
       >
-        <VStack spacing={4} align="stretch">
+        <VStack
+          spacing={4}
+          align="stretch"
+        >
           {mensagens.map((mensagem) => (
             <HStack
               key={mensagem.id}
@@ -159,16 +175,23 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
               justify={mensagem.tipo === 'usuario' ? 'flex-end' : 'flex-start'}
             >
               {mensagem.tipo === 'ia' && (
-                <Avatar size="sm" bg="blue.500" icon={<FaRobot />} />
+                <Avatar
+                  size="sm"
+                  bg="blue.500"
+                  icon={<FaRobot />}
+                />
               )}
-              
+
               <Card
                 maxW="80%"
                 bg={mensagem.tipo === 'usuario' ? 'blue.500' : 'gray.100'}
                 color={mensagem.tipo === 'usuario' ? 'white' : 'black'}
               >
                 <CardBody p={3}>
-                  <Text fontSize="sm" whiteSpace="pre-wrap">
+                  <Text
+                    fontSize="sm"
+                    whiteSpace="pre-wrap"
+                  >
                     {mensagem.conteudo}
                   </Text>
                   <Text
@@ -177,23 +200,31 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
                     mt={1}
                     textAlign={mensagem.tipo === 'usuario' ? 'right' : 'left'}
                   >
-                    {mensagem.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {mensagem.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </Text>
                 </CardBody>
               </Card>
 
               {mensagem.tipo === 'usuario' && (
-                <Avatar size="sm" bg="gray.500" icon={<FaUser />} />
+                <Avatar
+                  size="sm"
+                  bg="gray.500"
+                  icon={<FaUser />}
+                />
               )}
             </HStack>
           ))}
 
           {enviando && (
             <HStack justify="flex-start">
-              <Avatar size="sm" bg="blue.500" icon={<FaRobot />} />
+              <Avatar
+                size="sm"
+                bg="blue.500"
+                icon={<FaRobot />}
+              />
               <Card bg="gray.100">
                 <CardBody p={3}>
                   <HStack>
@@ -209,8 +240,17 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
 
       {/* Sugestões (apenas quando não há muitas mensagens) */}
       {mensagens.length <= 2 && (
-        <Box w="full" p={2} borderTop="1px" borderColor="gray.200">
-          <Text fontSize="xs" color="gray.600" mb={2}>
+        <Box
+          w="full"
+          p={2}
+          borderTop="1px"
+          borderColor="gray.200"
+        >
+          <Text
+            fontSize="xs"
+            color="gray.600"
+            mb={2}
+          >
             Sugestões:
           </Text>
           <VStack spacing={1}>
@@ -235,7 +275,12 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
       )}
 
       {/* Input de Mensagem */}
-      <Box w="full" p={4} borderTop="1px" borderColor="gray.200">
+      <Box
+        w="full"
+        p={4}
+        borderTop="1px"
+        borderColor="gray.200"
+      >
         <HStack>
           <Input
             value={novaMensagem}

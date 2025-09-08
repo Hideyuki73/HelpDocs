@@ -21,6 +21,7 @@ import { useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useDocumentos } from '../hooks/useDocumentos'
+import { DocumentoParams } from '@/action/documento'
 
 interface Equipe {
   id: string
@@ -31,10 +32,10 @@ interface CriarDocumentoModalProps {
   isOpen: boolean
   onClose: () => void
   equipes: Equipe[]
-  onSuccess: () => void
+  onSubmit: (formData: DocumentoParams) => Promise<any>
 }
 
-export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: CriarDocumentoModalProps) {
+export function CriarDocumentoModal({ isOpen, onClose, equipes, onSubmit }: CriarDocumentoModalProps) {
   const [user] = useAuthState(auth)
   const toast = useToast()
   const { criar, loading } = useDocumentos()
@@ -57,7 +58,7 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
     }
 
     try {
-      await criar({
+      await onSubmit({
         ...formData,
         tipo: 'criado',
         criadoPor: user?.uid || '',
@@ -71,7 +72,6 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
       })
 
       handleClose()
-      onSuccess()
     } catch {
       toast({
         title: 'Erro',

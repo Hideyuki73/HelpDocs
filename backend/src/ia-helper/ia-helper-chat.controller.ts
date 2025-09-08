@@ -20,7 +20,7 @@ export class IaHelperChatController {
       chatRequest.pergunta,
       chatRequest.contexto,
     );
-    
+
     return {
       pergunta: chatRequest.pergunta,
       resposta,
@@ -33,7 +33,7 @@ export class IaHelperChatController {
     const titulo = await this.iaHelperChatService.gerarSugestaoTitulo(
       sugestaoTitulo.conteudo,
     );
-    
+
     return {
       titulo,
       timestamp: new Date().toISOString(),
