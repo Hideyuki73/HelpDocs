@@ -366,4 +366,23 @@ export class EquipeService {
       empresaId: data?.empresaId || null,
     };
   }
+
+  async findEquipesByUsuario(usuarioId: string) {
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário não encontrado.');
+    }
+
+    const equipesSnapshot = await this.equipeCollection
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
+      .get();
+
+    return equipesSnapshot.docs.map((doc) => this.mapEquipe(doc));
+  }
 }

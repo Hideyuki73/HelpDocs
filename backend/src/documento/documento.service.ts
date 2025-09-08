@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateDocumentoDto } from './dto/create-documento.dto';
 import { UpdateDocumentoDto } from './dto/update-documento.dto';
@@ -19,13 +24,14 @@ export class DocumentoService {
   }
 
   async create(data: CreateDocumentoDto) {
-    // Validação das referências
     const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
     if (!empresaDoc.exists) {
       throw new NotFoundException('Empresa não encontrada.');
     }
 
-    const funcionarioDoc = await this.funcionarioCollection.doc(data.criadoPor).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(data.criadoPor)
+      .get();
     if (!funcionarioDoc.exists) {
       throw new NotFoundException('Funcionário criador não encontrado.');
     }
@@ -35,13 +41,15 @@ export class DocumentoService {
       throw new NotFoundException('Equipe não encontrada.');
     }
 
-    // Verificar se o funcionário pertence à equipe
     const equipeData = equipeDoc.data();
-    const funcionarioRef = this.funcionarioCollection.doc(data.criadoPor);
-    const isMembro = equipeData?.membros?.some((ref: any) => ref.id === data.criadoPor);
-    
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === data.criadoPor,
+    );
+
     if (!isMembro) {
-      throw new ForbiddenException('Você não tem permissão para criar documentos nesta equipe.');
+      throw new ForbiddenException(
+        'Você não tem permissão para criar documentos nesta equipe.',
+      );
     }
 
     const docRef = await this.collection.add({
@@ -60,7 +68,7 @@ export class DocumentoService {
       versao: 1,
       status: data.status || 'rascunho',
     });
-    
+
     const doc = await docRef.get();
     return this.mapDocumento(doc);
   }
@@ -72,37 +80,39 @@ export class DocumentoService {
       conteudo: '',
       status: 'publicado',
     };
-    
+
     return this.create(createData);
   }
 
   async findAll(usuarioId: string) {
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     if (!funcionarioDoc.exists) {
       throw new NotFoundException('Funcionário não encontrado.');
     }
 
-    const funcionarioData = funcionarioDoc.data();
-    
-    // Buscar equipes do usuário
     const equipesSnapshot = await this.equipeCollection
-      .where('membros', 'array-contains', this.funcionarioCollection.doc(usuarioId))
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
       .get();
 
-    const equipeIds = equipesSnapshot.docs.map(doc => doc.id);
-    
+    const equipeIds = equipesSnapshot.docs.map((doc) => doc.id);
+
     if (equipeIds.length === 0) {
       return [];
     }
 
-    // Buscar documentos das equipes do usuário
     const documentos: any[] = [];
     for (const equipeId of equipeIds) {
       const snapshot = await this.collection
         .where('equipeId', '==', this.equipeCollection.doc(equipeId))
         .get();
-      
-      const docs = snapshot.docs.map(doc => this.mapDocumento(doc));
+
+      const docs = snapshot.docs.map((doc) => this.mapDocumento(doc));
       documentos.push(...docs);
     }
 
@@ -110,24 +120,27 @@ export class DocumentoService {
   }
 
   async findByEquipe(equipeId: string, usuarioId: string) {
-    // Verificar se o usuário pertence à equipe
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     if (!equipeDoc.exists) {
       throw new NotFoundException('Equipe não encontrada.');
     }
 
     const equipeData = equipeDoc.data();
-    const isMembro = equipeData?.membros?.some((ref: any) => ref.id === usuarioId);
-    
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
     if (!isMembro) {
-      throw new ForbiddenException('Você não tem permissão para ver documentos desta equipe.');
+      throw new ForbiddenException(
+        'Você não tem permissão para ver documentos desta equipe.',
+      );
     }
 
     const snapshot = await this.collection
       .where('equipeId', '==', this.equipeCollection.doc(equipeId))
       .get();
-    
-    return snapshot.docs.map(doc => this.mapDocumento(doc));
+
+    return snapshot.docs.map((doc) => this.mapDocumento(doc));
   }
 
   async findOne(id: string, usuarioId: string) {
@@ -139,13 +152,16 @@ export class DocumentoService {
     const documentoData = doc.data();
     const equipeId = documentoData?.equipeId?.id;
 
-    // Verificar se o usuário pertence à equipe do documento
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     const equipeData = equipeDoc.data();
-    const isMembro = equipeData?.membros?.some((ref: any) => ref.id === usuarioId);
-    
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
     if (!isMembro) {
-      throw new ForbiddenException('Você não tem permissão para ver este documento.');
+      throw new ForbiddenException(
+        'Você não tem permissão para ver este documento.',
+      );
     }
 
     return this.mapDocumento(doc);
@@ -161,17 +177,20 @@ export class DocumentoService {
     const documentoData = doc.data();
     const equipeId = documentoData?.equipeId?.id;
 
-    // Verificar se o usuário pertence à equipe do documento
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     const equipeData = equipeDoc.data();
-    const isMembro = equipeData?.membros?.some((ref: any) => ref.id === usuarioId);
-    
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
     if (!isMembro) {
-      throw new ForbiddenException('Você não tem permissão para editar este documento.');
+      throw new ForbiddenException(
+        'Você não tem permissão para editar este documento.',
+      );
     }
 
     const updateData: any = { ...data };
-    
+
     if (data.empresaId) {
       const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
       if (!empresaDoc.exists) {
@@ -179,7 +198,7 @@ export class DocumentoService {
       }
       updateData.empresaId = this.empresaCollection.doc(data.empresaId);
     }
-    
+
     if (data.equipeId) {
       const equipeDoc = await this.equipeCollection.doc(data.equipeId).get();
       if (!equipeDoc.exists) {
@@ -187,20 +206,21 @@ export class DocumentoService {
       }
       updateData.equipeId = this.equipeCollection.doc(data.equipeId);
     }
-    
+
     if (data.criadoPor) {
-      const funcionarioDoc = await this.funcionarioCollection.doc(data.criadoPor).get();
+      const funcionarioDoc = await this.funcionarioCollection
+        .doc(data.criadoPor)
+        .get();
       if (!funcionarioDoc.exists) {
         throw new NotFoundException('Funcionário criador não encontrado.');
       }
       updateData.criadoPor = this.funcionarioCollection.doc(data.criadoPor);
     }
 
-    // Incrementar versão se o conteúdo foi alterado
     if (data.conteudo !== undefined) {
       updateData.versao = (documentoData?.versao || 1) + 1;
     }
-    
+
     updateData.dataAtualizacao = new Date();
 
     await docRef.update(updateData as any);
@@ -218,13 +238,16 @@ export class DocumentoService {
     const documentoData = doc.data();
     const equipeId = documentoData?.equipeId?.id;
 
-    // Verificar se o usuário pertence à equipe do documento
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     const equipeData = equipeDoc.data();
-    const isMembro = equipeData?.membros?.some((ref: any) => ref.id === usuarioId);
-    
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
     if (!isMembro) {
-      throw new ForbiddenException('Você não tem permissão para deletar este documento.');
+      throw new ForbiddenException(
+        'Você não tem permissão para deletar este documento.',
+      );
     }
 
     await docRef.delete();
@@ -232,18 +255,23 @@ export class DocumentoService {
   }
 
   async getDocumentoStats(usuarioId: string) {
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     if (!funcionarioDoc.exists) {
       throw new NotFoundException('Funcionário não encontrado.');
     }
 
-    // Buscar equipes do usuário
     const equipesSnapshot = await this.equipeCollection
-      .where('membros', 'array-contains', this.funcionarioCollection.doc(usuarioId))
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
       .get();
 
-    const equipeIds = equipesSnapshot.docs.map(doc => doc.id);
-    
+    const equipeIds = equipesSnapshot.docs.map((doc) => doc.id);
+
     if (equipeIds.length === 0) {
       return {
         totalDocumentos: 0,
@@ -266,14 +294,14 @@ export class DocumentoService {
       const snapshot = await this.collection
         .where('equipeId', '==', this.equipeCollection.doc(equipeId))
         .get();
-      
-      snapshot.docs.forEach(doc => {
+
+      snapshot.docs.forEach((doc) => {
         const data = doc.data();
         totalDocumentos++;
-        
+
         if (data?.tipo === 'criado') documentosCriados++;
         if (data?.tipo === 'upload') documentosUpload++;
-        
+
         if (data?.status === 'rascunho') documentosRascunho++;
         if (data?.status === 'publicado') documentosPublicados++;
         if (data?.status === 'arquivado') documentosArquivados++;
@@ -305,9 +333,104 @@ export class DocumentoService {
       equipeId: data?.equipeId?.id || null,
       criadoPor: data?.criadoPor?.id || null,
       dataCriacao: data?.dataCriacao?.toDate?.() || data?.dataCriacao,
-      dataAtualizacao: data?.dataAtualizacao?.toDate?.() || data?.dataAtualizacao,
+      dataAtualizacao:
+        data?.dataAtualizacao?.toDate?.() || data?.dataAtualizacao,
       versao: data?.versao || 1,
       status: data?.status || 'rascunho',
     };
+  }
+
+  async assignDocumentoToEquipe(
+    documentoId: string,
+    equipeId: string,
+    usuarioId: string,
+  ) {
+    const documentoRef = this.collection.doc(documentoId);
+    const documentoDoc = await documentoRef.get();
+
+    if (!documentoDoc.exists) {
+      throw new NotFoundException('Documento não encontrado.');
+    }
+
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    if (!equipeDoc.exists) {
+      throw new NotFoundException('Equipe não encontrada.');
+    }
+
+    const documentoData = documentoDoc.data();
+    const currentEquipeId = documentoData?.equipeId?.id;
+
+    if (currentEquipeId) {
+      const currentEquipeDoc = await this.equipeCollection
+        .doc(currentEquipeId)
+        .get();
+      const currentEquipeData = currentEquipeDoc.data();
+      const isMembroCurrentEquipe = currentEquipeData?.membros?.some(
+        (ref: any) => ref.id === usuarioId,
+      );
+      if (!isMembroCurrentEquipe) {
+        throw new ForbiddenException(
+          'Você não tem permissão para modificar este documento na equipe atual.',
+        );
+      }
+    }
+
+    const newEquipeData = equipeDoc.data();
+    const isMembroNewEquipe = newEquipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+    if (!isMembroNewEquipe) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atribuir documentos a esta equipe.',
+      );
+    }
+
+    await documentoRef.update({
+      equipeId: this.equipeCollection.doc(equipeId),
+      dataAtualizacao: new Date(),
+    });
+
+    const updatedDocumento = await documentoRef.get();
+    return this.mapDocumento(updatedDocumento);
+  }
+
+  async findDocumentosDisponiveisParaEquipe(usuarioId: string) {
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário não encontrado.');
+    }
+
+    const documentosSnapshot = await this.collection
+      .where('criadoPor', '==', this.funcionarioCollection.doc(usuarioId))
+      .get();
+
+    let documentos = documentosSnapshot.docs.map((doc) =>
+      this.mapDocumento(doc),
+    );
+
+    const equipesGerenciadasSnapshot = await this.equipeCollection
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
+      .get();
+
+    for (const equipeDoc of equipesGerenciadasSnapshot.docs) {
+      const equipeId = equipeDoc.id;
+      const docsDaEquipeSnapshot = await this.collection
+        .where('equipeId', '==', this.equipeCollection.doc(equipeId))
+        .get();
+      docsDaEquipeSnapshot.docs.forEach((doc) => {
+        const mappedDoc = this.mapDocumento(doc);
+        if (!documentos.some((d) => d.id === mappedDoc.id)) {
+          documentos.push(mappedDoc);
+        }
+      });
+    }
+
+    return documentos;
   }
 }

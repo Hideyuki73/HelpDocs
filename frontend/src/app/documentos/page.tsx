@@ -28,6 +28,9 @@ import { auth } from '@/config/firebase'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { CriarDocumentoModal } from './components/CriarDocumentoModal'
 import { UploadDocumentoModal } from './components/UploadDocumentoModal'
+import { listarDocumentos, atribuirDocumentoAEquipe, listarDocumentosDisponiveisParaEquipe } from '@/action/documento'
+import { listarEquipes, listarEquipesPorUsuario } from '@/action/equipe'
+import { AtribuirDocumentoModal } from './components/AtribuirDocumentoModal'
 
 interface Documento {
   id: string
@@ -58,9 +61,11 @@ export default function DocumentosPage() {
   const [filtroTipo, setFiltroTipo] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('')
   const [busca, setBusca] = useState('')
-  
+
   const { isOpen: isOpenCriar, onOpen: onOpenCriar, onClose: onCloseCriar } = useDisclosure()
   const { isOpen: isOpenUpload, onOpen: onOpenUpload, onClose: onCloseUpload } = useDisclosure()
+  const { isOpen: isOpenAtribuir, onOpen: onOpenAtribuir, onClose: onCloseAtribuir } = useDisclosure()
+  const [documentoSelecionado, setDocumentoSelecionado] = useState<Documento | null>(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -76,20 +81,14 @@ export default function DocumentosPage() {
   const carregarDados = async () => {
     try {
       setLoadingDocs(true)
-      
+
       // Carregar documentos
-      const responseDocumentos = await fetch(`/api/documentos?usuarioId=${user?.uid}`)
-      if (responseDocumentos.ok) {
-        const docs = await responseDocumentos.json()
-        setDocumentos(docs)
-      }
+      const docs = await listarDocumentos(user.uid)
+      setDocumentos(docs)
 
       // Carregar equipes
-      const responseEquipes = await fetch(`/api/equipes?usuarioId=${user?.uid}`)
-      if (responseEquipes.ok) {
-        const equipes = await responseEquipes.json()
-        setEquipes(equipes)
-      }
+      const equipesData = await listarEquipesPorUsuario(user.uid)
+      setEquipes(equipesData)
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
     } finally {
@@ -97,23 +96,28 @@ export default function DocumentosPage() {
     }
   }
 
-  const documentosFiltrados = documentos.filter(doc => {
+  const documentosFiltrados = documentos.filter((doc) => {
     const matchEquipe = !filtroEquipe || doc.equipeId === filtroEquipe
     const matchTipo = !filtroTipo || doc.tipo === filtroTipo
     const matchStatus = !filtroStatus || doc.status === filtroStatus
-    const matchBusca = !busca || 
+    const matchBusca =
+      !busca ||
       doc.titulo.toLowerCase().includes(busca.toLowerCase()) ||
       doc.descricao.toLowerCase().includes(busca.toLowerCase())
-    
+
     return matchEquipe && matchTipo && matchStatus && matchBusca
   })
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'publicado': return 'green'
-      case 'rascunho': return 'yellow'
-      case 'arquivado': return 'gray'
-      default: return 'blue'
+      case 'publicado':
+        return 'green'
+      case 'rascunho':
+        return 'yellow'
+      case 'arquivado':
+        return 'gray'
+      default:
+        return 'blue'
     }
   }
 
@@ -130,11 +134,22 @@ export default function DocumentosPage() {
   }
 
   return (
-    <Container maxW="7xl" py={8}>
-      <VStack spacing={6} align="stretch">
+    <Container
+      maxW="7xl"
+      py={8}
+    >
+      <VStack
+        spacing={6}
+        align="stretch"
+      >
         {/* Header */}
         <Box>
-          <Heading size="lg" mb={4}>Documentos</Heading>
+          <Heading
+            size="lg"
+            mb={4}
+          >
+            Documentos
+          </Heading>
           <HStack spacing={4}>
             <Button
               leftIcon={<FaPlus />}
@@ -157,7 +172,10 @@ export default function DocumentosPage() {
         <Card>
           <CardBody>
             <VStack spacing={4}>
-              <HStack spacing={4} w="full">
+              <HStack
+                spacing={4}
+                w="full"
+              >
                 <InputGroup flex={2}>
                   <InputLeftElement>
                     <FaSearch />
@@ -168,15 +186,18 @@ export default function DocumentosPage() {
                     onChange={(e) => setBusca(e.target.value)}
                   />
                 </InputGroup>
-                
+
                 <Select
                   placeholder="Todas as equipes"
                   value={filtroEquipe}
                   onChange={(e) => setFiltroEquipe(e.target.value)}
                   flex={1}
                 >
-                  {equipes.map(equipe => (
-                    <option key={equipe.id} value={equipe.id}>
+                  {equipes.map((equipe) => (
+                    <option
+                      key={equipe.id}
+                      value={equipe.id}
+                    >
                       {equipe.nome}
                     </option>
                   ))}
@@ -211,44 +232,48 @@ export default function DocumentosPage() {
         {documentosFiltrados.length === 0 ? (
           <Alert status="info">
             <AlertIcon />
-            {documentos.length === 0 
+            {documentos.length === 0
               ? 'Nenhum documento encontrado. Crie seu primeiro documento!'
-              : 'Nenhum documento encontrado com os filtros aplicados.'
-            }
+              : 'Nenhum documento encontrado com os filtros aplicados.'}
           </Alert>
         ) : (
-          <VStack spacing={4} align="stretch">
-            {documentosFiltrados.map(documento => (
-              <Card key={documento.id} cursor="pointer" _hover={{ shadow: 'md' }}>
+          <VStack
+            spacing={4}
+            align="stretch"
+          >
+            {documentosFiltrados.map((documento) => (
+              <Card
+                key={documento.id}
+                cursor="pointer"
+                _hover={{ shadow: 'md' }}
+              >
                 <CardBody>
                   <HStack justify="space-between">
-                    <VStack align="start" spacing={2} flex={1}>
+                    <VStack
+                      align="start"
+                      spacing={2}
+                      flex={1}
+                    >
                       <HStack>
                         {getTipoIcon(documento.tipo)}
                         <Heading size="md">{documento.titulo}</Heading>
-                        <Badge colorScheme={getStatusColor(documento.status)}>
-                          {documento.status}
-                        </Badge>
-                        {documento.tipo === 'upload' && (
-                          <Badge colorScheme="purple">
-                            {documento.nomeArquivo}
-                          </Badge>
-                        )}
+                        <Badge colorScheme={getStatusColor(documento.status)}>{documento.status}</Badge>
+                        {documento.tipo === 'upload' && <Badge colorScheme="purple">{documento.nomeArquivo}</Badge>}
                       </HStack>
                       <Text color="gray.600">{documento.descricao}</Text>
-                      <HStack spacing={4} fontSize="sm" color="gray.500">
+                      <HStack
+                        spacing={4}
+                        fontSize="sm"
+                        color="gray.500"
+                      >
                         <Text>Versão {documento.versao}</Text>
-                        <Text>
-                          Criado em {new Date(documento.dataCriacao).toLocaleDateString()}
-                        </Text>
+                        <Text>Criado em {new Date(documento.dataCriacao).toLocaleDateString()}</Text>
                         {documento.dataAtualizacao && (
-                          <Text>
-                            Atualizado em {new Date(documento.dataAtualizacao).toLocaleDateString()}
-                          </Text>
+                          <Text>Atualizado em {new Date(documento.dataAtualizacao).toLocaleDateString()}</Text>
                         )}
                       </HStack>
                     </VStack>
-                    
+
                     <HStack>
                       <Button
                         size="sm"
@@ -256,6 +281,17 @@ export default function DocumentosPage() {
                         onClick={() => router.push(`/documentos/${documento.id}/editar`)}
                       >
                         Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        variant="outline"
+                        onClick={() => {
+                          setDocumentoSelecionado(documento)
+                          onOpenAtribuir()
+                        }}
+                      >
+                        Atribuir à Equipe
                       </Button>
                       <Button
                         size="sm"
@@ -281,11 +317,18 @@ export default function DocumentosPage() {
         equipes={equipes}
         onSuccess={carregarDados}
       />
-      
+
       <UploadDocumentoModal
         isOpen={isOpenUpload}
         onClose={onCloseUpload}
         equipes={equipes}
+        onSuccess={carregarDados}
+      />
+
+      <AtribuirDocumentoModal
+        isOpen={isOpenAtribuir}
+        onClose={onCloseAtribuir}
+        documento={documentoSelecionado}
         onSuccess={carregarDados}
       />
     </Container>

@@ -36,10 +36,8 @@ export class DocumentoController {
       throw new BadRequestException('Arquivo é obrigatório');
     }
 
-    // Aqui você implementaria o upload para o Firebase Storage ou outro serviço
-    // Por enquanto, vamos simular uma URL
     const arquivoUrl = `https://storage.example.com/${file.filename}`;
-    
+
     const uploadData: UploadDocumentoDto = {
       ...uploadDocumentoDto,
       arquivoUrl,
@@ -103,5 +101,34 @@ export class DocumentoController {
       throw new BadRequestException('usuarioId é obrigatório');
     }
     return this.documentoService.remove(id, usuarioId);
+  }
+
+  @Patch(':id/atribuir-equipe')
+  async assignDocumentoToEquipe(
+    @Param('id') id: string,
+    @Body('equipeId') equipeId: string,
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    if (!equipeId) {
+      throw new BadRequestException('equipeId é obrigatório');
+    }
+    return this.documentoService.assignDocumentoToEquipe(
+      id,
+      equipeId,
+      usuarioId,
+    );
+  }
+
+  @Get('disponiveis-para-equipe')
+  async findDocumentosDisponiveisParaEquipe(
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    return this.documentoService.findDocumentosDisponiveisParaEquipe(usuarioId);
   }
 }
