@@ -25,7 +25,7 @@ import { FaSave, FaArrowLeft, FaRobot } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
-import { ChatIA } from '../components/ChatIA'
+import { ChatIA } from '../../components/ChatIA'
 
 interface Documento {
   id: string
@@ -45,12 +45,12 @@ export default function EditarDocumentoPage() {
   const router = useRouter()
   const params = useParams()
   const toast = useToast()
-  
+
   const [documento, setDocumento] = useState<Documento | null>(null)
   const [loadingDoc, setLoadingDoc] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showChat, setShowChat] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
@@ -72,9 +72,9 @@ export default function EditarDocumentoPage() {
   const carregarDocumento = async () => {
     try {
       setLoadingDoc(true)
-      
+
       const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`)
-      
+
       if (response.ok) {
         const doc = await response.json()
         setDocumento(doc)
@@ -111,7 +111,7 @@ export default function EditarDocumentoPage() {
   const salvarDocumento = async () => {
     try {
       setSaving(true)
-      
+
       const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`, {
         method: 'PATCH',
         headers: {
@@ -123,7 +123,7 @@ export default function EditarDocumentoPage() {
       if (response.ok) {
         const docAtualizado = await response.json()
         setDocumento(docAtualizado)
-        
+
         toast({
           title: 'Sucesso',
           description: 'Documento salvo com sucesso',
@@ -148,10 +148,10 @@ export default function EditarDocumentoPage() {
   const publicarDocumento = async () => {
     const novoFormData = { ...formData, status: 'publicado' as const }
     setFormData(novoFormData)
-    
+
     try {
       setSaving(true)
-      
+
       const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`, {
         method: 'PATCH',
         headers: {
@@ -163,7 +163,7 @@ export default function EditarDocumentoPage() {
       if (response.ok) {
         const docAtualizado = await response.json()
         setDocumento(docAtualizado)
-        
+
         toast({
           title: 'Sucesso',
           description: 'Documento publicado com sucesso',
@@ -200,20 +200,45 @@ export default function EditarDocumentoPage() {
   // Se for documento de upload, não permite edição do conteúdo
   if (documento.tipo === 'upload') {
     return (
-      <Container maxW="4xl" py={8}>
-        <VStack spacing={6} align="stretch">
+      <Container
+        maxW="4xl"
+        py={8}
+      >
+        <VStack
+          spacing={6}
+          align="stretch"
+        >
           <HStack justify="space-between">
-            <Button leftIcon={<FaArrowLeft />} onClick={() => router.push('/documentos')}>
+            <Button
+              leftIcon={<FaArrowLeft />}
+              onClick={() => router.push('/documentos')}
+            >
               Voltar
             </Button>
           </HStack>
-          
-          <Box textAlign="center" py={12}>
-            <Heading size="lg" mb={4}>Documento de Upload</Heading>
-            <Text color="gray.600" mb={6}>
+
+          <Box
+            textAlign="center"
+            py={12}
+          >
+            <Heading
+              size="lg"
+              mb={4}
+            >
+              Documento de Upload
+            </Heading>
+            <Text
+              color="gray.600"
+              mb={6}
+            >
               Este documento foi enviado como arquivo e não pode ser editado diretamente.
             </Text>
-            <Text fontSize="lg" fontWeight="bold">{documento.titulo}</Text>
+            <Text
+              fontSize="lg"
+              fontWeight="bold"
+            >
+              {documento.titulo}
+            </Text>
             <Text color="gray.600">{documento.descricao}</Text>
           </Box>
         </VStack>
@@ -222,11 +247,22 @@ export default function EditarDocumentoPage() {
   }
 
   return (
-    <Container maxW="full" py={4}>
-      <Grid templateColumns="1fr 400px" gap={6} h="calc(100vh - 120px)">
+    <Container
+      maxW="full"
+      py={4}
+    >
+      <Grid
+        templateColumns="1fr 400px"
+        gap={6}
+        h="calc(100vh - 120px)"
+      >
         {/* Editor Principal */}
         <GridItem>
-          <VStack spacing={4} align="stretch" h="full">
+          <VStack
+            spacing={4}
+            align="stretch"
+            h="full"
+          >
             {/* Header */}
             <HStack justify="space-between">
               <HStack>
@@ -237,14 +273,15 @@ export default function EditarDocumentoPage() {
                 >
                   Voltar
                 </Button>
-                <Badge colorScheme={documento.status === 'publicado' ? 'green' : 'yellow'}>
-                  {documento.status}
-                </Badge>
-                <Text fontSize="sm" color="gray.600">
+                <Badge colorScheme={documento.status === 'publicado' ? 'green' : 'yellow'}>{documento.status}</Badge>
+                <Text
+                  fontSize="sm"
+                  color="gray.600"
+                >
                   Versão {documento.versao}
                 </Text>
               </HStack>
-              
+
               <HStack>
                 <Button
                   leftIcon={<FaRobot />}
@@ -278,7 +315,11 @@ export default function EditarDocumentoPage() {
             </HStack>
 
             {/* Formulário de Edição */}
-            <VStack spacing={4} align="stretch" flex={1}>
+            <VStack
+              spacing={4}
+              align="stretch"
+              flex={1}
+            >
               <FormControl>
                 <FormLabel>Título</FormLabel>
                 <Input
@@ -316,8 +357,13 @@ export default function EditarDocumentoPage() {
         {/* Chat IA */}
         {showChat && (
           <GridItem>
-            <Box h="full" border="1px" borderColor="gray.200" borderRadius="md">
-              <ChatIA 
+            <Box
+              h="full"
+              border="1px"
+              borderColor="gray.200"
+              borderRadius="md"
+            >
+              <ChatIA
                 contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`}
               />
             </Box>

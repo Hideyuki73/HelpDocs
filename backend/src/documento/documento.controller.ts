@@ -21,11 +21,13 @@ import { UploadDocumentoDto } from './dto/upload-documento.dto';
 export class DocumentoController {
   constructor(private readonly documentoService: DocumentoService) {}
 
+  // 🔹 Criar documento
   @Post()
   create(@Body() createDocumentoDto: CreateDocumentoDto) {
     return this.documentoService.create(createDocumentoDto);
   }
 
+  // 🔹 Upload de arquivo
   @Post('upload')
   @UseInterceptors(FileInterceptor('arquivo'))
   async upload(
@@ -48,6 +50,7 @@ export class DocumentoController {
     return this.documentoService.upload(uploadData);
   }
 
+  // 🔹 Listar todos
   @Get()
   findAll(@Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
@@ -56,6 +59,18 @@ export class DocumentoController {
     return this.documentoService.findAll(usuarioId);
   }
 
+  // 🔹 Documentos disponíveis para equipe
+  @Get('disponiveis-para-equipe')
+  async findDocumentosDisponiveisParaEquipe(
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    return this.documentoService.findDocumentosDisponiveisParaEquipe(usuarioId);
+  }
+
+  // 🔹 Documentos por equipe
   @Get('equipe/:equipeId')
   findByEquipe(
     @Param('equipeId') equipeId: string,
@@ -67,6 +82,7 @@ export class DocumentoController {
     return this.documentoService.findByEquipe(equipeId, usuarioId);
   }
 
+  // 🔹 Estatísticas
   @Get('stats')
   getStats(@Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
@@ -75,6 +91,7 @@ export class DocumentoController {
     return this.documentoService.getDocumentoStats(usuarioId);
   }
 
+  // 🔹 Buscar por ID (vem por último para não engolir rotas fixas)
   @Get(':id')
   findOne(@Param('id') id: string, @Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
@@ -83,6 +100,7 @@ export class DocumentoController {
     return this.documentoService.findOne(id, usuarioId);
   }
 
+  // 🔹 Atualizar
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -95,14 +113,7 @@ export class DocumentoController {
     return this.documentoService.update(id, updateDocumentoDto, usuarioId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @Query('usuarioId') usuarioId: string) {
-    if (!usuarioId) {
-      throw new BadRequestException('usuarioId é obrigatório');
-    }
-    return this.documentoService.remove(id, usuarioId);
-  }
-
+  // 🔹 Atribuir a equipe
   @Patch(':id/atribuir-equipe')
   async assignDocumentoToEquipe(
     @Param('id') id: string,
@@ -122,13 +133,12 @@ export class DocumentoController {
     );
   }
 
-  @Get('disponiveis-para-equipe')
-  async findDocumentosDisponiveisParaEquipe(
-    @Query('usuarioId') usuarioId: string,
-  ) {
+  // 🔹 Remover
+  @Delete(':id')
+  remove(@Param('id') id: string, @Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
-    return this.documentoService.findDocumentosDisponiveisParaEquipe(usuarioId);
+    return this.documentoService.remove(id, usuarioId);
   }
 }

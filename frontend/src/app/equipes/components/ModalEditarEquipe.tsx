@@ -15,9 +15,11 @@ import {
   Input,
   VStack,
   useToast,
-  Text
+  Text,
+  Select,
 } from '@chakra-ui/react'
 import { Equipe, EquipeFormData } from '../types'
+import { useDocumentos } from '../hooks/useDocumentos'
 
 interface ModalEditarEquipeProps {
   isOpen: boolean
@@ -29,25 +31,26 @@ interface ModalEditarEquipeProps {
 export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEditarEquipeProps) {
   const [formData, setFormData] = useState<Partial<EquipeFormData>>({
     nome: '',
-    documentoId: ''
+    documentoId: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { documentos, loading } = useDocumentos()
   const toast = useToast()
 
   useEffect(() => {
     if (equipe) {
       setFormData({
         nome: equipe.nome,
-        documentoId: equipe.documentoId || ''
+        documentoId: equipe.documentoId || '',
       })
     }
   }, [equipe])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!equipe) return
-    
+
     if (!formData.nome?.trim()) {
       toast({
         title: 'Nome obrigatório',
@@ -64,11 +67,11 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
       const submitData: Partial<EquipeFormData> = {
         nome: formData.nome.trim(),
       }
-      
+
       if (formData.documentoId?.trim()) {
         submitData.documentoId = formData.documentoId.trim()
       }
-      
+
       await onSubmit(equipe.id, submitData)
       toast({
         title: 'Equipe atualizada',
@@ -94,40 +97,57 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
   const handleClose = () => {
     setFormData({
       nome: '',
-      documentoId: ''
+      documentoId: '',
     })
     onClose()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="md"
+    >
       <ModalOverlay />
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader>Editar Equipe</ModalHeader>
           <ModalCloseButton />
-          
+
           <ModalBody>
             <VStack spacing={4}>
               <FormControl isRequired>
                 <FormLabel>Nome da Equipe</FormLabel>
                 <Input
                   value={formData.nome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, nome: e.target.value }))}
                   placeholder="Digite o nome da equipe"
                   disabled={isSubmitting}
                 />
               </FormControl>
 
               <FormControl>
-                <FormLabel>ID do Documento (Opcional)</FormLabel>
-                <Input
+                <FormLabel>Documento associado (Opcional)</FormLabel>
+                <Select
+                  placeholder={loading ? 'Carregando documentos...' : 'Selecione um documento'}
                   value={formData.documentoId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, documentoId: e.target.value }))}
-                  placeholder="ID do documento associado"
-                  disabled={isSubmitting}
-                />
-                <Text fontSize="sm" color="gray.500" mt={1}>
+                  onChange={(e) => setFormData((prev) => ({ ...prev, documentoId: e.target.value }))}
+                  disabled={isSubmitting || loading}
+                >
+                  {documentos.map((doc) => (
+                    <option
+                      key={doc.id}
+                      value={doc.id}
+                    >
+                      {doc.titulo}
+                    </option>
+                  ))}
+                </Select>
+                <Text
+                  fontSize="sm"
+                  color="gray.500"
+                  mt={1}
+                >
                   Você pode associar um documento específico a esta equipe
                 </Text>
               </FormControl>
@@ -135,11 +155,16 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button 
-              colorScheme="blue" 
+            <Button
+              colorScheme="blue"
               type="submit"
               isLoading={isSubmitting}
               loadingText="Salvando..."
@@ -152,4 +177,3 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
     </Modal>
   )
 }
-

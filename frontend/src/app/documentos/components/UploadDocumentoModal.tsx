@@ -24,6 +24,7 @@ import { useState, useRef } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { FaUpload, FaFile } from 'react-icons/fa'
+import { useDocumentos } from '../hooks/useDocumentos'
 
 interface Equipe {
   id: string
@@ -41,7 +42,6 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
   const [user] = useAuthState(auth)
   const toast = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [loading, setLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     titulo: '',
@@ -49,11 +49,12 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
     equipeId: '',
   })
 
+  const { criar, loading } = useDocumentos()
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setSelectedFile(file)
-      // Auto-preencher título com nome do arquivo se estiver vazio
       if (!formData.titulo) {
         setFormData({ ...formData, titulo: file.name.split('.')[0] })
       }
@@ -72,56 +73,37 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
     }
 
     try {
-      setLoading(true)
-      
-      const formDataUpload = new FormData()
-      formDataUpload.append('arquivo', selectedFile)
-      formDataUpload.append('titulo', formData.titulo)
-      formDataUpload.append('descricao', formData.descricao)
-      formDataUpload.append('equipeId', formData.equipeId)
-      formDataUpload.append('criadoPor', user?.uid || '')
-      formDataUpload.append('empresaId', 'empresa-id') // Você precisará obter o ID da empresa do usuário
-
-      const response = await fetch('/api/documentos/upload', {
-        method: 'POST',
-        body: formDataUpload,
+      await criar({
+        ...formData,
+        tipo: 'upload',
+        criadoPor: user?.uid || '',
+        nomeArquivo: selectedFile.name,
+        tamanhoArquivo: selectedFile.size,
       })
 
-      if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: 'Arquivo enviado com sucesso',
-          status: 'success',
-          duration: 3000,
-        })
-        
-        handleClose()
-        onSuccess()
-      } else {
-        throw new Error('Erro ao fazer upload')
-      }
-    } catch (error) {
+      toast({
+        title: 'Sucesso',
+        description: 'Arquivo enviado com sucesso',
+        status: 'success',
+        duration: 3000,
+      })
+
+      handleClose()
+      onSuccess()
+    } catch {
       toast({
         title: 'Erro',
         description: 'Erro ao fazer upload do arquivo',
         status: 'error',
         duration: 3000,
       })
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleClose = () => {
-    setFormData({
-      titulo: '',
-      descricao: '',
-      equipeId: '',
-    })
+    setFormData({ titulo: '', descricao: '', equipeId: '' })
     setSelectedFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
     onClose()
   }
 
@@ -134,12 +116,16 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xl"
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Upload de Documento</ModalHeader>
         <ModalCloseButton />
-        
+
         <ModalBody>
           <VStack spacing={4}>
             <FormControl isRequired>
@@ -161,20 +147,32 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
                   onChange={handleFileSelect}
                   accept=".pdf,.doc,.docx,.txt,.md"
                 />
-                
+
                 {selectedFile ? (
                   <VStack spacing={2}>
-                    <FaFile size={24} color="blue" />
+                    <FaFile
+                      size={24}
+                      color="blue"
+                    />
                     <Text fontWeight="bold">{selectedFile.name}</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       {formatFileSize(selectedFile.size)}
                     </Text>
                   </VStack>
                 ) : (
                   <VStack spacing={2}>
-                    <FaUpload size={24} color="gray" />
+                    <FaUpload
+                      size={24}
+                      color="gray"
+                    />
                     <Text>Clique para selecionar um arquivo</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       PDF, DOC, DOCX, TXT, MD
                     </Text>
                   </VStack>
@@ -187,7 +185,6 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
               <Input
                 value={formData.titulo}
                 onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                placeholder="Digite o título do documento"
               />
             </FormControl>
 
@@ -196,7 +193,6 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
               <Textarea
                 value={formData.descricao}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Digite uma descrição para o documento"
                 rows={3}
               />
             </FormControl>
@@ -208,8 +204,11 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
                 onChange={(e) => setFormData({ ...formData, equipeId: e.target.value })}
                 placeholder="Selecione a equipe responsável"
               >
-                {equipes.map(equipe => (
-                  <option key={equipe.id} value={equipe.id}>
+                {equipes.map((equipe) => (
+                  <option
+                    key={equipe.id}
+                    value={equipe.id}
+                  >
                     {equipe.nome}
                   </option>
                 ))}
@@ -219,14 +218,17 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Up
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={handleClose}>
+          <Button
+            variant="ghost"
+            mr={3}
+            onClick={handleClose}
+          >
             Cancelar
           </Button>
           <Button
             colorScheme="green"
             onClick={handleSubmit}
             isLoading={loading}
-            loadingText="Enviando..."
             leftIcon={<FaUpload />}
           >
             Fazer Upload

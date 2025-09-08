@@ -82,6 +82,8 @@ export default function DocumentosPage() {
     try {
       setLoadingDocs(true)
 
+      if (!user) return
+
       // Carregar documentos
       const docs = await listarDocumentos(user.uid)
       setDocumentos(docs)

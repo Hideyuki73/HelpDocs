@@ -9,7 +9,6 @@ export interface DocumentoParams {
   arquivoUrl?: string
   nomeArquivo?: string
   tamanhoArquivo?: number
-  empresaId: string
   equipeId: string
   criadoPor: string
   status?: string
@@ -24,7 +23,6 @@ export interface Documento {
   arquivoUrl?: string
   nomeArquivo?: string
   tamanhoArquivo?: number
-  empresaId: string
   equipeId: string
   criadoPor: string
   dataCriacao: Date
@@ -66,7 +64,11 @@ export async function obterDocumento(documentoId: string, usuarioId: string) {
   return response.data
 }
 
-export async function atualizarDocumento(documentoId: string, documentoData: Partial<DocumentoParams>, usuarioId: string) {
+export async function atualizarDocumento(
+  documentoId: string,
+  documentoData: Partial<DocumentoParams>,
+  usuarioId: string,
+) {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
@@ -93,9 +95,13 @@ export async function atribuirDocumentoAEquipe(documentoId: string, equipeId: st
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.patch(`/documentos/${documentoId}/atribuir-equipe?usuarioId=${usuarioId}`, { equipeId }, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const response = await api.patch(
+    `/documentos/${documentoId}/atribuir-equipe?usuarioId=${usuarioId}`,
+    { equipeId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
   return response.data
 }
 
@@ -120,5 +126,3 @@ export async function obterEstatisticasDocumentos(usuarioId: string) {
   })
   return response.data
 }
-
-

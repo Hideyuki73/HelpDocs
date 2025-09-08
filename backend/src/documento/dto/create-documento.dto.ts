@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 
 export class CreateDocumentoDto {
   @IsString()
@@ -27,10 +33,6 @@ export class CreateDocumentoDto {
   @IsOptional()
   @IsNumber()
   tamanhoArquivo?: number;
-
-  @IsString()
-  @IsNotEmpty()
-  empresaId: string;
 
   @IsString()
   @IsNotEmpty()

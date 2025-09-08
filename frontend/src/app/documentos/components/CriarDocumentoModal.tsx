@@ -20,6 +20,7 @@ import {
 import { useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
+import { useDocumentos } from '../hooks/useDocumentos'
 
 interface Equipe {
   id: string
@@ -36,7 +37,7 @@ interface CriarDocumentoModalProps {
 export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: CriarDocumentoModalProps) {
   const [user] = useAuthState(auth)
   const toast = useToast()
-  const [loading, setLoading] = useState(false)
+  const { criar, loading } = useDocumentos()
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
@@ -56,70 +57,47 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
     }
 
     try {
-      setLoading(true)
-      
-      const response = await fetch('/api/documentos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          tipo: 'criado',
-          criadoPor: user?.uid,
-          empresaId: 'empresa-id', // Você precisará obter o ID da empresa do usuário
-        }),
+      await criar({
+        ...formData,
+        tipo: 'criado',
+        criadoPor: user?.uid || '',
       })
 
-      if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: 'Documento criado com sucesso',
-          status: 'success',
-          duration: 3000,
-        })
-        
-        setFormData({
-          titulo: '',
-          descricao: '',
-          equipeId: '',
-          conteudo: '',
-        })
-        
-        onClose()
-        onSuccess()
-      } else {
-        throw new Error('Erro ao criar documento')
-      }
-    } catch (error) {
+      toast({
+        title: 'Sucesso',
+        description: 'Documento criado com sucesso',
+        status: 'success',
+        duration: 3000,
+      })
+
+      handleClose()
+      onSuccess()
+    } catch {
       toast({
         title: 'Erro',
         description: 'Erro ao criar documento',
         status: 'error',
         duration: 3000,
       })
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleClose = () => {
-    setFormData({
-      titulo: '',
-      descricao: '',
-      equipeId: '',
-      conteudo: '',
-    })
+    setFormData({ titulo: '', descricao: '', equipeId: '', conteudo: '' })
     onClose()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xl"
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Criar Novo Documento</ModalHeader>
         <ModalCloseButton />
-        
+
         <ModalBody>
           <VStack spacing={4}>
             <FormControl isRequired>
@@ -127,7 +105,6 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
               <Input
                 value={formData.titulo}
                 onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                placeholder="Digite o título do documento"
               />
             </FormControl>
 
@@ -136,7 +113,6 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
               <Textarea
                 value={formData.descricao}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Digite uma descrição para o documento"
                 rows={3}
               />
             </FormControl>
@@ -148,8 +124,11 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
                 onChange={(e) => setFormData({ ...formData, equipeId: e.target.value })}
                 placeholder="Selecione a equipe responsável"
               >
-                {equipes.map(equipe => (
-                  <option key={equipe.id} value={equipe.id}>
+                {equipes.map((equipe) => (
+                  <option
+                    key={equipe.id}
+                    value={equipe.id}
+                  >
                     {equipe.nome}
                   </option>
                 ))}
@@ -161,7 +140,6 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
               <Textarea
                 value={formData.conteudo}
                 onChange={(e) => setFormData({ ...formData, conteudo: e.target.value })}
-                placeholder="Digite o conteúdo inicial do documento"
                 rows={6}
               />
             </FormControl>
@@ -169,14 +147,17 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSuccess }: Cri
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={handleClose}>
+          <Button
+            variant="ghost"
+            mr={3}
+            onClick={handleClose}
+          >
             Cancelar
           </Button>
           <Button
             colorScheme="blue"
             onClick={handleSubmit}
             isLoading={loading}
-            loadingText="Criando..."
           >
             Criar Documento
           </Button>

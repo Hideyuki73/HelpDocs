@@ -24,11 +24,7 @@ export class DocumentoService {
   }
 
   async create(data: CreateDocumentoDto) {
-    const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
-    if (!empresaDoc.exists) {
-      throw new NotFoundException('Empresa não encontrada.');
-    }
-
+    // Verifica se o funcionário criador existe
     const funcionarioDoc = await this.funcionarioCollection
       .doc(data.criadoPor)
       .get();
@@ -36,22 +32,30 @@ export class DocumentoService {
       throw new NotFoundException('Funcionário criador não encontrado.');
     }
 
+    const funcionarioData = funcionarioDoc.data();
+    if (!funcionarioData?.empresaId) {
+      throw new NotFoundException('Funcionário não possui empresa vinculada.');
+    }
+
+    // Verifica se a equipe existe
     const equipeDoc = await this.equipeCollection.doc(data.equipeId).get();
     if (!equipeDoc.exists) {
       throw new NotFoundException('Equipe não encontrada.');
     }
 
     const equipeData = equipeDoc.data();
+
+    // Valida se o criador realmente faz parte da equipe
     const isMembro = equipeData?.membros?.some(
       (ref: any) => ref.id === data.criadoPor,
     );
-
     if (!isMembro) {
       throw new ForbiddenException(
         'Você não tem permissão para criar documentos nesta equipe.',
       );
     }
 
+    // Criação do documento com empresaId vindo do criador
     const docRef = await this.collection.add({
       titulo: data.titulo,
       descricao: data.descricao,
@@ -60,7 +64,7 @@ export class DocumentoService {
       arquivoUrl: data.arquivoUrl || null,
       nomeArquivo: data.nomeArquivo || null,
       tamanhoArquivo: data.tamanhoArquivo || null,
-      empresaId: this.empresaCollection.doc(data.empresaId),
+      empresaId: this.empresaCollection.doc(funcionarioData.empresaId), // herdado do criador
       equipeId: this.equipeCollection.doc(data.equipeId),
       criadoPor: this.funcionarioCollection.doc(data.criadoPor),
       dataCriacao: new Date(),
