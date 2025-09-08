@@ -96,7 +96,7 @@ export function useAuth() {
       setAuthState((prev) => ({ ...prev, user: userData, loading: false }))
 
       console.log('Login bem-sucedido:', firebaseUser.uid)
-      router.push('/empresa-selection')
+      router.push('/home')
     } catch (error: any) {
       console.log('Erro de login:', error.message)
       setAuthState((prev) => ({

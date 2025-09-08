@@ -1,6 +1,3 @@
-// Conteúdo completo de empresa.service.ts
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 import {
   Injectable,
   NotFoundException,
@@ -57,17 +54,33 @@ export class EmpresaService {
     const empresaDoc = snapshot.docs[0];
     const empresaData = empresaDoc.data();
 
+    // Verificar se o funcionário já é membro da empresa
     if (empresaData.membros.includes(funcionarioId)) {
+      // Se já for membro, apenas atualiza o empresaId e cargo do funcionário se necessário
+      const funcionarioDoc = await this.funcionarioCollection
+        .doc(funcionarioId)
+        .get();
+      if (
+        funcionarioDoc.exists &&
+        funcionarioDoc.data()?.empresaId !== empresaDoc.id
+      ) {
+        await this.funcionarioCollection.doc(funcionarioId).update({
+          empresaId: empresaDoc.id,
+          cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
+        });
+      }
       return { id: empresaDoc.id, ...empresaData };
     }
 
+    // Adicionar funcionário à lista de membros da empresa
     await empresaDoc.ref.update({
       membros: admin.firestore.FieldValue.arrayUnion(funcionarioId),
     });
 
-    // Atualizar o campo empresaId no documento do funcionário
+    // Atualizar o campo empresaId e cargo no documento do funcionário
     await this.funcionarioCollection.doc(funcionarioId).update({
       empresaId: empresaDoc.id,
+      cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
     });
 
     const atualizado = await empresaDoc.ref.get();
@@ -183,7 +196,7 @@ export class EmpresaService {
     return { message: 'Empresa deletada com sucesso' };
   }
 
-  // Remover funcionário da empresa (apenas admin pode remover)
+  // Remover funcionário da empresa (apenas admin pode remover, exceto o dono)
   async removerFuncionario(
     empresaId: string,
     funcionarioId: string,
@@ -198,7 +211,7 @@ export class EmpresaService {
 
     const empresaData = empresaDoc.data();
 
-    // Verificar se o usuário tem permissão (criador ou admin)
+    // Verificar se o usuário que está expulsando é Admin
     const usuarioDoc = await this.funcionarioCollection.doc(usuarioUid).get();
     const usuarioData = usuarioDoc.data();
 
@@ -214,6 +227,13 @@ export class EmpresaService {
       throw new NotFoundException('Empresa não encontrada');
     }
 
+    // Impedir que o dono da empresa seja removido
+    if (empresaData.criadorUid === funcionarioId) {
+      throw new UnauthorizedException(
+        'O criador da empresa não pode ser removido',
+      );
+    }
+
     // Verificar se o funcionário está na empresa
     if (!empresaData.membros || !empresaData.membros.includes(funcionarioId)) {
       throw new NotFoundException('Funcionário não encontrado na empresa');
@@ -224,10 +244,10 @@ export class EmpresaService {
       membros: admin.firestore.FieldValue.arrayRemove(funcionarioId),
     });
 
-    // Remover empresaId do funcionário
+    // Remover empresaId e cargo do funcionário
     await this.funcionarioCollection.doc(funcionarioId).update({
       empresaId: admin.firestore.FieldValue.delete(),
-      cargo: admin.firestore.FieldValue.delete(), // Remove o cargo também
+      cargo: admin.firestore.FieldValue.delete(),
     });
 
     return { message: 'Funcionário removido da empresa com sucesso' };

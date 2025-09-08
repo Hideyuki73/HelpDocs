@@ -1,6 +1,3 @@
-// Conteúdo completo de funcionario.service.ts
-// Certifique-se de que este é o conteúdo EXATO do seu arquivo
-
 import {
   Injectable,
   Inject,
@@ -15,6 +12,13 @@ import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
 export class FuncionarioService {
   private funcionarioCollection;
   private empresaCollection;
+
+  // Hierarquia de cargos (quanto menor o grau, maior o poder)
+  private readonly cargos = [
+    { nome: 'Administrador', grau: 1 },
+    { nome: 'Gerente de Projetos', grau: 2 },
+    { nome: 'Desenvolvedor', grau: 3 },
+  ];
 
   constructor(@Inject('FIRESTORE') private firestore: Firestore) {
     this.funcionarioCollection = this.firestore.collection('funcionarios');
@@ -112,6 +116,13 @@ export class FuncionarioService {
     return snapshot.docs.map((doc) => this.mapFuncionario(doc));
   }
 
+  async findByEmpresaId(empresaId: string) {
+    const snapshot = await this.funcionarioCollection
+      .where('empresaId', '==', empresaId)
+      .get();
+    return snapshot.docs.map((doc) => this.mapFuncionario(doc));
+  }
+
   async findOne(id: string) {
     const doc = await this.funcionarioCollection.doc(id).get();
     if (!doc.exists) {
@@ -152,55 +163,99 @@ export class FuncionarioService {
   }
 
   // Atualizar cargo do funcionário
-  async updateCargo(funcionarioId: string, cargo: string, requesterId: string) {
-    // Verificar se o funcionário existe
+  async updateCargo(
+    funcionarioId: string,
+    novoCargo: string,
+    requesterId: string,
+  ) {
+    const getCargo = (nome: string) => this.cargos.find((c) => c.nome === nome);
+
+    // Verificar se o funcionário alvo existe
     const funcionarioDoc = await this.funcionarioCollection
       .doc(funcionarioId)
       .get();
     if (!funcionarioDoc.exists) {
-      throw new NotFoundException('Funcionário não encontrado');
+      throw new NotFoundException('Funcionário alvo não encontrado');
     }
-
-    // Verificar se o usuário que está fazendo a requisição é o criador da empresa
     const funcionarioData = funcionarioDoc.data();
-    if (!funcionarioData?.empresaId) {
-      throw new NotFoundException(
-        'Funcionário não está associado a nenhuma empresa',
-      );
-    }
 
-    // CORREÇÃO AQUI: Buscar a empresa diretamente pelo empresaId do funcionário
-    const empresaDoc = await this.empresaCollection
-      .doc(funcionarioData.empresaId)
+    // Verificar se o requisitante existe
+    const requesterDoc = await this.funcionarioCollection
+      .doc(requesterId)
       .get();
+    if (!requesterDoc.exists) {
+      throw new UnauthorizedException('Requisitante não encontrado');
+    }
+    const requesterData = requesterDoc.data();
 
-    if (!empresaDoc.exists) {
+    const requesterCargo = getCargo(requesterData?.cargo);
+    const alvoCargo = getCargo(funcionarioData?.cargo);
+    const novoCargoObj = getCargo(novoCargo);
+
+    if (!requesterCargo || !novoCargoObj) {
       throw new NotFoundException(
-        'Empresa não encontrada para este funcionário',
+        'Cargo inválido. Cargos permitidos: ' +
+          this.cargos.map((c) => c.nome).join(', '),
       );
     }
 
-    // Verificar se o usuário que está fazendo a requisição é o criador da empresa
-    if (funcionarioData.cargo !== 'Administrador') {
+    // Regra: só pode alterar cargo de alguém com grau maior (menos poder)
+    if (
+      alvoCargo &&
+      requesterCargo.grau >= alvoCargo.grau &&
+      funcionarioId !== requesterId
+    ) {
+      const empresaDoc = await this.empresaCollection
+        .doc(funcionarioData.empresaId)
+        .get();
+      const empresaData = empresaDoc.data();
+
+      const requesterEhCriador = empresaData?.criadorUid === requesterId;
+
+      if (
+        !(
+          requesterEhCriador &&
+          requesterCargo.nome === 'Administrador' &&
+          alvoCargo.nome === 'Administrador'
+        )
+      ) {
+        throw new UnauthorizedException(
+          `Você não tem permissão para alterar o cargo de alguém com mesmo ou maior nível que ${requesterCargo.nome}.`,
+        );
+      }
+    }
+
+    // Bloquear auto-promoção para cargo superior
+    if (
+      funcionarioId === requesterId &&
+      novoCargoObj.grau < requesterCargo.grau
+    ) {
       throw new UnauthorizedException(
-        'Apenas o Administrador da empresa pode atribuir cargos',
+        `Você não pode se promover de ${requesterCargo.nome} para ${novoCargo}.`,
       );
     }
 
-    // Validar cargo
-    const cargosPermitidos = [
-      'Gerente de Projetos',
-      'Administrador',
-      'Desenvolvedor',
-    ];
-    if (!cargosPermitidos.includes(cargo)) {
-      throw new NotFoundException(
-        'Cargo inválido. Cargos permitidos: ' + cargosPermitidos.join(', '),
-      );
+    // Caso o funcionário alvo seja o criador da empresa
+    if (funcionarioData.empresaId) {
+      const empresaDoc = await this.empresaCollection
+        .doc(funcionarioData.empresaId)
+        .get();
+      const empresaData = empresaDoc.data();
+      if (
+        empresaData &&
+        empresaData.criadorUid === funcionarioId &&
+        funcionarioId !== requesterId
+      ) {
+        throw new UnauthorizedException(
+          'O cargo do criador da empresa só pode ser alterado por ele mesmo.',
+        );
+      }
     }
 
-    // Atualizar o cargo
-    await this.funcionarioCollection.doc(funcionarioId).update({ cargo });
+    // Atualizar cargo
+    await this.funcionarioCollection
+      .doc(funcionarioId)
+      .update({ cargo: novoCargo });
 
     const updatedFuncionario = await this.funcionarioCollection
       .doc(funcionarioId)
