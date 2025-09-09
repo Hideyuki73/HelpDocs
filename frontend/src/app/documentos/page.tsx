@@ -55,8 +55,7 @@ export default function DocumentosPage() {
   }
 
   const handleViewDetails = (documento: Documento) => {
-    // TODO: Implementar visualização detalhada do documento
-    console.log('Ver detalhes do documento:', documento)
+    window.open(`/documentos/${documento.id}`, '_blank');
   }
 
   const handleCloseAtribuirModal = () => {
@@ -196,7 +195,7 @@ export default function DocumentosPage() {
                       <DocumentoCard
                         key={documento.id}
                         documento={documento}
-                        onDelete={deletar}
+                        onDelete={user ? (id: string) => { deletar(id, user.id); } : () => {}}
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
                         onViewDetails={handleViewDetails}
@@ -238,7 +237,10 @@ export default function DocumentosPage() {
       <AtribuirDocumentoModal
         isOpen={isAtribuirModalOpen}
         onClose={handleCloseAtribuirModal}
-        onSubmit={atualizar}
+        onSubmit={async (documentoId, equipeId, usuarioId) => {
+          await atualizar(documentoId, { equipeId: equipeId }, usuarioId);
+          handleCloseAtribuirModal();
+        }}
         documento={documentoParaAtribuir}
       />
     </Box>

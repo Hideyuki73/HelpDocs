@@ -124,10 +124,13 @@ export class FuncionarioService {
   }
 
   async findOne(id: string) {
+    console.log(`[FuncionarioService] Buscando funcionário com ID: ${id}`);
     const doc = await this.funcionarioCollection.doc(id).get();
     if (!doc.exists) {
+      console.log(`[FuncionarioService] Funcionário com ID ${id} não encontrado.`);
       throw new NotFoundException('Funcionário não encontrado');
     }
+    console.log(`[FuncionarioService] Funcionário com ID ${id} encontrado.`);
     return this.mapFuncionario(doc);
   }
 
@@ -200,25 +203,25 @@ export class FuncionarioService {
     }
 
     // Regra: só pode alterar cargo de alguém com grau maior (menos poder)
-    if (
-      alvoCargo &&
-      requesterCargo.grau >= alvoCargo.grau &&
-      funcionarioId !== requesterId
-    ) {
-      const empresaDoc = await this.empresaCollection
-        .doc(funcionarioData.empresaId)
-        .get();
-      const empresaData = empresaDoc.data();
+    if (alvoCargo && requesterCargo.grau >= alvoCargo.grau) {
+      // Permite que um admin rebaixe outro admin, mas verifica se é o único admin
+      if (alvoCargo.nome === 'Administrador' && novoCargoObj.nome !== 'Administrador') {
+        const empresaId = funcionarioData.empresaId;
+        const adminSnapshot = await this.funcionarioCollection
+          .where('empresaId', '==', empresaId)
+          .where('cargo', '==', 'Administrador')
+          .get();
+        const numAdmins = adminSnapshot.docs.length;
 
-      const requesterEhCriador = empresaData?.criadorUid === requesterId;
+        if (numAdmins === 1 && funcionarioId === adminSnapshot.docs[0].id) {
+          throw new UnauthorizedException(
+            'Você não pode rebaixar o único administrador da empresa.',
+          );
+        }
+      }
 
-      if (
-        !(
-          requesterEhCriador &&
-          requesterCargo.nome === 'Administrador' &&
-          alvoCargo.nome === 'Administrador'
-        )
-      ) {
+      // Bloquear rebaixamento de cargo se o requisitante não tiver permissão
+      if (funcionarioId !== requesterId) {
         throw new UnauthorizedException(
           `Você não tem permissão para alterar o cargo de alguém com mesmo ou maior nível que ${requesterCargo.nome}.`,
         );
@@ -235,17 +238,36 @@ export class FuncionarioService {
       );
     }
 
-    // Caso o funcionário alvo seja o criador da empresa
-    if (funcionarioData.empresaId) {
+    // Bloquear auto-rebaixamento de Administrador para não-Administrador se for o único
+    if (
+      funcionarioId === requesterId &&
+      alvoCargo?.nome === 'Administrador' &&
+      novoCargoObj.nome !== 'Administrador'
+    ) {
+      const empresaId = funcionarioData.empresaId;
+      const adminSnapshot = await this.funcionarioCollection
+        .where('empresaId', '==', empresaId)
+        .where('cargo', '==', 'Administrador')
+        .get();
+      const numAdmins = adminSnapshot.docs.length;
+
+      if (numAdmins === 1) {
+        throw new UnauthorizedException(
+          'Você não pode se rebaixar, pois é o único administrador da empresa.',
+        );
+      }
+    }
+
+    // Caso o funcionário alvo seja o criador da empresa e não seja o requisitante
+    if (
+      funcionarioData.empresaId &&
+      funcionarioId !== requesterId
+    ) {
       const empresaDoc = await this.empresaCollection
         .doc(funcionarioData.empresaId)
         .get();
       const empresaData = empresaDoc.data();
-      if (
-        empresaData &&
-        empresaData.criadorUid === funcionarioId &&
-        funcionarioId !== requesterId
-      ) {
+      if (empresaData && empresaData.criadorId?.id === funcionarioId) {
         throw new UnauthorizedException(
           'O cargo do criador da empresa só pode ser alterado por ele mesmo.',
         );

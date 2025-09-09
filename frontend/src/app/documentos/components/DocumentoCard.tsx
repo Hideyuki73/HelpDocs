@@ -24,7 +24,7 @@ import { Documento } from '@/action/documento'
 interface DocumentoCardProps {
   documento: Documento
   onEdit: (id: string, dados: any, usuarioId: string) => void
-  onDelete: (id: string, usuarioId: string) => void
+  onDelete: (id: string) => void
   onAtribuir: (documento: Documento) => void
   onViewDetails: (documento: Documento) => void
 }
@@ -87,7 +87,7 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewD
               <MenuItem onClick={() => onAtribuir(documento)}>Atribuir à Equipe</MenuItem>
               <MenuItem
                 icon={<FaTrash />}
-                onClick={() => onDelete(documento.id, 'user-id')}
+                onClick={() => onDelete(documento.id)}
                 color="red.500"
               >
                 Excluir

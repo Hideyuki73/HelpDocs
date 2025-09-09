@@ -1,4 +1,5 @@
 export interface Usuario {
+  uid(id: string, uid: any): void
   id: string
   nome: string
   email: string
