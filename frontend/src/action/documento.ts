@@ -12,6 +12,7 @@ export interface DocumentoParams {
   equipeId: string
   criadoPor: string
   status?: string
+  arquivo?: File
 }
 
 export interface Documento {

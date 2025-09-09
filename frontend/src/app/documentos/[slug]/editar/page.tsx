@@ -19,7 +19,6 @@ import {
   Center,
   Badge,
   Text,
-  Divider,
 } from '@chakra-ui/react'
 import { FaSave, FaArrowLeft, FaRobot } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
@@ -70,34 +69,10 @@ export default function EditarDocumentoPage() {
   }, [user, loading, params.slug, router])
 
   const carregarDocumento = async () => {
+    if (!user) return
     try {
       setLoadingDoc(true)
-
-      // Simular carregamento de documento - substitua pela lógica real
-      // const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`)
-
-      // Simulação de documento para teste
-      const docSimulado = {
-        id: params.slug as string,
-        titulo: 'Documento de Exemplo',
-        descricao: 'Este é um documento de exemplo para teste',
-        conteudo: 'Conteúdo inicial do documento...',
-        tipo: 'criado' as const,
-        status: 'rascunho' as const,
-        equipeId: 'equipe-1',
-        versao: 1,
-        dataCriacao: new Date().toISOString(),
-      }
-
-      setDocumento(docSimulado)
-      setFormData({
-        titulo: docSimulado.titulo,
-        descricao: docSimulado.descricao,
-        conteudo: docSimulado.conteudo || '',
-        status: docSimulado.status,
-      })
-
-      /* Código original comentado para evitar loading infinito
+      const response = await fetch(`/api/documentos/${params.slug}?usuarioId=${user.uid}`)
       if (response.ok) {
         const doc = await response.json()
         setDocumento(doc)
@@ -110,60 +85,60 @@ export default function EditarDocumentoPage() {
       } else if (response.status === 403) {
         toast({
           title: 'Acesso negado',
-          description: 'Você não tem permissão para editar este documento',
+          description: 'Você não tem permissão para acessar este documento.',
           status: 'error',
-          duration: 5000,
+          duration: 3000,
+          isClosable: true,
         })
         router.push('/documentos')
       } else {
         throw new Error('Documento não encontrado')
       }
-      */
     } catch (error) {
-      console.error('Erro ao carregar documento:', error)
+      console.error(error)
       toast({
         title: 'Erro',
-        description: 'Erro ao carregar documento',
+        description: 'Não foi possível carregar o documento.',
         status: 'error',
         duration: 3000,
+        isClosable: true,
       })
-      // router.push('/documentos')
     } finally {
       setLoadingDoc(false)
     }
   }
 
   const salvarDocumento = async () => {
+    if (!user) return
     try {
       setSaving(true)
-
-      const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`, {
+      const response = await fetch(`/api/documentos/${params.slug}?usuarioId=${user.uid}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
 
       if (response.ok) {
-        const docAtualizado = await response.json()
-        setDocumento(docAtualizado)
-
+        const atualizado = await response.json()
+        setDocumento(atualizado)
         toast({
           title: 'Sucesso',
-          description: 'Documento salvo com sucesso',
+          description: 'Documento atualizado com sucesso.',
           status: 'success',
           duration: 3000,
+          isClosable: true,
         })
       } else {
-        throw new Error('Erro ao salvar documento')
+        throw new Error('Erro ao atualizar documento')
       }
     } catch (error) {
+      console.error(error)
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar documento',
+        description: 'Não foi possível salvar as alterações.',
         status: 'error',
         duration: 3000,
+        isClosable: true,
       })
     } finally {
       setSaving(false)
@@ -177,7 +152,7 @@ export default function EditarDocumentoPage() {
     try {
       setSaving(true)
 
-      const response = await fetch(`/api/documentos/${params.id}?usuarioId=${user?.uid}`, {
+      const response = await fetch(`/api/documentos/${params.slug}?usuarioId=${user?.uid}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

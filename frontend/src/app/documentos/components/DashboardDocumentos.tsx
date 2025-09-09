@@ -2,7 +2,6 @@
 
 import {
   Box,
-  SimpleGrid,
   Stat,
   StatLabel,
   StatNumber,
@@ -13,14 +12,12 @@ import {
   VStack,
   HStack,
   Text,
-  Progress,
-  Spinner,
   useColorModeValue,
   GridItem,
   Grid,
   Icon,
 } from '@chakra-ui/react'
-import { FaFile, FaEdit, FaCheck, FaArchive, FaChartPie, FaTags, FaUsers, FaUpload } from 'react-icons/fa'
+import { FaFile, FaEdit, FaCheck, FaUpload } from 'react-icons/fa'
 import { useAuth } from '@/app/user/hooks/useAuth'
 
 interface DocumentoStats {
