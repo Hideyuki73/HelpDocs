@@ -24,6 +24,7 @@ import {
 import { FaPlus, FaUpload } from 'react-icons/fa'
 import { useAuth } from '@/app/user/hooks/useAuth'
 import { useDocumentos } from './hooks/useDocumentos'
+import { useEquipes } from '@/app/equipes/hooks/useEquipes'
 import { CriarDocumentoModal } from './components/CriarDocumentoModal'
 import { UploadDocumentoModal } from './components/UploadDocumentoModal'
 import { AtribuirDocumentoModal } from './components/AtribuirDocumentoModal'
@@ -34,6 +35,7 @@ import { Documento } from '@/action/documento'
 export default function DocumentosPage() {
   const { user } = useAuth()
   const { documentos, stats, loading, error, criar, atualizar, deletar, limparErro } = useDocumentos()
+  const { equipes: todasEquipes, loading: loadingEquipes } = useEquipes()
 
   const [documentoParaAtribuir, setDocumentoParaAtribuir] = useState<Documento | null>(null)
 
@@ -223,14 +225,14 @@ export default function DocumentosPage() {
         isOpen={isCreateModalOpen}
         onClose={onCreateModalClose}
         onSubmit={criar}
-        equipes={[]}
+        equipes={todasEquipes}
       />
 
       <UploadDocumentoModal
         isOpen={isUploadModalOpen}
         onClose={onUploadModalClose}
         onSubmit={criar}
-        equipes={[]}
+        equipes={todasEquipes}
       />
 
       <AtribuirDocumentoModal
