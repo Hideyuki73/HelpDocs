@@ -16,6 +16,7 @@ import {
   Select,
   VStack,
   useToast,
+  Portal,
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
@@ -92,9 +93,10 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSubmit }: Cria
       isOpen={isOpen}
       onClose={handleClose}
       size="xl"
+      motionPreset="scale"
     >
-      <ModalOverlay />
-      <ModalContent>
+      <ModalOverlay zIndex={1400} />
+      <ModalContent zIndex={1500}>
         <ModalHeader>Criar Novo Documento</ModalHeader>
         <ModalCloseButton />
 

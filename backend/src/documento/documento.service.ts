@@ -110,7 +110,11 @@ export class DocumentoService {
     // Se não for admin, busca as equipes do usuário
     const equipesSnapshot = await this.equipeCollection
       .where('empresaId', '==', this.empresaCollection.doc(empresaId))
-      .where('membros', 'array-contains', this.funcionarioCollection.doc(usuarioId))
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
       .get();
 
     const equipeIds = equipesSnapshot.docs.map((doc) => doc.id);
@@ -245,12 +249,14 @@ export class DocumentoService {
     const docRef = this.collection.doc(id);
     const doc = await docRef.get();
     if (!doc.exists) {
-      throw new NotFoundException("Documento não encontrado");
+      throw new NotFoundException('Documento não encontrado');
     }
 
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     if (!funcionarioDoc.exists) {
-      throw new NotFoundException("Funcionário não encontrado.");
+      throw new NotFoundException('Funcionário não encontrado.');
     }
     const funcionarioData = funcionarioDoc.data();
 
@@ -259,15 +265,18 @@ export class DocumentoService {
     const documentoEquipeId = documentoData?.equipeId?.id;
 
     // Verifica se o usuário é administrador da empresa do documento
-    if (funcionarioData.cargo === 'Administrador' && funcionarioData.empresaId === documentoEmpresaId) {
+    if (
+      funcionarioData.cargo === 'Administrador' &&
+      funcionarioData.empresaId === documentoEmpresaId
+    ) {
       await docRef.delete();
-      return { message: "Documento deletado com sucesso" };
+      return { message: 'Documento deletado com sucesso' };
     }
 
     // Se não for administrador, verifica se é membro da equipe do documento
     const equipeDoc = await this.equipeCollection.doc(documentoEquipeId).get();
     if (!equipeDoc.exists) {
-      throw new NotFoundException("Equipe do documento não encontrada.");
+      throw new NotFoundException('Equipe do documento não encontrada.');
     }
     const equipeData = equipeDoc.data();
     const isMembro = equipeData?.membros?.some(
@@ -276,11 +285,11 @@ export class DocumentoService {
 
     if (!isMembro) {
       throw new ForbiddenException(
-        "Você não tem permissão para deletar este documento.",
+        'Você não tem permissão para deletar este documento.',
       );
     }
     await docRef.delete();
-    return { message: "Documento deletado com sucesso" };
+    return { message: 'Documento deletado com sucesso' };
   }
 
   async getDocumentoStats(usuarioId: string) {

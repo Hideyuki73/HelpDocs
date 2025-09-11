@@ -18,9 +18,14 @@ import {
   Text,
   Box,
   Select,
+  Checkbox,
+  CheckboxGroup,
+  Stack,
+  Spinner,
 } from '@chakra-ui/react'
 import { EquipeFormData } from '../types'
 import { useDocumentos } from '../hooks/useDocumentos'
+import { useEquipes } from '../hooks/useEquipes'
 
 interface ModalCriarEquipeProps {
   isOpen: boolean
@@ -35,7 +40,9 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
     membros: [],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { documentos, loading } = useDocumentos()
+
+  const { documentos, loading: loadingDocs } = useDocumentos()
+  const { membrosEmpresa, loadingMembros } = useEquipes()
   const toast = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,9 +61,10 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
 
     setIsSubmitting(true)
     try {
-      const submitData = {
+      const submitData: EquipeFormData = {
         nome: formData.nome.trim(),
         ...(formData.documentoId?.trim() && { documentoId: formData.documentoId.trim() }),
+        membros: formData.membros,
       }
 
       await onSubmit(submitData)
@@ -94,7 +102,7 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      size="md"
+      size="lg"
     >
       <ModalOverlay />
       <ModalContent>
@@ -103,7 +111,11 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
           <ModalCloseButton />
 
           <ModalBody>
-            <VStack spacing={4}>
+            <VStack
+              spacing={4}
+              align="stretch"
+            >
+              {/* Nome */}
               <FormControl isRequired>
                 <FormLabel>Nome da Equipe</FormLabel>
                 <Input
@@ -114,13 +126,14 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
                 />
               </FormControl>
 
+              {/* Documento */}
               <FormControl>
                 <FormLabel>Documento associado (Opcional)</FormLabel>
                 <Select
-                  placeholder={loading ? 'Carregando documentos...' : 'Selecione um documento'}
+                  placeholder={loadingDocs ? 'Carregando documentos...' : 'Selecione um documento'}
                   value={formData.documentoId}
                   onChange={(e) => setFormData((prev) => ({ ...prev, documentoId: e.target.value }))}
-                  disabled={isSubmitting || loading}
+                  disabled={isSubmitting || loadingDocs}
                 >
                   {documentos.map((doc) => (
                     <option
@@ -139,21 +152,30 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
                   Você pode associar um documento específico a esta equipe
                 </Text>
               </FormControl>
-              <Box
-                p={3}
-                bg="blue.50"
-                borderRadius="md"
-                borderLeft="4px solid"
-                borderLeftColor="blue.500"
-                w="full"
-              >
-                <Text
-                  fontSize="sm"
-                  color="blue.700"
-                >
-                  <strong>Dica:</strong> Após criar a equipe, você poderá adicionar membros através do menu de ações.
-                </Text>
-              </Box>
+
+              {/* Membros */}
+              <FormControl>
+                <FormLabel>Adicionar Membros</FormLabel>
+                {loadingMembros ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <CheckboxGroup
+                    value={formData.membros}
+                    onChange={(values) => setFormData((prev) => ({ ...prev, membros: values as string[] }))}
+                  >
+                    <Stack spacing={2}>
+                      {membrosEmpresa.map((membro) => (
+                        <Checkbox
+                          key={membro.id}
+                          value={membro.id}
+                        >
+                          {membro.nome} ({membro.email})
+                        </Checkbox>
+                      ))}
+                    </Stack>
+                  </CheckboxGroup>
+                )}
+              </FormControl>
             </VStack>
           </ModalBody>
 

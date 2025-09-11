@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  listarDocumentos,
   criarDocumento,
   atualizarDocumento,
   deletarDocumento,
   obterEstatisticasDocumentos,
   Documento,
   DocumentoParams,
+  listarDocumentosDisponiveisParaEquipe,
 } from '@/action/documento'
 import { auth } from '@/config/firebase'
 
@@ -34,7 +34,7 @@ export function useDocumentos() {
       const user = auth.currentUser
       if (!user) throw new Error('Usuário não autenticado')
 
-      const lista = await listarDocumentos(user.uid)
+      const lista = await listarDocumentosDisponiveisParaEquipe(user.uid)
       setState((prev) => ({ ...prev, documentos: lista, loading: false }))
     } catch (error: any) {
       setState((prev) => ({
