@@ -13,6 +13,7 @@ import {
 import { auth } from '@/config/firebase'
 import { criarFuncionarioClient, FuncionarioParams, getFuncionario } from '@/action/funcionario'
 import { AuthState, Usuario } from '../types'
+import { api } from '@/action/api'
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -161,6 +162,27 @@ export function useAuth() {
     }
   }
 
+  // Deletar conta
+  const deleteAccount = async () => {
+    const firebaseUser = auth.currentUser
+    if (!firebaseUser) throw new Error('Usuário não autenticado')
+
+    const token = await firebaseUser.getIdToken()
+
+    try {
+      await api.delete('/funcionarios/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      // Logout após deletar
+      await signOut(auth)
+      setAuthState({ user: null, loading: false, error: null })
+    } catch (error: any) {
+      console.error('Erro ao deletar conta:', error)
+      throw error
+    }
+  }
+
   const clearError = () => {
     setAuthState((prev) => ({ ...prev, error: null }))
   }
@@ -171,6 +193,7 @@ export function useAuth() {
     register,
     logout,
     clearError,
-    refreshUserData, // Função adicional para atualizar dados do usuário
+    refreshUserData,
+    deleteAccount,
   }
 }
