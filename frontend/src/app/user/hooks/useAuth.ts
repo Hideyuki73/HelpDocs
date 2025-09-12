@@ -97,7 +97,7 @@ export function useAuth() {
       setAuthState((prev) => ({ ...prev, user: userData, loading: false }))
 
       console.log('Login bem-sucedido:', firebaseUser.uid)
-      router.push('/home')
+      router.push('/empresa')
     } catch (error: any) {
       console.log('Erro de login:', error.message)
       setAuthState((prev) => ({
@@ -133,7 +133,7 @@ export function useAuth() {
       setAuthState((prev) => ({ ...prev, user: userData, loading: false }))
 
       if (response) {
-        router.push('/home')
+        router.push('/empresa')
       }
     } catch (error: any) {
       console.log('Erro ao registrar:', error.message)

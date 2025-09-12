@@ -40,7 +40,7 @@ export function Header({ user, onLogout }: HeaderProps) {
       shadow="md"
     >
       {/* Logo */}
-      <Link href={user ? '/home' : '/'}>
+      <Link href={user ? '/empresa' : '/'}>
         <Text
           fontSize="2xl"
           fontWeight="bold"
