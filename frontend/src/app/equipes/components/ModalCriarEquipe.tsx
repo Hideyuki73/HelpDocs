@@ -16,9 +16,16 @@ import {
   VStack,
   useToast,
   Text,
-  Box
+  Box,
+  Select,
+  Checkbox,
+  CheckboxGroup,
+  Stack,
+  Spinner,
 } from '@chakra-ui/react'
 import { EquipeFormData } from '../types'
+import { useDocumentos } from '../hooks/useDocumentos'
+import { useEquipes } from '../hooks/useEquipes'
 
 interface ModalCriarEquipeProps {
   isOpen: boolean
@@ -30,14 +37,17 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
   const [formData, setFormData] = useState<EquipeFormData>({
     nome: '',
     documentoId: '',
-    membros: []
+    membros: [],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { documentos, loading: loadingDocs } = useDocumentos()
+  const { membrosEmpresa, loadingMembros } = useEquipes()
   const toast = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.nome.trim()) {
       toast({
         title: 'Nome obrigatório',
@@ -51,11 +61,12 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
 
     setIsSubmitting(true)
     try {
-      const submitData = {
+      const submitData: EquipeFormData = {
         nome: formData.nome.trim(),
-        ...(formData.documentoId?.trim() && { documentoId: formData.documentoId.trim() })
+        ...(formData.documentoId?.trim() && { documentoId: formData.documentoId.trim() }),
+        membros: formData.membros,
       }
-      
+
       await onSubmit(submitData)
       toast({
         title: 'Equipe criada',
@@ -82,58 +93,103 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
     setFormData({
       nome: '',
       documentoId: '',
-      membros: []
+      membros: [],
     })
     onClose()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="lg"
+    >
       <ModalOverlay />
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader>Criar Nova Equipe</ModalHeader>
           <ModalCloseButton />
-          
+
           <ModalBody>
-            <VStack spacing={4}>
+            <VStack
+              spacing={4}
+              align="stretch"
+            >
+              {/* Nome */}
               <FormControl isRequired>
                 <FormLabel>Nome da Equipe</FormLabel>
                 <Input
                   value={formData.nome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, nome: e.target.value }))}
                   placeholder="Digite o nome da equipe"
                   disabled={isSubmitting}
                 />
               </FormControl>
 
+              {/* Documento */}
               <FormControl>
-                <FormLabel>ID do Documento (Opcional)</FormLabel>
-                <Input
+                <FormLabel>Documento associado (Opcional)</FormLabel>
+                <Select
+                  placeholder={loadingDocs ? 'Carregando documentos...' : 'Selecione um documento'}
                   value={formData.documentoId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, documentoId: e.target.value }))}
-                  placeholder="ID do documento associado"
-                  disabled={isSubmitting}
-                />
-                <Text fontSize="sm" color="gray.500" mt={1}>
+                  onChange={(e) => setFormData((prev) => ({ ...prev, documentoId: e.target.value }))}
+                  disabled={isSubmitting || loadingDocs}
+                >
+                  {documentos.map((doc) => (
+                    <option
+                      key={doc.id}
+                      value={doc.id}
+                    >
+                      {doc.titulo}
+                    </option>
+                  ))}
+                </Select>
+                <Text
+                  fontSize="sm"
+                  color="gray.500"
+                  mt={1}
+                >
                   Você pode associar um documento específico a esta equipe
                 </Text>
               </FormControl>
 
-              <Box p={3} bg="blue.50" borderRadius="md" borderLeft="4px solid" borderLeftColor="blue.500" w="full">
-                <Text fontSize="sm" color="blue.700">
-                  <strong>Dica:</strong> Após criar a equipe, você poderá adicionar membros através do menu de ações.
-                </Text>
-              </Box>
+              {/* Membros */}
+              <FormControl>
+                <FormLabel>Adicionar Membros</FormLabel>
+                {loadingMembros ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <CheckboxGroup
+                    value={formData.membros}
+                    onChange={(values) => setFormData((prev) => ({ ...prev, membros: values as string[] }))}
+                  >
+                    <Stack spacing={2}>
+                      {membrosEmpresa.map((membro) => (
+                        <Checkbox
+                          key={membro.id}
+                          value={membro.id}
+                        >
+                          {membro.nome} ({membro.email})
+                        </Checkbox>
+                      ))}
+                    </Stack>
+                  </CheckboxGroup>
+                )}
+              </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button 
-              colorScheme="blue" 
+            <Button
+              colorScheme="blue"
               type="submit"
               isLoading={isSubmitting}
               loadingText="Criando..."
@@ -146,4 +202,3 @@ export function ModalCriarEquipe({ isOpen, onClose, onSubmit }: ModalCriarEquipe
     </Modal>
   )
 }
-

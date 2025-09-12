@@ -14,6 +14,7 @@ import { FuncionarioService } from './funcionario.service';
 import * as admin from 'firebase-admin';
 import { CreateFuncionarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
+import { auth } from 'firebase-admin';
 
 @Controller('funcionarios')
 export class FuncionarioController {
@@ -87,8 +88,16 @@ export class FuncionarioController {
     return this.funcionarioService.update(id, updateFuncionarioDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.funcionarioService.remove(id);
+  @Delete('me')
+  async remove(@Headers('authorization') authorization: string) {
+    if (!authorization) throw new UnauthorizedException('Token não fornecido');
+
+    const token = authorization.split(' ')[1];
+    const decoded = await auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    await this.funcionarioService.remove(uid);
+
+    return { message: 'Conta deletada com sucesso.' };
   }
 }

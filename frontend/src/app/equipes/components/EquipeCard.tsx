@@ -29,17 +29,16 @@ import {
 } from '@chakra-ui/react'
 import { Equipe } from '../types'
 import { useAuth } from '@/app/user/hooks/useAuth'
-import { FaBars, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
+import { FaBars, FaEdit, FaTrash } from 'react-icons/fa'
 
 interface EquipeCardProps {
   equipe: Equipe
   onDelete: (equipeId: string) => Promise<void>
   onEdit: (equipe: Equipe) => void
-  onAddMember: (equipe: Equipe) => void
   onViewDetails: (equipe: Equipe) => void
 }
 
-export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetails }: EquipeCardProps) {
+export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCardProps) {
   const { user } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isDeleting, setIsDeleting] = useState(false)
@@ -145,15 +144,6 @@ export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetail
                   >
                     Editar
                   </MenuItem>
-                  <MenuItem
-                    icon={<FaPlus />}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAddMember(equipe)
-                    }}
-                  >
-                    Adicionar Membro
-                  </MenuItem>
                   {canDelete && (
                     <MenuItem
                       icon={<FaTrash />}
@@ -163,7 +153,7 @@ export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetail
                         onOpen()
                       }}
                     >
-                      Deletar
+                      Apagar equipe
                     </MenuItem>
                   )}
                 </MenuList>
@@ -250,7 +240,7 @@ export function EquipeCard({ equipe, onDelete, onEdit, onAddMember, onViewDetail
                 isLoading={isDeleting}
                 loadingText="Deletando..."
               >
-                Deletar
+                Apagar equipe
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

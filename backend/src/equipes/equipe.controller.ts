@@ -95,4 +95,9 @@ export class EquipeController {
     const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.equipeService.removeMembro(equipeId, membroId, usuarioId);
   }
+
+  @Get('usuario/:usuarioId')
+  async findEquipesByUsuario(@Param('usuarioId') usuarioId: string) {
+    return this.equipeService.findEquipesByUsuario(usuarioId);
+  }
 }

@@ -15,9 +15,16 @@ import {
   Input,
   VStack,
   useToast,
-  Text
+  Text,
+  Select,
+  Checkbox,
+  CheckboxGroup,
+  Box,
+  Spinner,
 } from '@chakra-ui/react'
 import { Equipe, EquipeFormData } from '../types'
+import { useDocumentos } from '../hooks/useDocumentos'
+import { useEquipes } from '../hooks/useEquipes'
 
 interface ModalEditarEquipeProps {
   isOpen: boolean
@@ -27,35 +34,30 @@ interface ModalEditarEquipeProps {
 }
 
 export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEditarEquipeProps) {
-  const [formData, setFormData] = useState<Partial<EquipeFormData>>({
-    nome: '',
-    documentoId: ''
-  })
+  const [formData, setFormData] = useState<Partial<EquipeFormData>>({ nome: '', documentoId: '' })
+  const [selectedMembros, setSelectedMembros] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { documentos, loading: loadingDocs } = useDocumentos()
+  const { membrosEmpresa, adicionarMembro, removerMembro, loadingMembros } = useEquipes()
   const toast = useToast()
 
   useEffect(() => {
     if (equipe) {
       setFormData({
         nome: equipe.nome,
-        documentoId: equipe.documentoId || ''
+        documentoId: equipe.documentoId || '',
       })
+      setSelectedMembros(equipe.membros || [])
     }
   }, [equipe])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (!equipe) return
-    
+
     if (!formData.nome?.trim()) {
-      toast({
-        title: 'Nome obrigatório',
-        description: 'Por favor, informe o nome da equipe.',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      })
+      toast({ title: 'Nome obrigatório', status: 'warning' })
       return
     }
 
@@ -63,88 +65,117 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
     try {
       const submitData: Partial<EquipeFormData> = {
         nome: formData.nome.trim(),
+        documentoId: formData.documentoId?.trim(),
       }
-      
-      if (formData.documentoId?.trim()) {
-        submitData.documentoId = formData.documentoId.trim()
-      }
-      
       await onSubmit(equipe.id, submitData)
-      toast({
-        title: 'Equipe atualizada',
-        description: 'A equipe foi atualizada com sucesso.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
+
+      // 🔹 Atualizar membros: compara seleção com os atuais
+      const novos = selectedMembros.filter((id) => !equipe.membros.includes(id))
+      const removidos = equipe.membros.filter((id) => !selectedMembros.includes(id))
+
+      if (novos.length) await adicionarMembro(equipe.id, novos)
+      for (const rem of removidos) {
+        await removerMembro(equipe.id, rem)
+      }
+
+      toast({ title: 'Equipe atualizada', status: 'success' })
       handleClose()
-    } catch (error: any) {
-      toast({
-        title: 'Erro ao atualizar equipe',
-        description: error.message || 'Ocorreu um erro inesperado.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
+    } catch (err: any) {
+      toast({ title: 'Erro ao atualizar equipe', description: err.message, status: 'error' })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleClose = () => {
-    setFormData({
-      nome: '',
-      documentoId: ''
-    })
+    setFormData({ nome: '', documentoId: '' })
+    setSelectedMembros([])
     onClose()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="lg"
+    >
       <ModalOverlay />
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader>Editar Equipe</ModalHeader>
           <ModalCloseButton />
-          
           <ModalBody>
-            <VStack spacing={4}>
+            <VStack
+              spacing={4}
+              align="stretch"
+            >
               <FormControl isRequired>
                 <FormLabel>Nome da Equipe</FormLabel>
                 <Input
                   value={formData.nome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                  onChange={(e) => setFormData((p) => ({ ...p, nome: e.target.value }))}
                   placeholder="Digite o nome da equipe"
                   disabled={isSubmitting}
                 />
               </FormControl>
 
               <FormControl>
-                <FormLabel>ID do Documento (Opcional)</FormLabel>
-                <Input
+                <FormLabel>Documento associado (Opcional)</FormLabel>
+                <Select
+                  placeholder={loadingDocs ? 'Carregando...' : 'Selecione'}
                   value={formData.documentoId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, documentoId: e.target.value }))}
-                  placeholder="ID do documento associado"
-                  disabled={isSubmitting}
-                />
-                <Text fontSize="sm" color="gray.500" mt={1}>
-                  Você pode associar um documento específico a esta equipe
-                </Text>
+                  onChange={(e) => setFormData((p) => ({ ...p, documentoId: e.target.value }))}
+                  disabled={isSubmitting || loadingDocs}
+                >
+                  {documentos.map((doc) => (
+                    <option
+                      key={doc.id}
+                      value={doc.id}
+                    >
+                      {doc.titulo}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Membros da equipe</FormLabel>
+                {loadingMembros ? (
+                  <Spinner />
+                ) : (
+                  <CheckboxGroup
+                    value={selectedMembros}
+                    onChange={(v) => setSelectedMembros(v as string[])}
+                  >
+                    <VStack align="start">
+                      {membrosEmpresa.map((m) => (
+                        <Checkbox
+                          key={m.id}
+                          value={m.id}
+                        >
+                          {m.nome} • {m.cargo}
+                        </Checkbox>
+                      ))}
+                    </VStack>
+                  </CheckboxGroup>
+                )}
               </FormControl>
             </VStack>
           </ModalBody>
-
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleClose}
+            >
               Cancelar
             </Button>
-            <Button 
-              colorScheme="blue" 
+            <Button
+              colorScheme="blue"
               type="submit"
               isLoading={isSubmitting}
-              loadingText="Salvando..."
             >
-              Salvar Alterações
+              Salvar
             </Button>
           </ModalFooter>
         </form>
@@ -152,4 +183,3 @@ export function ModalEditarEquipe({ isOpen, onClose, onSubmit, equipe }: ModalEd
     </Modal>
   )
 }
-

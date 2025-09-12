@@ -85,11 +85,12 @@ export async function adicionarMembros(equipeId: string, membros: string[]) {
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.post(`/equipes/${equipeId}/adicionar-membros`, 
-    { membros }, 
+  const response = await api.post(
+    `/equipes/${equipeId}/adicionar-membros`,
+    { membros },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   )
   return response.data
 }
@@ -116,3 +117,13 @@ export async function obterEstatisticasEquipes() {
   return response.data
 }
 
+export async function listarEquipesPorUsuario(usuarioId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.get(`/equipes/usuario/${usuarioId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return response.data
+}
