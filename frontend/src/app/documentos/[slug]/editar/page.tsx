@@ -364,8 +364,7 @@ export default function EditarDocumentoPage() {
               borderRadius="md"
             >
               <ChatIA
-                contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`}
-              />
+                contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`} user={null}              />
             </Box>
           </GridItem>
         )}

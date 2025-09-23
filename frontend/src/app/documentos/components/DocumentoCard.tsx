@@ -74,7 +74,9 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewD
             <MenuList>
               <MenuItem
                 icon={<FaEye />}
-                onClick={() => onViewDetails(documento)}
+                onClick={() => window.open(`/documentos/${documento.id}/editar`, 
+                  '_blank'
+                )}
               >
                 Ver Detalhes
               </MenuItem>
@@ -147,7 +149,9 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewD
             colorScheme="blue"
             variant="outline"
             w="full"
-            onClick={() => onViewDetails(documento)}
+            onClick={() => window.open(`/documentos/${documento.id}/editar`, 
+              '_blank'
+            )}
           >
             Ver Documento
           </Button>

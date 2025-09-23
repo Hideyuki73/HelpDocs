@@ -24,11 +24,14 @@ interface Mensagem {
   timestamp: Date
 }
 
+import { User } from 'firebase/auth';
+
 interface ChatIAProps {
-  contextoDocumento?: string
+  contextoDocumento?: string;
+  user: User | null;
 }
 
-export function ChatIA({ contextoDocumento }: ChatIAProps) {
+export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
   const [mensagens, setMensagens] = useState<Mensagem[]>([
     {
       id: '1',
@@ -64,14 +67,23 @@ export function ChatIA({ contextoDocumento }: ChatIAProps) {
     setEnviando(true)
 
     try {
-      const response = await fetch('/api/ia-helper/chat/pergunta', {
-        method: 'POST',
+      if (!user) {
+        console.error("Usuário não autenticado para enviar mensagem para a IA.");
+        setEnviando(false);
+        return;
+      }
+
+      const token = await user.getIdToken();
+
+      const response = await fetch("/ia-helper/message", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          pergunta: novaMensagem,
-          contexto: contextoDocumento,
+          message: novaMensagem,
+          contextoDocumento: contextoDocumento,
         }),
       })
 

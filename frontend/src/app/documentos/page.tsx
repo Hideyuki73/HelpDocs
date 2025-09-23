@@ -49,6 +49,11 @@ export default function DocumentosPage() {
   const canCreateDocument = isAdmin || isGerente
   const canViewDashboard = isAdmin || isGerente
 
+
+  const handleDelete = (id: string) => {
+  if (!user?.uid) return;  // protege contra null
+  void deletar(id, user.uid); // chama deletar com id e uid corretos
+};
   const handleAtribuirDocumento = (documento: Documento) => {
     setDocumentoParaAtribuir(documento)
     onAtribuirModalOpen()
@@ -194,8 +199,9 @@ export default function DocumentosPage() {
                     {documentos.map((documento) => (
                       <DocumentoCard
                         key={documento.id}
-                        documento={documento}
-                        onDelete={user ? (id: string) => { deletar(id, user.id); } : () => {}}
+                        documento={documento}                        
+
+                        onDelete={handleDelete}      
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
                         onViewDetails={handleViewDetails}
