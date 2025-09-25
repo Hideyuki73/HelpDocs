@@ -32,6 +32,7 @@ export class IaHelperController {
     @Body('contextoDocumento') contextoDocumento: string,
     @Headers('authorization') authorization: string,
   ) {
+    console.log('Requisição recebida para /ia-helper/message');
     const usuarioId = await this.getUidFromAuthHeader(authorization);
     return this.iaHelperService.getIaResponse(message, contextoDocumento, usuarioId);
   }
