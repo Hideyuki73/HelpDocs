@@ -67,6 +67,7 @@ export function useDocumentos() {
     setState((prev) => ({ ...prev, loading: true }))
     try {
       const atualizado = await atualizarDocumento(id, dados, usuarioId)
+      console.log(id)
       setState((prev) => ({
         ...prev,
         documentos: prev.documentos.map((doc) => (doc.id === id ? atualizado : doc)),
