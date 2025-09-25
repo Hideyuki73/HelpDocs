@@ -64,14 +64,14 @@ export default function DocumentosPage() {
   }
 
   const handleDelete = (id: string) => {
-    if (user && user.uid) {
+    if (user && user.id) {
       console.log(
         'Deletando documento com ID:',
         id,
         'pelo usuário ID:',
-        user.uid,
+        user.id,
         '(Tipo de user.uid:',
-        typeof user.uid,
+        typeof user.id,
         ')',
       )
       deletar(id, user.id as string)
