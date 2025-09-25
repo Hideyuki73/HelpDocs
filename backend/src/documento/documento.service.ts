@@ -239,6 +239,13 @@ export class DocumentoService {
   }
 
   async update(slug: string, data: UpdateDocumentoDto, usuarioId: string) {
+    // 🔹 Função utilitária para remover undefined
+    const removeUndefined = (obj: Record<string, any>) => {
+      return Object.fromEntries(
+        Object.entries(obj).filter(([_, v]) => v !== undefined),
+      );
+    };
+
     const docRef = this.collection.doc(slug);
     const doc = await docRef.get();
     if (!doc.exists) {
@@ -248,6 +255,7 @@ export class DocumentoService {
     const documentoData = doc.data();
     const equipeId = documentoData?.equipeId?.id;
 
+    // 🔹 Verifica se o usuário é membro da equipe
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     const equipeData = equipeDoc.data();
     const isMembro = equipeData?.membros?.some(
@@ -260,8 +268,10 @@ export class DocumentoService {
       );
     }
 
-    const updateData: any = { ...data };
+    // 🔹 Remove undefined do objeto
+    const updateData: any = removeUndefined({ ...data });
 
+    // 🔹 Valida empresaId (se enviado)
     if (data.empresaId) {
       const empresaDoc = await this.empresaCollection.doc(data.empresaId).get();
       if (!empresaDoc.exists) {
@@ -270,6 +280,7 @@ export class DocumentoService {
       updateData.empresaId = this.empresaCollection.doc(data.empresaId);
     }
 
+    // 🔹 Valida equipeId (se enviado)
     if (data.equipeId) {
       const equipeDoc = await this.equipeCollection.doc(data.equipeId).get();
       if (!equipeDoc.exists) {
@@ -278,6 +289,7 @@ export class DocumentoService {
       updateData.equipeId = this.equipeCollection.doc(data.equipeId);
     }
 
+    // 🔹 Valida criadoPor (se enviado)
     if (data.criadoPor) {
       const funcionarioDoc = await this.funcionarioCollection
         .doc(data.criadoPor)
@@ -288,13 +300,16 @@ export class DocumentoService {
       updateData.criadoPor = this.funcionarioCollection.doc(data.criadoPor);
     }
 
+    // 🔹 Incrementa versão se houve alteração no conteúdo
     if (data.conteudo !== undefined) {
       updateData.versao = (documentoData?.versao || 1) + 1;
     }
 
+    // 🔹 Atualiza data
     updateData.dataAtualizacao = new Date();
 
-    await docRef.update(updateData as any);
+    // 🔹 Atualiza documento no Firestore
+    await docRef.update(updateData);
     const updated = await docRef.get();
     return this.mapDocumento(updated);
   }
