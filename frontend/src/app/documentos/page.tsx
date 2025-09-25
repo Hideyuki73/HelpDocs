@@ -49,11 +49,6 @@ export default function DocumentosPage() {
   const canCreateDocument = isAdmin || isGerente
   const canViewDashboard = isAdmin || isGerente
 
-
-  const handleDelete = (id: string) => {
-  if (!user?.uid) return;  // protege contra null
-  void deletar(id, user.uid); // chama deletar com id e uid corretos
-};
   const handleAtribuirDocumento = (documento: Documento) => {
     setDocumentoParaAtribuir(documento)
     onAtribuirModalOpen()
@@ -66,6 +61,15 @@ export default function DocumentosPage() {
   const handleCloseAtribuirModal = () => {
     setDocumentoParaAtribuir(null)
     onAtribuirModalClose()
+  }
+
+  const handleDelete = (id: string) => {
+    if (user && user.uid) {
+      console.log("Deletando documento com ID:", id, "pelo usuário ID:", user.uid, "(Tipo de user.uid:", typeof user.uid, ")");
+      deletar(id, user.id as string);
+    } else {
+      console.error("Usuário não autenticado ou UID não disponível para deletar documento.");
+    }
   }
 
   if (loading && documentos.length === 0) {
@@ -199,9 +203,7 @@ export default function DocumentosPage() {
                     {documentos.map((documento) => (
                       <DocumentoCard
                         key={documento.id}
-                        documento={documento}                        
-
-                        onDelete={handleDelete}      
+                        documento={documento}                        onDelete={handleDelete}
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
                         onViewDetails={handleViewDetails}
@@ -252,3 +254,5 @@ export default function DocumentosPage() {
     </Box>
   )
 }
+
+

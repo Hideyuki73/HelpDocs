@@ -75,7 +75,10 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
 
       const token = await user.getIdToken();
 
-      const response = await fetch("/ia-helper/message", {
+      // === ALTERAÇÃO MÍNIMA AQUI ===
+      // Usa a base da API definida em NEXT_PUBLIC_API_URL
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
+      const response = await fetch(`${apiBase}/ia-helper/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,6 +89,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
           contextoDocumento: contextoDocumento,
         }),
       })
+      // =============================
 
       if (response.ok) {
         const data = await response.json()
