@@ -92,48 +92,48 @@ export class DocumentoController {
   }
 
   // 🔹 Remover
-  @Delete(":id")
-  remove(@Param("id") id: string, @Query("usuarioId") usuarioId: string) {
+  @Delete(':id')
+  remove(@Param('id') id: string, @Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
-      throw new BadRequestException("usuarioId é obrigatório");
+      throw new BadRequestException('usuarioId é obrigatório');
     }
     return this.documentoService.remove(id, usuarioId);
   }
 
   // 🔹 Buscar por ID (vem por último para não engolir rotas fixas)
-  @Get(":slug")
-  findOne(@Param("slug") slug: string, @Query("usuarioId") usuarioId: string) {
+  @Get(':slug')
+  findOne(@Param('slug') slug: string, @Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
-      throw new BadRequestException("usuarioId é obrigatório");
+      throw new BadRequestException('usuarioId é obrigatório');
     }
     return this.documentoService.findOne(slug, usuarioId);
   }
 
   // 🔹 Atualizar
-  @Patch(":id")
+  @Patch(':id')
   update(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() updateDocumentoDto: UpdateDocumentoDto,
-    @Query("usuarioId") usuarioId: string,
+    @Query('usuarioId') usuarioId: string,
   ) {
     if (!usuarioId) {
-      throw new BadRequestException("usuarioId é obrigatório");
+      throw new BadRequestException('usuarioId é obrigatório');
     }
     return this.documentoService.update(id, updateDocumentoDto, usuarioId);
   }
 
   // 🔹 Atribuir a equipe
-  @Patch(":id/atribuir-equipe")
+  @Patch(':id/atribuir-equipe')
   async assignDocumentoToEquipe(
-    @Param("id") id: string,
-    @Body("equipeId") equipeId: string,
-    @Query("usuarioId") usuarioId: string,
+    @Param('id') id: string,
+    @Body('equipeId') equipeId: string,
+    @Query('usuarioId') usuarioId: string,
   ) {
     if (!usuarioId) {
-      throw new BadRequestException("usuarioId é obrigatório");
+      throw new BadRequestException('usuarioId é obrigatório');
     }
     if (!equipeId) {
-      throw new BadRequestException("equipeId é obrigatório");
+      throw new BadRequestException('equipeId é obrigatório');
     }
     return this.documentoService.assignDocumentoToEquipe(
       id,

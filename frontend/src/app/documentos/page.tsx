@@ -55,7 +55,7 @@ export default function DocumentosPage() {
   }
 
   const handleViewDetails = (documento: Documento) => {
-    window.open(`/documentos/${documento.id}`, '_blank');
+    window.open(`/documentos/${documento.id}`, '_blank')
   }
 
   const handleCloseAtribuirModal = () => {
@@ -65,10 +65,18 @@ export default function DocumentosPage() {
 
   const handleDelete = (id: string) => {
     if (user && user.uid) {
-      console.log("Deletando documento com ID:", id, "pelo usuário ID:", user.uid, "(Tipo de user.uid:", typeof user.uid, ")");
-      deletar(id, user.id as string);
+      console.log(
+        'Deletando documento com ID:',
+        id,
+        'pelo usuário ID:',
+        user.uid,
+        '(Tipo de user.uid:',
+        typeof user.uid,
+        ')',
+      )
+      deletar(id, user.id as string)
     } else {
-      console.error("Usuário não autenticado ou UID não disponível para deletar documento.");
+      console.error('Usuário não autenticado ou UID não disponível para deletar documento.')
     }
   }
 
@@ -203,7 +211,8 @@ export default function DocumentosPage() {
                     {documentos.map((documento) => (
                       <DocumentoCard
                         key={documento.id}
-                        documento={documento}                        onDelete={handleDelete}
+                        documento={documento}
+                        onDelete={handleDelete}
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
                         onViewDetails={handleViewDetails}
@@ -246,13 +255,11 @@ export default function DocumentosPage() {
         isOpen={isAtribuirModalOpen}
         onClose={handleCloseAtribuirModal}
         onSubmit={async (documentoId, equipeId, usuarioId) => {
-          await atualizar(documentoId, { equipeId: equipeId }, usuarioId);
-          handleCloseAtribuirModal();
+          await atualizar(documentoId, { equipeId: equipeId }, usuarioId)
+          handleCloseAtribuirModal()
         }}
         documento={documentoParaAtribuir}
       />
     </Box>
   )
 }
-
-

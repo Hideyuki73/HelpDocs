@@ -12,6 +12,7 @@ import ModalExpulsar from './components/ModalExpulsar'
 import ModalDeleteEmpresa from './components/ModalDeleteEmpresa'
 import EmpresaInfo from './components/EmpresaInfo'
 import ModalSairEmpresa from './components/ModalSairEmpresa'
+import { redirect } from 'next/navigation'
 
 export default function EmpresaPage() {
   // Estados locais
@@ -95,6 +96,7 @@ export default function EmpresaPage() {
   }
 
   if (!empresa) {
+    redirect('/empresa-selection')
     return (
       <Text
         textAlign="center"

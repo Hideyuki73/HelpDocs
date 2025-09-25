@@ -1,6 +1,7 @@
 import { api } from './api'
 import { AxiosRequestConfig } from 'axios'
 import { auth } from '@/config/firebase'
+import { Usuario } from '@/app/user/types'
 
 export interface FuncionarioParams {
   nome: string
@@ -17,7 +18,7 @@ export async function criarFuncionarioClient(body: FuncionarioParams, config: Ax
 }
 
 // Buscar funcionário por ID
-export async function getFuncionario(funcionarioId: string) {
+export async function getFuncionario(funcionarioId: string): Promise<Usuario> {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()

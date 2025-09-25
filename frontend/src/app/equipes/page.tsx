@@ -26,23 +26,19 @@ import { useEquipes } from './hooks/useEquipes'
 import { EquipeCard } from './components/EquipeCard'
 import { ModalCriarEquipe } from './components/ModalCriarEquipe'
 import { ModalEditarEquipe } from './components/ModalEditarEquipe'
-import { ModalAdicionarMembro } from './components/ModalAdicionarMembro'
 import { DashboardEquipes } from './components/DashboardEquipes'
 import { Equipe } from './types'
 import { FaPlus } from 'react-icons/fa'
 
 export default function EquipesPage() {
   const { user } = useAuth()
-  const { equipes, stats, loading, error, criar, atualizar, deletar, adicionarMembro, limparErro } = useEquipes()
+  const { equipes, stats, loading, error, criar, atualizar, deletar, limparErro } = useEquipes()
 
   const [equipeParaEditar, setEquipeParaEditar] = useState<Equipe | null>(null)
-  const [equipeParaAdicionarMembro, setEquipeParaAdicionarMembro] = useState<Equipe | null>(null)
 
   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
 
   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure()
-
-  const { isOpen: isAddMemberModalOpen, onOpen: onAddMemberModalOpen, onClose: onAddMemberModalClose } = useDisclosure()
 
   const bg = useColorModeValue('gray.50', 'gray.900')
   const isAdmin = user?.cargo === 'Administrador'
@@ -55,11 +51,6 @@ export default function EquipesPage() {
     onEditModalOpen()
   }
 
-  const handleAddMember = (equipe: Equipe) => {
-    setEquipeParaAdicionarMembro(equipe)
-    onAddMemberModalOpen()
-  }
-
   const handleViewDetails = (equipe: Equipe) => {
     // TODO: Implementar visualização detalhada da equipe
     console.log('Ver detalhes da equipe:', equipe)
@@ -68,11 +59,6 @@ export default function EquipesPage() {
   const handleCloseEditModal = () => {
     setEquipeParaEditar(null)
     onEditModalClose()
-  }
-
-  const handleCloseAddMemberModal = () => {
-    setEquipeParaAdicionarMembro(null)
-    onAddMemberModalClose()
   }
 
   if (loading && equipes.length === 0) {
@@ -188,7 +174,6 @@ export default function EquipesPage() {
                         equipe={equipe}
                         onDelete={deletar}
                         onEdit={handleEditEquipe}
-                        onAddMember={handleAddMember}
                         onViewDetails={handleViewDetails}
                       />
                     ))}
@@ -222,13 +207,6 @@ export default function EquipesPage() {
         onClose={handleCloseEditModal}
         onSubmit={atualizar}
         equipe={equipeParaEditar}
-      />
-
-      <ModalAdicionarMembro
-        isOpen={isAddMemberModalOpen}
-        onClose={handleCloseAddMemberModal}
-        onSubmit={adicionarMembro}
-        equipe={equipeParaAdicionarMembro}
       />
     </Box>
   )

@@ -110,7 +110,11 @@ export class DocumentoService {
     // Se não for admin, busca as equipes do usuário
     const equipesSnapshot = await this.equipeCollection
       .where('empresaId', '==', this.empresaCollection.doc(empresaId))
-      .where('membros', 'array-contains', this.funcionarioCollection.doc(usuarioId))
+      .where(
+        'membros',
+        'array-contains',
+        this.funcionarioCollection.doc(usuarioId),
+      )
       .get();
 
     const equipeIds = equipesSnapshot.docs.map((doc) => doc.id);
@@ -155,55 +159,81 @@ export class DocumentoService {
 
     return snapshot.docs.map((doc) => this.mapDocumento(doc));
   }
-async findOne(slug: string, usuarioId: string) {
-    console.log(`[DocumentoService] findOne: Iniciando busca para SLUG: ${slug}, USUARIO: ${usuarioId}`);
+  async findOne(slug: string, usuarioId: string) {
+    console.log(
+      `[DocumentoService] findOne: Iniciando busca para SLUG: ${slug}, USUARIO: ${usuarioId}`,
+    );
     const doc = await this.collection.doc(slug).get();
 
     if (!doc.exists) {
-      console.log(`[DocumentoService] findOne: Documento com SLUG ${slug} NÃO encontrado no Firestore.`);
-      throw new NotFoundException("Documento não encontrado");
+      console.log(
+        `[DocumentoService] findOne: Documento com SLUG ${slug} NÃO encontrado no Firestore.`,
+      );
+      throw new NotFoundException('Documento não encontrado');
     }
-    console.log(`[DocumentoService] findOne: Documento com SLUG ${slug} ENCONTRADO no Firestore.`);
+    console.log(
+      `[DocumentoService] findOne: Documento com SLUG ${slug} ENCONTRADO no Firestore.`,
+    );
 
     const documentoData = doc.data();
     if (!documentoData) {
-      console.log(`[DocumentoService] findOne: Dados do documento com SLUG ${slug} são nulos.`);
-      throw new NotFoundException("Documento não encontrado ou dados inválidos");
+      console.log(
+        `[DocumentoService] findOne: Dados do documento com SLUG ${slug} são nulos.`,
+      );
+      throw new NotFoundException(
+        'Documento não encontrado ou dados inválidos',
+      );
     }
 
     const equipeId = documentoData?.equipeId?.id;
-    console.log(`[DocumentoService] findOne: Equipe ID do documento: ${equipeId}`);
+    console.log(
+      `[DocumentoService] findOne: Equipe ID do documento: ${equipeId}`,
+    );
 
     if (!equipeId) {
-      console.log(`[DocumentoService] findOne: Documento com SLUG ${slug} não possui equipeId.`);
+      console.log(
+        `[DocumentoService] findOne: Documento com SLUG ${slug} não possui equipeId.`,
+      );
       // Dependendo da regra de negócio, isso pode ser um NotFound ou Forbidden
-      throw new ForbiddenException("Documento não associado a uma equipe ou acesso negado.");
+      throw new ForbiddenException(
+        'Documento não associado a uma equipe ou acesso negado.',
+      );
     }
 
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     if (!equipeDoc.exists) {
-      console.log(`[DocumentoService] findOne: Equipe ${equipeId} do documento ${slug} NÃO encontrada.`);
-      throw new NotFoundException("Equipe do documento não encontrada");
+      console.log(
+        `[DocumentoService] findOne: Equipe ${equipeId} do documento ${slug} NÃO encontrada.`,
+      );
+      throw new NotFoundException('Equipe do documento não encontrada');
     }
-    console.log(`[DocumentoService] findOne: Equipe ${equipeId} do documento ${slug} ENCONTRADA.`);
+    console.log(
+      `[DocumentoService] findOne: Equipe ${equipeId} do documento ${slug} ENCONTRADA.`,
+    );
 
     const equipeData = equipeDoc.data();
     if (!equipeData) {
-      console.log(`[DocumentoService] findOne: Dados da equipe ${equipeId} são nulos.`);
-      throw new NotFoundException("Dados da equipe inválidos");
+      console.log(
+        `[DocumentoService] findOne: Dados da equipe ${equipeId} são nulos.`,
+      );
+      throw new NotFoundException('Dados da equipe inválidos');
     }
 
     const isMembro = equipeData?.membros?.some(
       (ref: any) => ref.id === usuarioId,
     );
-    console.log(`[DocumentoService] findOne: Usuário ${usuarioId} é membro da equipe ${equipeId}? ${isMembro}`);
+    console.log(
+      `[DocumentoService] findOne: Usuário ${usuarioId} é membro da equipe ${equipeId}? ${isMembro}`,
+    );
 
     if (!isMembro) {
       throw new ForbiddenException(
-        "Você não tem permissão para ver este documento.",
+        'Você não tem permissão para ver este documento.',
       );
     }
-    console.log(`[DocumentoService] findOne: Permissão concedida para o usuário ${usuarioId} acessar o documento ${slug}.`);
+    console.log(
+      `[DocumentoService] findOne: Permissão concedida para o usuário ${usuarioId} acessar o documento ${slug}.`,
+    );
 
     return this.mapDocumento(doc);
   }
@@ -270,41 +300,62 @@ async findOne(slug: string, usuarioId: string) {
   }
 
   async remove(slug: string, usuarioId: string) {
-    console.log(`[DocumentoService] Tentando remover documento com SLUG: ${slug} pelo usuário: ${usuarioId}`);
+    console.log(
+      `[DocumentoService] Tentando remover documento com SLUG: ${slug} pelo usuário: ${usuarioId}`,
+    );
     const docRef = this.collection.doc(slug);
     const doc = await docRef.get();
     if (!doc.exists) {
-      console.log(`[DocumentoService] Documento com SLUG ${slug} não encontrado.`);
-      throw new NotFoundException("Documento não encontrado");
+      console.log(
+        `[DocumentoService] Documento com SLUG ${slug} não encontrado.`,
+      );
+      throw new NotFoundException('Documento não encontrado');
     }
     console.log(`[DocumentoService] Documento ${slug} encontrado.`);
 
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     if (!funcionarioDoc.exists) {
-      console.log(`[DocumentoService] Funcionário ${usuarioId} não encontrado.`);
-      throw new NotFoundException("Funcionário não encontrado.");
+      console.log(
+        `[DocumentoService] Funcionário ${usuarioId} não encontrado.`,
+      );
+      throw new NotFoundException('Funcionário não encontrado.');
     }
     const funcionarioData = funcionarioDoc.data();
-    console.log(`[DocumentoService] Funcionário ${usuarioId} encontrado. Cargo: ${funcionarioData?.cargo}, Empresa: ${funcionarioData?.empresaId}`);
+    console.log(
+      `[DocumentoService] Funcionário ${usuarioId} encontrado. Cargo: ${funcionarioData?.cargo}, Empresa: ${funcionarioData?.empresaId}`,
+    );
 
     const documentoData = doc.data();
     const documentoEmpresaId = documentoData?.empresaId?.id;
     const documentoEquipeId = documentoData?.equipeId?.id;
-    console.log(`[DocumentoService] Documento ${slug} pertence à Empresa: ${documentoEmpresaId}, Equipe: ${documentoEquipeId}`);
+    console.log(
+      `[DocumentoService] Documento ${slug} pertence à Empresa: ${documentoEmpresaId}, Equipe: ${documentoEquipeId}`,
+    );
 
     // Verifica se o usuário é administrador da empresa do documento
-    if (funcionarioData.cargo === 'Administrador' && funcionarioData.empresaId === documentoEmpresaId) {
-      console.log(`[DocumentoService] Usuário ${usuarioId} é administrador da empresa ${documentoEmpresaId}. Deletando documento.`);
+    if (
+      funcionarioData.cargo === 'Administrador' &&
+      funcionarioData.empresaId === documentoEmpresaId
+    ) {
+      console.log(
+        `[DocumentoService] Usuário ${usuarioId} é administrador da empresa ${documentoEmpresaId}. Deletando documento.`,
+      );
       await docRef.delete();
-      return { message: "Documento deletado com sucesso" };
+      return { message: 'Documento deletado com sucesso' };
     }
 
     // Se não for administrador, verifica se é membro da equipe do documento
-    console.log(`[DocumentoService] Usuário ${usuarioId} não é administrador. Verificando permissão de equipe.`);
+    console.log(
+      `[DocumentoService] Usuário ${usuarioId} não é administrador. Verificando permissão de equipe.`,
+    );
     const equipeDoc = await this.equipeCollection.doc(documentoEquipeId).get();
     if (!equipeDoc.exists) {
-      console.log(`[DocumentoService] Equipe do documento ${documentoEquipeId} não encontrada.`);
-      throw new NotFoundException("Equipe do documento não encontrada.");
+      console.log(
+        `[DocumentoService] Equipe do documento ${documentoEquipeId} não encontrada.`,
+      );
+      throw new NotFoundException('Equipe do documento não encontrada.');
     }
     const equipeData = equipeDoc.data();
     const isMembro = equipeData?.membros?.some(
@@ -312,14 +363,18 @@ async findOne(slug: string, usuarioId: string) {
     );
 
     if (!isMembro) {
-      console.log(`[DocumentoService] Usuário ${usuarioId} não é membro da equipe ${documentoEquipeId}.`);
+      console.log(
+        `[DocumentoService] Usuário ${usuarioId} não é membro da equipe ${documentoEquipeId}.`,
+      );
       throw new ForbiddenException(
-        "Você não tem permissão para deletar este documento.",
+        'Você não tem permissão para deletar este documento.',
       );
     }
-    console.log(`[DocumentoService] Usuário ${usuarioId} é membro da equipe ${documentoEquipeId}. Deletando documento.`);
+    console.log(
+      `[DocumentoService] Usuário ${usuarioId} é membro da equipe ${documentoEquipeId}. Deletando documento.`,
+    );
     await docRef.delete();
-    return { message: "Documento deletado com sucesso" };
+    return { message: 'Documento deletado com sucesso' };
   }
 
   async getDocumentoStats(usuarioId: string) {

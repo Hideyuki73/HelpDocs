@@ -3,10 +3,12 @@ import {
   Inject,
   NotFoundException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateFuncionarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
+import { auth } from 'firebase-admin';
 
 @Injectable()
 export class FuncionarioService {
@@ -127,7 +129,9 @@ export class FuncionarioService {
     console.log(`[FuncionarioService] Buscando funcionário com ID: ${id}`);
     const doc = await this.funcionarioCollection.doc(id).get();
     if (!doc.exists) {
-      console.log(`[FuncionarioService] Funcionário com ID ${id} não encontrado.`);
+      console.log(
+        `[FuncionarioService] Funcionário com ID ${id} não encontrado.`,
+      );
       throw new NotFoundException('Funcionário não encontrado');
     }
     console.log(`[FuncionarioService] Funcionário com ID ${id} encontrado.`);
@@ -154,15 +158,58 @@ export class FuncionarioService {
     const updated = await docRef.get();
     return this.mapFuncionario(updated);
   }
-
   async remove(id: string) {
     const docRef = this.funcionarioCollection.doc(id);
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new NotFoundException('Funcionário não encontrado');
     }
-    await docRef.delete();
-    return { message: 'Funcionário deletado com sucesso' };
+
+    const funcionarioData = doc.data();
+    const uid = doc.id; // O ID do documento é o UID do Firebase
+
+    // Primeiro, tentamos deletar do Firebase Authentication
+    try {
+      await auth().deleteUser(uid);
+      console.log(
+        `Usuário ${uid} deletado do Firebase Authentication com sucesso`,
+      );
+    } catch (firebaseError) {
+      console.error(
+        'Erro ao deletar usuário do Firebase Authentication:',
+        firebaseError,
+      );
+
+      // Se o erro for "user not found", continuamos com a exclusão do Firestore
+      if (firebaseError.code === 'auth/user-not-found') {
+        console.log(
+          'Usuário não encontrado no Firebase Authentication, continuando com exclusão do Firestore',
+        );
+      } else {
+        // Para outros erros, lançamos uma exceção
+        throw new InternalServerErrorException(
+          'Erro ao deletar usuário do Firebase Authentication: ' +
+            firebaseError.message,
+        );
+      }
+    }
+
+    // Depois deletamos do Firestore
+    try {
+      await docRef.delete();
+      console.log(`Funcionário ${uid} deletado do Firestore com sucesso`);
+      return {
+        message: 'Funcionário e usuário do Firebase deletados com sucesso',
+      };
+    } catch (firestoreError) {
+      console.error(
+        'Erro ao deletar funcionário do Firestore:',
+        firestoreError,
+      );
+      throw new InternalServerErrorException(
+        'Erro ao deletar funcionário do Firestore: ' + firestoreError.message,
+      );
+    }
   }
 
   // Atualizar cargo do funcionário
@@ -205,7 +252,10 @@ export class FuncionarioService {
     // Regra: só pode alterar cargo de alguém com grau maior (menos poder)
     if (alvoCargo && requesterCargo.grau >= alvoCargo.grau) {
       // Permite que um admin rebaixe outro admin, mas verifica se é o único admin
-      if (alvoCargo.nome === 'Administrador' && novoCargoObj.nome !== 'Administrador') {
+      if (
+        alvoCargo.nome === 'Administrador' &&
+        novoCargoObj.nome !== 'Administrador'
+      ) {
         const empresaId = funcionarioData.empresaId;
         const adminSnapshot = await this.funcionarioCollection
           .where('empresaId', '==', empresaId)
@@ -259,10 +309,7 @@ export class FuncionarioService {
     }
 
     // Caso o funcionário alvo seja o criador da empresa e não seja o requisitante
-    if (
-      funcionarioData.empresaId &&
-      funcionarioId !== requesterId
-    ) {
+    if (funcionarioData.empresaId && funcionarioId !== requesterId) {
       const empresaDoc = await this.empresaCollection
         .doc(funcionarioData.empresaId)
         .get();

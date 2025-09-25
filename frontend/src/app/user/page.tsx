@@ -5,7 +5,7 @@ import { useAuth } from './hooks/useAuth'
 import { useRouter } from 'next/navigation'
 
 export default function UserPage() {
-  const { user, loading } = useAuth()
+  const { user, loading, deleteAccount } = useAuth()
   const router = useRouter()
   const bg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
@@ -80,6 +80,19 @@ export default function UserPage() {
             onClick={() => router.push(user.empresaId ? '/empresa' : '/empresa-selection')}
           >
             Ir para Empresas
+          </Button>
+          <Button
+            colorScheme="red"
+            size="lg"
+            w="100%"
+            onClick={async () => {
+              if (confirm('Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.')) {
+                await deleteAccount()
+                router.push('/')
+              }
+            }}
+          >
+            Deletar Conta
           </Button>
         </VStack>
       </VStack>
