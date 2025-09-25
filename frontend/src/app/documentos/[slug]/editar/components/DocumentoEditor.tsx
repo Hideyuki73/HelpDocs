@@ -24,7 +24,7 @@ interface DocumentoEditorProps {
   formData: DocumentoFormData
   saving: boolean
   showChat: boolean
-  user: User | null
+  user?: User | null
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onSalvar: () => void
   onPublicar: () => void

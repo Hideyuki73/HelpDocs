@@ -4,7 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useToast } from '@chakra-ui/react'
 import { Documento, DocumentoFormData } from '../types/documento'
-import { carregarDocumentoAction, publicarDocumentoAction, salvarDocumentoAction } from '@/action/documento'
+import { atualizarDocumento, carregarDocumentoAction, publicarDocumentoAction } from '@/action/documento'
 
 export function useDocumentoEdicao() {
   const [user, loadingUser] = useAuthState(auth)
@@ -68,7 +68,7 @@ export function useDocumentoEdicao() {
 
     setSaving(true)
     try {
-      const updatedDoc = await salvarDocumentoAction(documento.id, user.uid, formData)
+      const updatedDoc = await atualizarDocumento(documento.id, formData, user.uid)
       setDocumento(updatedDoc)
       toast({
         title: 'Sucesso',
