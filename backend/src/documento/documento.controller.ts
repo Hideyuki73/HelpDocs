@@ -101,12 +101,12 @@ export class DocumentoController {
   }
 
   // 🔹 Buscar por ID (vem por último para não engolir rotas fixas)
-  @Get(':id')
-  findOne(@Param('id') id: string, @Query('usuarioId') usuarioId: string) {
+  @Get(':slug')
+  findOne(@Param('slug') slug: string, @Query('usuarioId') usuarioId: string) {
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
-    return this.documentoService.findOne(id, usuarioId);
+    return this.documentoService.findOne(slug, usuarioId);
   }
 
   // 🔹 Atualizar

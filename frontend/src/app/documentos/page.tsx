@@ -63,6 +63,23 @@ export default function DocumentosPage() {
     onAtribuirModalClose()
   }
 
+  const handleDelete = (id: string) => {
+    if (user && user.id) {
+      console.log(
+        'Deletando documento com ID:',
+        id,
+        'pelo usuário ID:',
+        user.id,
+        '(Tipo de user.uid:',
+        typeof user.id,
+        ')',
+      )
+      deletar(id, user.id as string)
+    } else {
+      console.error('Usuário não autenticado ou UID não disponível para deletar documento.')
+    }
+  }
+
   if (loading && documentos.length === 0) {
     return (
       <Container
@@ -195,13 +212,7 @@ export default function DocumentosPage() {
                       <DocumentoCard
                         key={documento.id}
                         documento={documento}
-                        onDelete={
-                          user
-                            ? (id: string) => {
-                                deletar(id, user.id)
-                              }
-                            : () => {}
-                        }
+                        onDelete={handleDelete}
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
                         onViewDetails={handleViewDetails}
