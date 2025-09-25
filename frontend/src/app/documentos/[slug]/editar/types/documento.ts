@@ -14,6 +14,13 @@ export interface Documento {
 export type DocumentoFormData = {
   titulo: string
   descricao: string
-  conteudo: string
+  conteudo?: string
+  tipo?: string
+  arquivoUrl?: string
+  nomeArquivo?: string
+  tamanhoArquivo?: number
+  equipeId?: string
+  criadoPor?: string
   status: 'rascunho' | 'publicado' | 'arquivado'
+  arquivo?: File
 }

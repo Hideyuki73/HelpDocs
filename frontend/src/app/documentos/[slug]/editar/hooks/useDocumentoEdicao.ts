@@ -4,7 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useToast } from '@chakra-ui/react'
 import { Documento, DocumentoFormData } from '../types/documento'
-import { carregarDocumentoAction, publicarDocumentoAction, salvarDocumentoAction } from '../action/documentoAction'
+import { carregarDocumentoAction, publicarDocumentoAction, salvarDocumentoAction } from '@/action/documento'
 
 export function useDocumentoEdicao() {
   const [user, loadingUser] = useAuthState(auth)

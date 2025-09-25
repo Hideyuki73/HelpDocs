@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import * as admin from 'firebase-admin';
-import * as serviceAccount from '../../firebase-service-account.json';
+import serviceAccount from '../../firebase-service-account.json';
 
 @Global()
 @Module({
@@ -18,7 +18,7 @@ import * as serviceAccount from '../../firebase-service-account.json';
             type: serviceAccount.type,
             project_id: serviceAccount.project_id,
             private_key_id: serviceAccount.private_key_id,
-            private_key: serviceAccount.private_key,
+            private_key: serviceAccount.private_key.replace(/\\n/g, '\n'),
             client_email: serviceAccount.client_email,
             client_id: serviceAccount.client_id,
             auth_uri: serviceAccount.auth_uri,

@@ -127,3 +127,40 @@ export async function obterEstatisticasDocumentos(usuarioId: string) {
   })
   return response.data
 }
+
+export async function carregarDocumentoAction(slug: string, userId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.get(`/documentos/${slug}?usuarioId=${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return response.data
+}
+
+export async function salvarDocumentoAction(documentoId: string, userId: string, formData: any) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.patch(`/documentos/${documentoId}?usuarioId=${userId}`, formData, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return response.data
+}
+
+export async function publicarDocumentoAction(documentoId: string, userId: string, formData: any) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.patch(
+    `/documentos/${documentoId}?usuarioId=${userId}`,
+    { ...formData, status: 'publicado' },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+  return response.data
+}
