@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Body, Headers, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { IaHelperService } from './ia-helper.service';
 import { CreateIaHelperDto } from './dto/create-ia-helper.dto';
 import * as admin from 'firebase-admin';
@@ -34,6 +41,10 @@ export class IaHelperController {
   ) {
     console.log('Requisição recebida para /ia-helper/message');
     const usuarioId = await this.getUidFromAuthHeader(authorization);
-    return this.iaHelperService.getIaResponse(message, contextoDocumento, usuarioId);
+    return this.iaHelperService.getIaResponse(
+      message,
+      contextoDocumento,
+      usuarioId,
+    );
   }
 }

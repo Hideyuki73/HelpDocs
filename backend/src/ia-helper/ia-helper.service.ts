@@ -13,8 +13,10 @@ export class IaHelperService {
     @Inject('FIRESTORE') private readonly firestore: Firestore,
   ) {
     // Instancia o modelo Gemini usando a variável de ambiente
-    this.model = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!)
-      .getGenerativeModel({ model: 'gemini-1.5-pro' });
+    console.log('Key', process.env.GOOGLE_API_KEY);
+    this.model = new GoogleGenerativeAI(
+      process.env.GOOGLE_API_KEY!,
+    ).getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
     // Coleção principal no Firestore
     this.collection = this.firestore.collection('ia-helpers');

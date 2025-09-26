@@ -8,8 +8,6 @@ import { ChatModule } from './chat/chat.module';
 import { MensagemModule } from './mensagem/mensagem.module';
 import { IaHelperModule } from './ia-helper/ia-helper.module';
 import { EquipeModule } from './equipes/equipe.module';
-
-
 @Module({
   imports: [
     FirebaseModule,
@@ -21,7 +19,6 @@ import { EquipeModule } from './equipes/equipe.module';
     MensagemModule,
     IaHelperModule,
     EquipeModule,
-
   ],
 })
 export class AppModule {}

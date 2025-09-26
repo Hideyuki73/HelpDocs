@@ -79,7 +79,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
       const mensagemIA: Mensagem = {
         id: (Date.now() + 1).toString(),
         tipo: 'ia',
-        conteudo: data.resposta,
+        conteudo: typeof data === 'string' ? data : data.resposta,
         timestamp: new Date(),
       }
 
@@ -146,6 +146,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         w="full"
         overflowY="auto"
         p={4}
+        maxH="500px"
         css={{
           '&::-webkit-scrollbar': {
             width: '4px',
