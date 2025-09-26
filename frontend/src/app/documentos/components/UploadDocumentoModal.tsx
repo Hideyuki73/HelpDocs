@@ -151,7 +151,6 @@ export function UploadDocumentoModal({ isOpen, onClose, equipes, onSubmit }: Upl
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  display="none"
                   onChange={handleFileSelect}
                   accept=".pdf,.doc,.docx,.txt,.md"
                 />

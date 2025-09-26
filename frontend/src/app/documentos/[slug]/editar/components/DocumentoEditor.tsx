@@ -35,6 +35,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Heading,
 } from '@chakra-ui/react'
 import {
   FaSave,
@@ -66,6 +67,61 @@ interface DocumentoEditorProps {
   onPublicar: () => void
   onToggleChat: () => void
   onVoltar: () => void
+}
+
+// Função simples para renderizar markdown básico
+const renderMarkdown = (text: string) => {
+  if (!text) return 'Nenhum conteúdo foi adicionado ainda.'
+
+  let html = text
+
+  // Títulos
+  html = html.replace(
+    /^### (.*$)/gim,
+    '<h3 style="font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem 0; color: #2D3748;">$1</h3>',
+  )
+  html = html.replace(
+    /^## (.*$)/gim,
+    '<h2 style="font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem 0; color: #2D3748;">$1</h2>',
+  )
+  html = html.replace(
+    /^# (.*$)/gim,
+    '<h1 style="font-size: 2rem; font-weight: 800; margin: 2rem 0 1rem 0; color: #1A202C;">$1</h1>',
+  )
+
+  // Negrito e itálico
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>')
+  html = html.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>')
+
+  // Listas
+  html = html.replace(/^\- (.*$)/gim, '<li style="margin: 0.25rem 0; padding-left: 0.5rem;">$1</li>')
+  html = html.replace(
+    /(<li.*<\/li>)/,
+    '<ul style="margin: 1rem 0; padding-left: 1.5rem; list-style-type: disc;">$1</ul>',
+  )
+
+  // Código inline
+  html = html.replace(
+    /`([^`]+)`/g,
+    '<code style="background-color: #EDF2F7; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem;">$1</code>',
+  )
+
+  // Blocos de código
+  html = html.replace(
+    /```([\\s\\S]*?)```/g,
+    '<pre style="background-color: #1A202C; color: #E2E8F0; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; overflow-x: auto; font-family: monospace; font-size: 0.875rem; line-height: 1.5;"><code>$1</code></pre>',
+  )
+
+  // Links
+  html = html.replace(
+    /\\[([^\\]]+\\]\\(([^\\)]+)\\)/g,
+    '<a href="$2" style="color: #3182CE; text-decoration: underline;" target="_blank" rel="noopener noreferrer">$1</a>',
+  )
+
+  // Quebras de linha
+  html = html.replace(/\\n/g, '<br>')
+
+  return html
 }
 
 export function DocumentoEditor({
@@ -187,11 +243,14 @@ export function DocumentoEditor({
     }
   }
 
+  // Formatação rápida melhorada - só aparece no modo de edição
   const formatacaoRapida = [
-    { label: 'Título', action: () => insertTextAtCursor('# ') },
-    { label: 'Subtítulo', action: () => insertTextAtCursor('## ') },
-    { label: 'Lista', action: () => insertTextAtCursor('- ') },
-    { label: 'Código', action: () => insertTextAtCursor('```\n\n```') },
+    { label: 'Título', action: () => insertTextAtCursor('# '), description: 'Adiciona um título principal' },
+    { label: 'Subtítulo', action: () => insertTextAtCursor('## '), description: 'Adiciona um subtítulo' },
+    { label: 'Lista', action: () => insertTextAtCursor('- '), description: 'Adiciona um item de lista' },
+    { label: 'Código', action: () => insertTextAtCursor('```\\n\\n```'), description: 'Adiciona um bloco de código' },
+    { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
+    { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
   ]
 
   return (
@@ -317,12 +376,12 @@ export function DocumentoEditor({
                       />
                     </Tooltip>
 
-                    <Tooltip label={previewMode ? 'Modo de edição' : 'Visualizar'}>
+                    <Tooltip label={previewMode ? 'Modo de edição' : 'Visualizar documento'}>
                       <IconButton
                         aria-label="Visualizar"
-                        icon={<FaEye />}
+                        icon={previewMode ? <FaEdit /> : <FaEye />}
                         variant={previewMode ? 'solid' : 'ghost'}
-                        colorScheme={previewMode ? 'blue' : 'gray'}
+                        colorScheme={previewMode ? 'green' : 'gray'}
                         size="sm"
                         onClick={() => setPreviewMode(!previewMode)}
                       />
@@ -388,35 +447,57 @@ export function DocumentoEditor({
               </CardBody>
             </Card>
 
-            {/* Barra de Formatação Rápida */}
+            {/* Barra de Formatação Rápida - APENAS NO MODO DE EDIÇÃO */}
             {!previewMode && (
               <Card
                 mb={4}
                 boxShadow="sm"
               >
                 <CardBody p={3}>
-                  <HStack
-                    spacing={2}
-                    wrap="wrap"
+                  <VStack
+                    spacing={3}
+                    align="stretch"
                   >
-                    <Text
-                      fontSize="sm"
-                      color="gray.600"
-                      mr={2}
+                    <HStack
+                      spacing={2}
+                      wrap="wrap"
                     >
-                      Formatação rápida:
-                    </Text>
-                    {formatacaoRapida.map((item, index) => (
-                      <Button
-                        key={index}
-                        size="xs"
-                        variant="outline"
-                        onClick={item.action}
+                      <Text
+                        fontSize="sm"
+                        color="gray.600"
+                        mr={2}
                       >
-                        {item.label}
-                      </Button>
-                    ))}
-                  </HStack>
+                        Formatação rápida:
+                      </Text>
+                      {formatacaoRapida.map((item, index) => (
+                        <Tooltip
+                          key={index}
+                          label={item.description}
+                        >
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={item.action}
+                            _hover={{ bg: 'blue.50', borderColor: 'blue.300' }}
+                          >
+                            {item.label}
+                          </Button>
+                        </Tooltip>
+                      ))}
+                    </HStack>
+
+                    <Alert
+                      status="info"
+                      size="sm"
+                      borderRadius="md"
+                    >
+                      <AlertIcon />
+                      <Text fontSize="xs">
+                        Use a formatação Markdown para estruturar seu documento. Clique em "Visualizar" para ver o
+                        resultado formatado.
+                      </Text>
+                    </Alert>
+                  </VStack>
                 </CardBody>
               </Card>
             )}
@@ -505,11 +586,13 @@ export function DocumentoEditor({
                           onChange={onFormChange}
                           placeholder="Digite o conteúdo do documento aqui... 
 
-Dicas:
-- Use # para títulos
+Dicas de formatação Markdown:
+- Use # para títulos principais
 - Use ## para subtítulos  
 - Use - para listas
-- Use ``` para blocos de código"
+- Use ```código``` para blocos de código
+- Use **texto** para negrito
+- Use *texto* para itálico"
                           resize="none"
                           h="full"
                           fontFamily="'JetBrains Mono', 'Fira Code', monospace"
@@ -529,25 +612,26 @@ Dicas:
                       </FormControl>
                     </>
                   ) : (
-                    // Modo Preview
+                    // Modo Preview com Renderização de Markdown
                     <VStack
                       align="stretch"
                       spacing={4}
                       h="full"
                     >
                       <Box>
-                        <Text
-                          fontSize="3xl"
-                          fontWeight="bold"
+                        <Heading
+                          size="2xl"
                           mb={2}
+                          color="gray.800"
                         >
                           {formData.titulo || 'Documento sem título'}
-                        </Text>
+                        </Heading>
                         {formData.descricao && (
                           <Text
                             fontSize="lg"
                             color="gray.600"
                             mb={4}
+                            fontStyle="italic"
                           >
                             {formData.descricao}
                           </Text>
@@ -558,20 +642,41 @@ Dicas:
                       <Box
                         flex={1}
                         overflowY="auto"
-                        p={4}
-                        bg="gray.50"
+                        p={6}
+                        bg="white"
                         borderRadius="lg"
                         border="1px solid"
                         borderColor="gray.200"
+                        boxShadow="inner"
                       >
-                        <Text
-                          whiteSpace="pre-wrap"
-                          lineHeight="1.8"
-                          fontSize="md"
-                        >
-                          {formData.conteudo || 'Nenhum conteúdo foi adicionado ainda.'}
-                        </Text>
+                        <Box
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(formData.conteudo || ''),
+                          }}
+                          sx={{
+                            '& > *:first-child': {
+                              marginTop: 0,
+                            },
+                            '& > *:last-child': {
+                              marginBottom: 0,
+                            },
+                          }}
+                        />
                       </Box>
+
+                      <Alert
+                        status="success"
+                        borderRadius="md"
+                      >
+                        <AlertIcon />
+                        <Box>
+                          <AlertTitle>Modo de Visualização</AlertTitle>
+                          <AlertDescription>
+                            Este é como seu documento aparecerá quando publicado. Clique no ícone de edição para voltar
+                            ao modo de edição.
+                          </AlertDescription>
+                        </Box>
+                      </Alert>
                     </VStack>
                   )}
                 </VStack>
@@ -585,7 +690,7 @@ Dicas:
           <GridItem>
             <Box h="full">
               <ChatIA
-                contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`}
+                contextoDocumento={`Título: ${formData.titulo}\\nDescrição: ${formData.descricao}\\nConteúdo: ${formData.conteudo}`}
                 user={user ?? null}
               />
             </Box>
@@ -615,6 +720,20 @@ Dicas:
                 <Box>
                   <AlertTitle>Auto-salvamento</AlertTitle>
                   <AlertDescription>O documento é salvo automaticamente a cada 30 segundos.</AlertDescription>
+                </Box>
+              </Alert>
+
+              <Alert
+                status="success"
+                borderRadius="md"
+              >
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>Suporte a Markdown</AlertTitle>
+                  <AlertDescription>
+                    O editor agora suporta formatação Markdown. Use o modo de visualização para ver o resultado
+                    formatado.
+                  </AlertDescription>
                 </Box>
               </Alert>
 

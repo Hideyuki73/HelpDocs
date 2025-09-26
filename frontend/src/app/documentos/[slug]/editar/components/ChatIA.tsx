@@ -189,7 +189,8 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
 
   return (
     <VStack
-      h="full"
+      h="600px" // ALTURA FIXA DEFINIDA
+      maxH="600px" // ALTURA MÁXIMA PARA EVITAR CRESCIMENTO
       spacing={0}
       bg="white"
       borderRadius="xl"
@@ -205,6 +206,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         bg="gradient-to-r"
         bgGradient="linear(to-r, blue.500, blue.600)"
         color="white"
+        flexShrink={0} // IMPEDE QUE O HEADER ENCOLHA
       >
         <HStack justify="space-between">
           <HStack>
@@ -250,13 +252,14 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         </HStack>
       </Box>
 
-      {/* Mensagens */}
+      {/* Mensagens - ÁREA COM SCROLL CONTROLADO */}
       <Box
         ref={scrollRef}
         flex={1}
         w="full"
         overflowY="auto"
         p={4}
+        minH={0} // IMPORTANTE: PERMITE QUE O FLEX FUNCIONE CORRETAMENTE
         css={{
           '&::-webkit-scrollbar': { width: '6px' },
           '&::-webkit-scrollbar-thumb': {
@@ -286,15 +289,16 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
                     bg="blue.500"
                     icon={<FaRobot />}
                     boxShadow="md"
+                    flexShrink={0} // IMPEDE QUE O AVATAR ENCOLHA
                   />
                 )}
 
                 <VStack
                   align={mensagem.tipo === 'usuario' ? 'flex-end' : 'flex-start'}
                   spacing={1}
+                  maxW="85%" // LIMITA LARGURA MÁXIMA DAS MENSAGENS
                 >
                   <Card
-                    maxW="85%"
                     bg={mensagem.tipo === 'usuario' ? 'blue.500' : 'gray.50'}
                     color={mensagem.tipo === 'usuario' ? 'white' : 'gray.800'}
                     boxShadow="md"
@@ -311,6 +315,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
                         fontSize="sm"
                         whiteSpace="pre-wrap"
                         lineHeight="1.5"
+                        wordBreak="break-word" // QUEBRA PALAVRAS LONGAS
                       >
                         {mensagem.conteudo}
                       </Text>
@@ -376,6 +381,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
                     bg="gray.500"
                     icon={<FaUser />}
                     boxShadow="md"
+                    flexShrink={0} // IMPEDE QUE O AVATAR ENCOLHA
                   />
                 )}
               </HStack>
@@ -393,6 +399,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
                   bg="blue.500"
                   icon={<FaRobot />}
                   boxShadow="md"
+                  flexShrink={0}
                 />
                 <Card
                   bg="gray.50"
@@ -420,7 +427,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         </VStack>
       </Box>
 
-      {/* Sugestões Contextuais */}
+      {/* Sugestões Contextuais - ÁREA FIXA */}
       {sugestoesVisiveis && (
         <Fade in={true}>
           <Box
@@ -429,6 +436,9 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
             bg="gray.50"
             borderTop="1px solid"
             borderColor="gray.200"
+            flexShrink={0} // IMPEDE QUE A ÁREA DE SUGESTÕES ENCOLHA
+            maxH="150px" // ALTURA MÁXIMA PARA SUGESTÕES
+            overflowY="auto" // SCROLL SE NECESSÁRIO
           >
             <HStack mb={3}>
               <FaLightbulb color="orange" />
@@ -474,13 +484,14 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
 
       <Divider />
 
-      {/* Input Melhorado */}
+      {/* Input Melhorado - ÁREA FIXA */}
       <Box
         w="full"
         p={4}
         bg="white"
         borderTop="1px solid"
         borderColor="gray.100"
+        flexShrink={0} // IMPEDE QUE A ÁREA DE INPUT ENCOLHA
       >
         <HStack spacing={3}>
           <Input
@@ -513,6 +524,7 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
               borderRadius="lg"
               _hover={{ transform: 'translateY(-1px)' }}
               transition="all 0.2s"
+              flexShrink={0} // IMPEDE QUE O BOTÃO ENCOLHA
             />
           </Tooltip>
         </HStack>

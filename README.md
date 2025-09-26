@@ -1,4 +1,3 @@
-
 # 📄 HelpDocs
 
 Uma plataforma inteligente para documentação de software, auxiliando desenvolvedores e gerentes de projeto a criarem documentações mais completas, precisas e organizadas, utilizando Inteligência Artificial.
@@ -16,11 +15,11 @@ Uma plataforma inteligente para documentação de software, auxiliando desenvolv
 
 ## 👥 **Equipe**
 
-- **Analistas/Desenvolvedores:**  
-  - Valdson Martins Tenório  
-  - Rodrigo Hideyuki Kawakami  
-- **Orientador:** Antonio Pires  
-- **Consultor:** Breno de Barros Mongelo  
+- **Analistas/Desenvolvedores:**
+  - Valdson Martins Tenório
+  - Rodrigo Hideyuki Kawakami
+- **Orientador:** Antonio Pires
+- **Consultor:** Breno de Barros Mongelo
 
 ---
 
@@ -71,15 +70,15 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 
 ## 🧠 **Consultor do Sistema**
 
-- **Nome:** Breno de Barros Montebelo  
-- **CPF:** 025.944.651-35  
-- **Telefone:** (67) 98156-7714  
-- **Experiência:**  
-  - Desenvolvedor Python na Alfaneo Legal IA  
-  - Criação e implementação de API REST  
-  - Desenvolvimento de aplicações de Machine Learning  
-  - Gerenciamento de serviços em nuvem (AWS)  
-  - Implantação de dashboards e reuniões de alinhamento com clientes  
+- **Nome:** Breno de Barros Montebelo
+- **CPF:** 025.944.651-35
+- **Telefone:** (67) 98156-7714
+- **Experiência:**
+  - Desenvolvedor Python na Alfaneo Legal IA
+  - Criação e implementação de API REST
+  - Desenvolvimento de aplicações de Machine Learning
+  - Gerenciamento de serviços em nuvem (AWS)
+  - Implantação de dashboards e reuniões de alinhamento com clientes
 
 ---
 
@@ -96,6 +95,7 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 ## 🔍 **Requisitos do Sistema**
 
 ### 🔗 **Funcionais**
+
 - Cadastro de empresas.
 - Cadastro de funcionários.
 - Upload e gestão de documentos.
@@ -105,6 +105,7 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 - Possibilidade de download dos documentos a qualquer momento.
 
 ### 🔐 **Não Funcionais**
+
 - **Segurança:** Proteção contra acesso não autorizado.
 - **Disponibilidade:** Alta disponibilidade do sistema.
 - **Manutenção:** Código limpo e de fácil manutenção.
@@ -120,6 +121,7 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 - **Deploy:** Automatizado via Firebase CLI.
 
 ### 🗺️ **Fases do Desenvolvimento**
+
 1. **Cadastro e Autenticação:** Login, cadastro e exclusão de conta.
 2. **Gestão Corporativa:** Gerenciamento de empresas e funcionários.
 3. **Gestão de Documentos:** Upload, organização e histórico de documentos.
@@ -131,21 +133,25 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 ## 🏗️ **Tecnologias Utilizadas**
 
 ### 🌐 **Frontend**
+
 - **Framework:** React.js + Next.js
 - **Estilo:** Chakra UI
 - **Formulários:** Formik + Yup
 - **Requisições:** Axios
 
 ### 🔗 **Backend**
+
 - **Framework:** Node.js + NestJS
 - **Autenticação:** JSON Web Tokens (JWT)
 - **Gerenciamento:** Firebase Authentication
 
 ### ☁️ **Banco de Dados e Deploy**
+
 - **Banco:** Firebase Realtime Database / Firestore
 - **Deploy:** Firebase Hosting (frontend) + Firebase Functions ou API hospedada
 
 ### 🛠️ **Ferramentas Auxiliares**
+
 - **Testes:** Postman
 - **Versionamento:** Git + GitHub
 - **Deploy:** Firebase CLI
@@ -154,15 +160,16 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 
 ## 🖥️ **Ambientes**
 
-- **Desenvolvimento:**  
-  - VSCode  
-  - Node.js 18.x  
-  - Sistema Operacional: Windows 11  
+- **Desenvolvimento:**
 
-- **Produção:**  
-  - Frontend no Firebase Hosting  
-  - Backend via Firebase Functions ou Node.js hospedado  
-  - Banco no Firestore ou Realtime Database  
+  - VSCode
+  - Node.js 22.x
+  - Sistema Operacional: Windows 11
+
+- **Produção:**
+  - Frontend no Firebase Hosting
+  - Backend via Firebase Functions ou Node.js hospedado
+  - Banco no Firestore ou Realtime Database
 
 ---
 
@@ -181,18 +188,22 @@ Este projeto é de caráter acadêmico e não possui uma licença definida para 
 ## 🚀 **Instalação e Execução**
 
 ### 🔧 **Pré-requisitos**
+
 - Node.js (versão 18.x ou superior)
 - Git
 - Firebase CLI
 
 ### 📥 **Passos de Instalação**
+
 1. **Clone o repositório:**
+
    ```bash
    git clone https://github.com/seu-usuario/helpdocs.git
    cd helpdocs
    ```
 
 2. **Instale as dependências:**
+
    ```bash
    npm install
    ```
@@ -213,13 +224,15 @@ Este projeto é de caráter acadêmico e não possui uma licença definida para 
 ### ▶️ **Execução**
 
 - **Backend:**  
-Execute o servidor backend com o comando:  
+  Execute o servidor backend com o comando:
+
 ```bash
 npm run start:dev
 ```
 
 - **Frontend:**  
-Inicie a aplicação React com:  
+  Inicie a aplicação React com:
+
 ```bash
 npm start
 ```
@@ -227,7 +240,8 @@ npm start
 ### 🧪 **Testes**
 
 - Utilize o **Postman** para testar os endpoints da API.  
-Exemplo de requisição para criação de um funcionário:
+  Exemplo de requisição para criação de um funcionário:
+
 ```json
 {
   "nome": "João Silva",
