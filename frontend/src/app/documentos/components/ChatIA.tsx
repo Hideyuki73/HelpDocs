@@ -16,6 +16,8 @@ import {
 } from '@chakra-ui/react'
 import { useState, useRef, useEffect } from 'react'
 import { FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa'
+import { User } from 'firebase/auth'
+import { enviarMensagemIA } from '@/action/ia'
 
 interface Mensagem {
   id: string
@@ -24,11 +26,9 @@ interface Mensagem {
   timestamp: Date
 }
 
-import { User } from 'firebase/auth';
-
 interface ChatIAProps {
-  contextoDocumento?: string;
-  user: User | null;
+  contextoDocumento?: string
+  user: User | null
 }
 
 export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
@@ -46,7 +46,6 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Auto-scroll para a última mensagem
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
@@ -68,43 +67,23 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
 
     try {
       if (!user) {
-        console.error("Usuário não autenticado para enviar mensagem para a IA.");
-        setEnviando(false);
-        return;
+        console.error('Usuário não autenticado para enviar mensagem para a IA.')
+        setEnviando(false)
+        return
       }
 
-      const token = await user.getIdToken();
+      const token = await user.getIdToken()
 
-      // === ALTERAÇÃO MÍNIMA AQUI ===
-      // Usa a base da API definida em NEXT_PUBLIC_API_URL
-      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
-      const response = await fetch(`${apiBase}/ia-helper/message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message: novaMensagem,
-          contextoDocumento: contextoDocumento,
-        }),
-      })
-      // =============================
+      const data = await enviarMensagemIA(novaMensagem, contextoDocumento, token)
 
-      if (response.ok) {
-        const data = await response.json()
-
-        const mensagemIA: Mensagem = {
-          id: (Date.now() + 1).toString(),
-          tipo: 'ia',
-          conteudo: data.resposta,
-          timestamp: new Date(),
-        }
-
-        setMensagens((prev) => [...prev, mensagemIA])
-      } else {
-        throw new Error('Erro ao obter resposta da IA')
+      const mensagemIA: Mensagem = {
+        id: (Date.now() + 1).toString(),
+        tipo: 'ia',
+        conteudo: data.resposta,
+        timestamp: new Date(),
       }
+
+      setMensagens((prev) => [...prev, mensagemIA])
     } catch (error) {
       const mensagemErro: Mensagem = {
         id: (Date.now() + 1).toString(),
