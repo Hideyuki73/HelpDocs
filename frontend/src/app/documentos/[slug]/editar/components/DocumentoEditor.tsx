@@ -1,10 +1,9 @@
+'use client'
+
 import {
   Container,
   Grid,
   GridItem,
-  Box,
-  Heading,
-  Button,
   VStack,
   HStack,
   Input,
@@ -13,11 +12,12 @@ import {
   FormLabel,
   Badge,
   Text,
+  Button,
 } from '@chakra-ui/react'
 import { FaSave, FaArrowLeft, FaRobot } from 'react-icons/fa'
 import { Documento, DocumentoFormData } from '../types/documento'
 import { User } from 'firebase/auth'
-import { ChatIA } from '@/app/documentos/components/ChatIA'
+import { ChatIA } from './ChatIA'
 
 interface DocumentoEditorProps {
   documento: Documento
@@ -50,19 +50,28 @@ export function DocumentoEditor({
       py={4}
     >
       <Grid
-        templateColumns="1fr 400px"
+        templateColumns={showChat ? '1fr minmax(350px, 400px)' : '1fr'}
         gap={6}
-        h="calc(100vh - 120px)"
+        h="calc(100vh - 80px)"
       >
-        {/* Editor Principal */}
+        {/* Editor */}
         <GridItem>
           <VStack
             spacing={4}
             align="stretch"
             h="full"
           >
-            {/* Header */}
-            <HStack justify="space-between">
+            {/* Header fixo */}
+            <HStack
+              justify="space-between"
+              position="sticky"
+              top="0"
+              bg="white"
+              zIndex={1}
+              p={2}
+              borderBottom="1px solid"
+              borderColor="gray.200"
+            >
               <HStack>
                 <Button
                   leftIcon={<FaArrowLeft />}
@@ -112,11 +121,13 @@ export function DocumentoEditor({
               </HStack>
             </HStack>
 
-            {/* Formulário de Edição */}
+            {/* Form */}
             <VStack
               spacing={4}
               align="stretch"
               flex={1}
+              overflow="auto"
+              p={2}
             >
               <FormControl>
                 <FormLabel>Título</FormLabel>
@@ -136,6 +147,8 @@ export function DocumentoEditor({
                   value={formData.descricao}
                   onChange={onFormChange}
                   rows={2}
+                  bg="gray.50"
+                  _focus={{ bg: 'white', borderColor: 'blue.300' }}
                 />
               </FormControl>
 
@@ -149,6 +162,8 @@ export function DocumentoEditor({
                   resize="none"
                   h="full"
                   fontFamily="mono"
+                  bg="gray.50"
+                  _focus={{ bg: 'white', borderColor: 'blue.300' }}
                 />
               </FormControl>
             </VStack>
@@ -158,17 +173,10 @@ export function DocumentoEditor({
         {/* Chat IA */}
         {showChat && (
           <GridItem>
-            <Box
-              h="full"
-              border="1px"
-              borderColor="gray.200"
-              borderRadius="md"
-            >
-              <ChatIA
-                contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`}
-                user={user ?? null}
-              />
-            </Box>
+            <ChatIA
+              contextoDocumento={`Título: ${formData.titulo}\nDescrição: ${formData.descricao}\nConteúdo: ${formData.conteudo}`}
+              user={user ?? null}
+            />
           </GridItem>
         )}
       </Grid>

@@ -1,19 +1,6 @@
 'use client'
 
-import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Input,
-  Button,
-  Avatar,
-  Card,
-  CardBody,
-  Spinner,
-  Heading,
-  Divider,
-} from '@chakra-ui/react'
+import { Box, VStack, HStack, Text, Input, Button, Avatar, Card, CardBody, Spinner, Heading } from '@chakra-ui/react'
 import { useState, useRef, useEffect } from 'react'
 import { FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa'
 import { User } from 'firebase/auth'
@@ -73,7 +60,6 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
       }
 
       const token = await user.getIdToken()
-
       const data = await enviarMensagemIA(novaMensagem, contextoDocumento, token)
 
       const mensagemIA: Mensagem = {
@@ -84,14 +70,13 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
       }
 
       setMensagens((prev) => [...prev, mensagemIA])
-    } catch (error) {
+    } catch {
       const mensagemErro: Mensagem = {
         id: (Date.now() + 1).toString(),
         tipo: 'ia',
         conteudo: 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.',
         timestamp: new Date(),
       }
-
       setMensagens((prev) => [...prev, mensagemErro])
     } finally {
       setEnviando(false)
@@ -116,13 +101,17 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
     <VStack
       h="full"
       spacing={0}
+      bg="gray.50"
+      borderRadius="md"
+      overflow="hidden"
     >
       {/* Header */}
       <Box
         w="full"
         p={4}
         bg="blue.50"
-        borderTopRadius="md"
+        borderBottom="1px solid"
+        borderColor="gray.200"
       >
         <HStack>
           <FaRobot color="blue" />
@@ -137,27 +126,16 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         </Text>
       </Box>
 
-      <Divider />
-
-      {/* Área de Mensagens */}
+      {/* Mensagens */}
       <Box
         ref={scrollRef}
         flex={1}
         w="full"
         overflowY="auto"
         p={4}
-        maxH="500px"
         css={{
-          '&::-webkit-scrollbar': {
-            width: '4px',
-          },
-          '&::-webkit-scrollbar-track': {
-            width: '6px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: '#CBD5E0',
-            borderRadius: '24px',
-          },
+          '&::-webkit-scrollbar': { width: '4px' },
+          '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '24px' },
         }}
       >
         <VStack
@@ -179,9 +157,11 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
               )}
 
               <Card
-                maxW="80%"
-                bg={mensagem.tipo === 'usuario' ? 'blue.500' : 'gray.100'}
-                color={mensagem.tipo === 'usuario' ? 'white' : 'black'}
+                maxW="75%"
+                bg={mensagem.tipo === 'usuario' ? 'blue.600' : 'white'}
+                color={mensagem.tipo === 'usuario' ? 'white' : 'gray.800'}
+                shadow="sm"
+                border={mensagem.tipo === 'ia' ? '1px solid #E2E8F0' : 'none'}
               >
                 <CardBody p={3}>
                   <Text
@@ -221,7 +201,10 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
                 bg="blue.500"
                 icon={<FaRobot />}
               />
-              <Card bg="gray.100">
+              <Card
+                bg="white"
+                border="1px solid #E2E8F0"
+              >
                 <CardBody p={3}>
                   <HStack>
                     <Spinner size="sm" />
@@ -234,13 +217,14 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         </VStack>
       </Box>
 
-      {/* Sugestões (apenas quando não há muitas mensagens) */}
+      {/* Sugestões */}
       {mensagens.length <= 2 && (
         <Box
           w="full"
           p={2}
-          borderTop="1px"
+          borderTop="1px solid"
           borderColor="gray.200"
+          bg="white"
         >
           <Text
             fontSize="xs"
@@ -270,12 +254,15 @@ export function ChatIA({ contextoDocumento, user }: ChatIAProps) {
         </Box>
       )}
 
-      {/* Input de Mensagem */}
+      {/* Input */}
       <Box
         w="full"
-        p={4}
-        borderTop="1px"
+        p={3}
+        borderTop="1px solid"
         borderColor="gray.200"
+        bg="white"
+        position="sticky"
+        bottom="0"
       >
         <HStack>
           <Input
