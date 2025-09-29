@@ -20,16 +20,16 @@ import {
 } from '@chakra-ui/react'
 import { FaEdit, FaTrash, FaEye, FaEllipsisV, FaFile, FaUpload } from 'react-icons/fa'
 import { Documento } from '@/action/documento'
+import { redirect } from 'next/navigation'
 
 interface DocumentoCardProps {
   documento: Documento
   onEdit: (id: string, dados: any, usuarioId: string) => void
   onDelete: (id: string) => void
   onAtribuir: (documento: Documento) => void
-  onViewDetails: (documento: Documento) => void
 }
 
-export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewDetails }: DocumentoCardProps) {
+export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: DocumentoCardProps) {
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
@@ -72,14 +72,6 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewD
               size="sm"
             />
             <MenuList>
-              <MenuItem
-                icon={<FaEye />}
-                onClick={() => window.open(`/documentos/${documento.id}/editar`, 
-                  '_blank'
-                )}
-              >
-                Ver Detalhes
-              </MenuItem>
               <MenuItem
                 icon={<FaEdit />}
                 onClick={() => onEdit(documento.id, {}, 'user-id')}
@@ -149,9 +141,7 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir, onViewD
             colorScheme="blue"
             variant="outline"
             w="full"
-            onClick={() => window.open(`/documentos/${documento.id}/editar`, 
-              '_blank'
-            )}
+            onClick={() => redirect(`/documentos/${documento.id}/editar`)}
           >
             Ver Documento
           </Button>

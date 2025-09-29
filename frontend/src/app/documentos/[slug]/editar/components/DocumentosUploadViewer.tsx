@@ -40,7 +40,10 @@ import {
   FaCopy,
 } from 'react-icons/fa'
 import { useState } from 'react'
-import { Documento } from '../types/documento'
+import { Documento } from '../types'
+import { downloadDocumento, visualizarDocumento } from '../../../../../action/documento'
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { auth } from '@/config/firebase'
 
 interface DocumentoUploadViewerProps {
   documento: Documento
@@ -80,13 +83,25 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  // Simular download do arquivo
+  const [user] = useAuthState(auth)
+
+  // Download real do arquivo
   const handleDownload = async () => {
+    if (!user?.uid) {
+      toast({
+        title: 'Erro de autenticação',
+        description: 'Você precisa estar logado para baixar o documento.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
+    }
+
     setIsDownloading(true)
 
-    // Simular processo de download
-    setTimeout(() => {
-      setIsDownloading(false)
+    try {
+      await downloadDocumento(documento.id, user.uid)
       toast({
         title: 'Download iniciado',
         description: 'O arquivo está sendo baixado para seu dispositivo.',
@@ -94,20 +109,52 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
         duration: 3000,
         isClosable: true,
       })
-    }, 2000)
+    } catch (error) {
+      console.error('Erro ao baixar documento:', error)
+      toast({
+        title: 'Erro no download',
+        description: 'Não foi possível baixar o documento. Tente novamente.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
-  // Simular visualização do arquivo
-  const handleVisualize = () => {
-    toast({
-      title: 'Abrindo visualizador',
-      description: 'O arquivo será aberto em uma nova aba.',
-      status: 'info',
-      duration: 2000,
-      isClosable: true,
-    })
-    // Aqui seria aberto o arquivo em uma nova aba
-    // window.open(documento.urlArquivo, '_blank')
+  // Visualização real do arquivo
+  const handleVisualize = async () => {
+    if (!user?.uid) {
+      toast({
+        title: 'Erro de autenticação',
+        description: 'Você precisa estar logado para visualizar o documento.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
+    }
+
+    try {
+      await visualizarDocumento(documento.id, user.uid)
+      toast({
+        title: 'Abrindo visualizador',
+        description: 'O arquivo será aberto em uma nova aba.',
+        status: 'info',
+        duration: 2000,
+        isClosable: true,
+      })
+    } catch (error) {
+      console.error('Erro ao visualizar documento:', error)
+      toast({
+        title: 'Erro na visualização',
+        description: 'Não foi possível abrir o documento. Tente novamente.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+    }
   }
 
   // Simular compartilhamento

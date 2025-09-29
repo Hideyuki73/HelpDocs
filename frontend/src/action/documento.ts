@@ -153,3 +153,59 @@ export async function publicarDocumentoAction(documentoId: string, userId: strin
   )
   return response.data
 }
+
+// Função para download de documento
+export async function downloadDocumento(slug: string, usuarioId: string) {
+  try {
+    const user = auth.currentUser
+    if (!user) throw new Error('Usuário não autenticado')
+    const token = await user.getIdToken()
+
+    const response = await api.get(`/documentos/${slug}/download`, {
+      params: { usuarioId },
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    const { arquivoUrl, nomeArquivo } = response.data
+
+    // Criar um link temporário para download
+    const link = document.createElement('a')
+    link.href = arquivoUrl
+    link.download = nomeArquivo || 'documento'
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    return response.data
+  } catch (error) {
+    console.error('Erro ao baixar documento:', error)
+    throw error
+  }
+}
+
+// Função para visualizar documento
+export async function visualizarDocumento(slug: string, usuarioId: string) {
+  try {
+    const user = auth.currentUser
+    if (!user) throw new Error('Usuário não autenticado')
+    const token = await user.getIdToken()
+
+    const response = await api.get(`/documentos/${slug}/visualizar`, {
+      params: { usuarioId },
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    const data = response.data
+
+    // Se for um documento de upload, abrir em nova aba
+    if (data.tipo === 'upload' && data.arquivoUrl) {
+      window.open(data.arquivoUrl, '_blank')
+    }
+
+    return data
+  } catch (error) {
+    console.error('Erro ao visualizar documento:', error)
+    throw error
+  }
+}

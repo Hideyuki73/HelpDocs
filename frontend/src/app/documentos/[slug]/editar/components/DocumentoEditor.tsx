@@ -52,7 +52,7 @@ import {
   FaClock,
 } from 'react-icons/fa'
 import { useState, useEffect, useRef } from 'react'
-import { Documento, DocumentoFormData } from '../types/documento'
+import { Documento, DocumentoFormData } from '../types'
 import { User } from 'firebase/auth'
 import { ChatIA } from './ChatIA'
 

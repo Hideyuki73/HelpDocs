@@ -3,7 +3,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useToast } from '@chakra-ui/react'
-import { Documento, DocumentoFormData } from '../types/documento'
+import { Documento, DocumentoFormData } from '../types/index'
 import { atualizarDocumento, carregarDocumentoAction, publicarDocumentoAction } from '@/action/documento'
 
 export function useDocumentoEdicao() {
