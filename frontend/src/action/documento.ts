@@ -209,3 +209,20 @@ export async function visualizarDocumento(slug: string, usuarioId: string) {
     throw error
   }
 }
+
+export async function substituirDocumento(documentoId: string, usuarioId: string, file: File) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const formData = new FormData()
+  formData.append('arquivo', file)
+
+  const response = await api.patch(`/documentos/${documentoId}/substituir-arquivo?usuarioId=${usuarioId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return response.data
+}

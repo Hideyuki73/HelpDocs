@@ -654,10 +654,10 @@ Dicas de formatação Markdown:
                             __html: renderMarkdown(formData.conteudo || ''),
                           }}
                           sx={{
-                            '& > *:first-child': {
+                            '& > *:first-of-type': {
                               marginTop: 0,
                             },
-                            '& > *:last-child': {
+                            '& > *:last-of-type': {
                               marginBottom: 0,
                             },
                           }}

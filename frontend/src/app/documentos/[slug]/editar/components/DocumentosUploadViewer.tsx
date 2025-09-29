@@ -19,14 +19,11 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Progress,
   Flex,
   Spacer,
 } from '@chakra-ui/react'
 import {
   FaArrowLeft,
-  FaDownload,
-  FaEye,
   FaFilePdf,
   FaFileWord,
   FaFileImage,
@@ -34,14 +31,12 @@ import {
   FaCalendarAlt,
   FaUser,
   FaFileAlt,
-  FaShare,
   FaTrash,
   FaEdit,
-  FaCopy,
 } from 'react-icons/fa'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Documento } from '../types'
-import { downloadDocumento, visualizarDocumento } from '../../../../../action/documento'
+import { deletarDocumento, substituirDocumento } from '../../../../../action/documento'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 
@@ -51,8 +46,9 @@ interface DocumentoUploadViewerProps {
 }
 
 export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadViewerProps) {
-  const [isDownloading, setIsDownloading] = useState(false)
   const toast = useToast()
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Função para determinar o ícone baseado no tipo de arquivo
   const getFileIcon = (fileName: string) => {
@@ -85,12 +81,53 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
 
   const [user] = useAuthState(auth)
 
-  // Download real do arquivo
-  const handleDownload = async () => {
+  const handleReplaceFileClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      if (!user?.uid) {
+        toast({
+          title: 'Erro de autenticação',
+          description: 'Você precisa estar logado para substituir o documento.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
+        return
+      }
+      try {
+        // Aqui você chamaria a action para substituir o documento
+        // await substituirDocumento(documento.id, user.uid, file);
+        await substituirDocumento(documento.id, user.uid, file)
+        toast({
+          title: 'Documento substituído',
+          description: `O arquivo ${file.name} foi substituído com sucesso.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      } catch (error) {
+        console.error('Erro ao substituir documento:', error)
+        toast({
+          title: 'Erro na substituição',
+          description: 'Não foi possível substituir o documento. Tente novamente.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
+      }
+    }
+  }
+
+  const handleDeleteDocument = async () => {
     if (!user?.uid) {
       toast({
         title: 'Erro de autenticação',
-        description: 'Você precisa estar logado para baixar o documento.',
+        description: 'Você precisa estar logado para excluir o documento.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -98,75 +135,28 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
       return
     }
 
-    setIsDownloading(true)
-
-    try {
-      await downloadDocumento(documento.id, user.uid)
-      toast({
-        title: 'Download iniciado',
-        description: 'O arquivo está sendo baixado para seu dispositivo.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
-    } catch (error) {
-      console.error('Erro ao baixar documento:', error)
-      toast({
-        title: 'Erro no download',
-        description: 'Não foi possível baixar o documento. Tente novamente.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-    } finally {
-      setIsDownloading(false)
+    if (window.confirm('Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.')) {
+      try {
+        await deletarDocumento(documento.id, user.uid)
+        toast({
+          title: 'Documento excluído',
+          description: 'O documento foi excluído com sucesso.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+        onVoltar() // Redireciona após a exclusão
+      } catch (error) {
+        console.error('Erro ao excluir documento:', error)
+        toast({
+          title: 'Erro na exclusão',
+          description: 'Não foi possível excluir o documento. Tente novamente.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
+      }
     }
-  }
-
-  // Visualização real do arquivo
-  const handleVisualize = async () => {
-    if (!user?.uid) {
-      toast({
-        title: 'Erro de autenticação',
-        description: 'Você precisa estar logado para visualizar o documento.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
-
-    try {
-      await visualizarDocumento(documento.id, user.uid)
-      toast({
-        title: 'Abrindo visualizador',
-        description: 'O arquivo será aberto em uma nova aba.',
-        status: 'info',
-        duration: 2000,
-        isClosable: true,
-      })
-    } catch (error) {
-      console.error('Erro ao visualizar documento:', error)
-      toast({
-        title: 'Erro na visualização',
-        description: 'Não foi possível abrir o documento. Tente novamente.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-    }
-  }
-
-  // Simular compartilhamento
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href)
-    toast({
-      title: 'Link copiado!',
-      description: 'O link do documento foi copiado para a área de transferência.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    })
   }
 
   const fileInfo = getFileIcon(documento.titulo)
@@ -302,63 +292,6 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
                     </Box>
 
                     <Divider />
-
-                    {/* Botões de Ação */}
-                    <HStack
-                      spacing={4}
-                      wrap="wrap"
-                      justify="center"
-                    >
-                      <Button
-                        leftIcon={<FaEye />}
-                        colorScheme="blue"
-                        size="lg"
-                        onClick={handleVisualize}
-                      >
-                        Visualizar
-                      </Button>
-
-                      <Button
-                        leftIcon={<FaDownload />}
-                        colorScheme="green"
-                        variant="outline"
-                        size="lg"
-                        onClick={handleDownload}
-                        isLoading={isDownloading}
-                        loadingText="Baixando..."
-                      >
-                        Download
-                      </Button>
-
-                      <Button
-                        leftIcon={<FaShare />}
-                        colorScheme="purple"
-                        variant="outline"
-                        size="lg"
-                        onClick={handleShare}
-                      >
-                        Compartilhar
-                      </Button>
-                    </HStack>
-
-                    {isDownloading && (
-                      <Box w="full">
-                        <Progress
-                          size="sm"
-                          isIndeterminate
-                          colorScheme="green"
-                          borderRadius="full"
-                        />
-                        <Text
-                          fontSize="sm"
-                          color="gray.600"
-                          textAlign="center"
-                          mt={2}
-                        >
-                          Preparando download...
-                        </Text>
-                      </Box>
-                    )}
                   </VStack>
                 </CardBody>
               </Card>
@@ -506,22 +439,19 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
                     Ações Rápidas
                   </Heading>
                   <VStack spacing={3}>
-                    <Button
-                      leftIcon={<FaCopy />}
-                      variant="outline"
-                      size="sm"
-                      w="full"
-                      onClick={handleShare}
-                    >
-                      Copiar Link
-                    </Button>
-
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                    />
                     <Button
                       leftIcon={<FaEdit />}
                       variant="outline"
                       size="sm"
                       w="full"
                       colorScheme="orange"
+                      onClick={handleReplaceFileClick}
                     >
                       Substituir Arquivo
                     </Button>
@@ -532,35 +462,11 @@ export function DocumentoUploadViewer({ documento, onVoltar }: DocumentoUploadVi
                       size="sm"
                       w="full"
                       colorScheme="red"
+                      onClick={handleDeleteDocument}
                     >
                       Excluir Documento
                     </Button>
                   </VStack>
-                </CardBody>
-              </Card>
-
-              {/* Dicas */}
-              <Card
-                boxShadow="sm"
-                bg="blue.50"
-                borderColor="blue.200"
-              >
-                <CardBody p={6}>
-                  <Heading
-                    size="sm"
-                    mb={3}
-                    color="blue.700"
-                  >
-                    💡 Dica
-                  </Heading>
-                  <Text
-                    fontSize="sm"
-                    color="blue.700"
-                    lineHeight="1.5"
-                  >
-                    Para converter este documento em um formato editável, considere usar ferramentas de conversão online
-                    ou recriar o conteúdo em um novo documento editável.
-                  </Text>
                 </CardBody>
               </Card>
             </VStack>
