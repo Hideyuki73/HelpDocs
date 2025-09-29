@@ -54,6 +54,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Documento, DocumentoFormData } from '../types'
 import { User } from 'firebase/auth'
 import { ChatIA } from './ChatIA'
+import { HistoricoVersoes } from './HistoricoVersoes'
 
 interface DocumentoEditorProps {
   documento: Documento
@@ -141,6 +142,7 @@ export function DocumentoEditor({
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
   const [previewMode, setPreviewMode] = useState(false)
   const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure()
+  const { isOpen: isHistoricoModalOpen, onOpen: onHistoricoModalOpen, onClose: onHistoricoModalClose } = useDisclosure()
   const toast = useToast()
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
@@ -251,6 +253,20 @@ export function DocumentoEditor({
     { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
     { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
   ]
+
+  const handleVersaoRestaurada = () => {
+    toast({
+      title: 'Versão restaurada!',
+      description: 'A página será recarregada para exibir a versão restaurada.',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    })
+    // Recarregar a página após 2 segundos para mostrar a versão restaurada
+    setTimeout(() => {
+      window.location.reload()
+    }, 2000)
+  }
 
   return (
     <Container
@@ -370,6 +386,7 @@ export function DocumentoEditor({
                       <IconButton
                         aria-label="Histórico"
                         icon={<FaHistory />}
+                        onClick={onHistoricoModalOpen}
                         variant="ghost"
                         size="sm"
                       />
@@ -759,6 +776,38 @@ Dicas de formatação Markdown:
           </ModalBody>
           <ModalFooter>
             <Button onClick={onSettingsClose}>Fechar</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isHistoricoModalOpen}
+        onClose={onHistoricoModalClose}
+        size="4xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <HStack>
+              <FaHistory />
+              <Text>Histórico de Versões</Text>
+              <Badge colorScheme="blue">{documento.titulo}</Badge>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody
+            maxH="70vh"
+            overflowY="auto"
+          >
+            <HistoricoVersoes
+              documentoId={documento.id}
+              usuarioId={user?.uid || ''}
+              versaoAtual={documento.versao}
+              onVersaoRestaurada={handleVersaoRestaurada}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={onHistoricoModalClose}>Fechar</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
