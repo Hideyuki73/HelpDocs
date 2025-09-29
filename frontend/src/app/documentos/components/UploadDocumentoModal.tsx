@@ -18,7 +18,6 @@ import {
   useToast,
   Box,
   Text,
-  HStack,
 } from '@chakra-ui/react'
 import { useState, useRef } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'

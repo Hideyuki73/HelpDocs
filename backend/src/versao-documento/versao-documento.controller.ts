@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { VersaoDocumentoService } from './versao-documento.service';
 import { CreateVersaoDocumentoDto } from './dto/create-versao-documento.dto';
@@ -23,8 +24,8 @@ export class VersaoDocumentoController {
   }
 
   @Get()
-  findAll() {
-    return this.versaoDocumentoService.findAll();
+  findAll(@Query('documentoId') documentoId?: string) {
+    return this.versaoDocumentoService.findAll(documentoId);
   }
 
   @Get(':id')

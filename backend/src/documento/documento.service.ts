@@ -3,10 +3,12 @@ import {
   Inject,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateDocumentoDto } from './dto/create-documento.dto';
 import { UpdateDocumentoDto } from './dto/update-documento.dto';
+import { VersaoDocumentoService } from '../versao-documento/versao-documento.service';
 import { UploadDocumentoDto } from './dto/upload-documento.dto';
 
 @Injectable()
@@ -16,7 +18,10 @@ export class DocumentoService {
   private readonly funcionarioCollection;
   private readonly equipeCollection;
 
-  constructor(@Inject('FIRESTORE') private readonly firestore: Firestore) {
+  constructor(
+    @Inject('FIRESTORE') private readonly firestore: Firestore,
+    private readonly versaoDocumentoService: VersaoDocumentoService,
+  ) {
     this.collection = this.firestore.collection('documentos');
     this.empresaCollection = this.firestore.collection('empresas');
     this.funcionarioCollection = this.firestore.collection('funcionarios');
@@ -74,7 +79,18 @@ export class DocumentoService {
     });
 
     const doc = await docRef.get();
-    return this.mapDocumento(doc);
+    const novoDocumento = this.mapDocumento(doc);
+
+    // Cria a primeira versão do documento
+    await this.versaoDocumentoService.create({
+      documentoId: novoDocumento.id,
+      numeroVersao: novoDocumento.versao,
+      conteudo: novoDocumento.conteudo || '',
+
+      criadoPor: novoDocumento.criadoPor,
+    });
+
+    return novoDocumento;
   }
 
   async upload(data: UploadDocumentoDto) {
@@ -300,9 +316,14 @@ export class DocumentoService {
       updateData.criadoPor = this.funcionarioCollection.doc(data.criadoPor);
     }
 
-    // 🔹 Incrementa versão se houve alteração no conteúdo
-    if (data.conteudo !== undefined) {
+    // 🔹 Verifica se o conteúdo foi alterado para criar uma nova versão
+    let novaVersaoCriada = false;
+    if (
+      data.conteudo !== undefined &&
+      data.conteudo !== documentoData?.conteudo
+    ) {
       updateData.versao = (documentoData?.versao || 1) + 1;
+      novaVersaoCriada = true;
     }
 
     // 🔹 Atualiza data
@@ -311,7 +332,20 @@ export class DocumentoService {
     // 🔹 Atualiza documento no Firestore
     await docRef.update(updateData);
     const updated = await docRef.get();
-    return this.mapDocumento(updated);
+    const documentoAtualizado = this.mapDocumento(updated);
+
+    // 🔹 Se uma nova versão foi criada, registra no histórico de versões
+    if (novaVersaoCriada) {
+      await this.versaoDocumentoService.create({
+        documentoId: documentoAtualizado.id,
+        numeroVersao: documentoAtualizado.versao,
+        conteudo: documentoAtualizado.conteudo || '',
+
+        criadoPor: usuarioId, // O usuário que está atualizando o documento
+      });
+    }
+
+    return documentoAtualizado;
   }
 
   async remove(slug: string, usuarioId: string) {
@@ -570,5 +604,123 @@ export class DocumentoService {
     }
 
     return documentos;
+  }
+
+  async downloadDocumento(slug: string, usuarioId: string) {
+    console.log(
+      `[DocumentoService] downloadDocumento: Iniciando download para SLUG: ${slug}, USUARIO: ${usuarioId}`,
+    );
+
+    // Buscar o documento
+    const doc = await this.collection.doc(slug).get();
+    if (!doc.exists) {
+      console.log(
+        `[DocumentoService] downloadDocumento: Documento com SLUG ${slug} NÃO encontrado.`,
+      );
+      throw new NotFoundException('Documento não encontrado');
+    }
+
+    const documentoData = doc.data();
+    if (!documentoData) {
+      throw new NotFoundException('Dados do documento inválidos');
+    }
+
+    // Verificar se é um documento de upload
+    if (documentoData.tipo !== 'upload') {
+      throw new BadRequestException(
+        'Este documento não é um arquivo de upload',
+      );
+    }
+
+    // Verificar se o usuário tem permissão para acessar o documento
+    const equipeId = documentoData?.equipeId?.id;
+    if (!equipeId) {
+      throw new ForbiddenException('Documento não associado a uma equipe');
+    }
+
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    if (!equipeDoc.exists) {
+      throw new NotFoundException('Equipe do documento não encontrada');
+    }
+
+    const equipeData = equipeDoc.data();
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
+    if (!isMembro) {
+      throw new ForbiddenException(
+        'Você não tem permissão para baixar este documento.',
+      );
+    }
+
+    // Retornar informações do arquivo para download
+    return {
+      arquivoUrl: documentoData.arquivoUrl,
+      nomeArquivo: documentoData.nomeArquivo,
+      tamanhoArquivo: documentoData.tamanhoArquivo,
+      titulo: documentoData.titulo,
+      tipo: documentoData.tipo,
+    };
+  }
+
+  async visualizarDocumento(slug: string, usuarioId: string) {
+    console.log(
+      `[DocumentoService] visualizarDocumento: Iniciando visualização para SLUG: ${slug}, USUARIO: ${usuarioId}`,
+    );
+
+    // Buscar o documento
+    const doc = await this.collection.doc(slug).get();
+    if (!doc.exists) {
+      console.log(
+        `[DocumentoService] visualizarDocumento: Documento com SLUG ${slug} NÃO encontrado.`,
+      );
+      throw new NotFoundException('Documento não encontrado');
+    }
+
+    const documentoData = doc.data();
+    if (!documentoData) {
+      throw new NotFoundException('Dados do documento inválidos');
+    }
+
+    // Verificar se o usuário tem permissão para acessar o documento
+    const equipeId = documentoData?.equipeId?.id;
+    if (!equipeId) {
+      throw new ForbiddenException('Documento não associado a uma equipe');
+    }
+
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    if (!equipeDoc.exists) {
+      throw new NotFoundException('Equipe do documento não encontrada');
+    }
+
+    const equipeData = equipeDoc.data();
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
+    if (!isMembro) {
+      throw new ForbiddenException(
+        'Você não tem permissão para visualizar este documento.',
+      );
+    }
+
+    // Para documentos de upload, retornar URL do arquivo
+    if (documentoData.tipo === 'upload') {
+      return {
+        tipo: 'upload',
+        arquivoUrl: documentoData.arquivoUrl,
+        nomeArquivo: documentoData.nomeArquivo,
+        tamanhoArquivo: documentoData.tamanhoArquivo,
+        titulo: documentoData.titulo,
+      };
+    }
+
+    // Para documentos criados, retornar o conteúdo
+    return {
+      tipo: 'criado',
+      conteudo: documentoData.conteudo,
+      titulo: documentoData.titulo,
+    };
   }
 }

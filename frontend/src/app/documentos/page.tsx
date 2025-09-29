@@ -54,10 +54,6 @@ export default function DocumentosPage() {
     onAtribuirModalOpen()
   }
 
-  const handleViewDetails = (documento: Documento) => {
-    window.open(`/documentos/${documento.id}`, '_blank')
-  }
-
   const handleCloseAtribuirModal = () => {
     setDocumentoParaAtribuir(null)
     onAtribuirModalClose()
@@ -215,7 +211,6 @@ export default function DocumentosPage() {
                         onDelete={handleDelete}
                         onEdit={atualizar}
                         onAtribuir={handleAtribuirDocumento}
-                        onViewDetails={handleViewDetails}
                       />
                     ))}
                   </Grid>

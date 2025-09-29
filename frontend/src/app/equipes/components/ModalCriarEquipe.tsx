@@ -16,7 +16,6 @@ import {
   VStack,
   useToast,
   Text,
-  Box,
   Select,
   Checkbox,
   CheckboxGroup,

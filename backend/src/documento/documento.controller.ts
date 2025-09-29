@@ -20,7 +20,6 @@ import { UploadDocumentoDto } from './dto/upload-documento.dto';
 @Controller('documentos')
 export class DocumentoController {
   constructor(private readonly documentoService: DocumentoService) {}
-
   // 🔹 Criar documento
   @Post()
   create(@Body() createDocumentoDto: CreateDocumentoDto) {
@@ -140,5 +139,29 @@ export class DocumentoController {
       equipeId,
       usuarioId,
     );
+  }
+
+  // 🔹 Download de documento
+  @Get(':slug/download')
+  downloadDocumento(
+    @Param('slug') slug: string,
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    return this.documentoService.downloadDocumento(slug, usuarioId);
+  }
+
+  // 🔹 Visualizar documento
+  @Get(':slug/visualizar')
+  visualizarDocumento(
+    @Param('slug') slug: string,
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    return this.documentoService.visualizarDocumento(slug, usuarioId);
   }
 }

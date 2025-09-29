@@ -1,17 +1,6 @@
 'use client'
 
-import {
-  Box,
-  Button,
-  Heading,
-  Stack,
-  Text,
-  VStack,
-  SimpleGrid,
-  Icon,
-  useColorModeValue,
-  HStack,
-} from '@chakra-ui/react'
+import { Box, Button, Heading, Stack, Text, VStack, SimpleGrid, Icon, useColorModeValue } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { FaRobot, FaLock, FaUsers, FaComments, FaChartLine, FaBuilding } from 'react-icons/fa'
 
@@ -69,15 +58,6 @@ export default function HomePage() {
           >
             Criar Conta
           </Button>
-          {/* <Button
-            leftIcon={<Icon as={FaBuilding} />}
-            colorScheme="blue"
-            size="lg"
-            onClick={() => router.push('/empresa/register')}
-            _hover={{ bg: 'blue.600' }}
-          >
-            Criar Empresa
-          </Button> */}
         </Stack>
 
         <Box

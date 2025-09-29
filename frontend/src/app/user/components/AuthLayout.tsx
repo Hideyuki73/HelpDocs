@@ -1,4 +1,4 @@
-import { Box, VStack, Text, Flex, useColorModeValue } from '@chakra-ui/react'
+import { Box, VStack, Text, useColorModeValue } from '@chakra-ui/react'
 import { ReactNode } from 'react'
 
 interface AuthLayoutProps {
@@ -9,15 +9,15 @@ interface AuthLayoutProps {
   showRegisterLink?: boolean
 }
 
-export default function AuthLayout({ 
-  children, 
-  title, 
+export default function AuthLayout({
+  children,
+  title,
   subtitle,
   showLoginLink = false,
-  showRegisterLink = false 
+  showRegisterLink = false,
 }: AuthLayoutProps) {
-  const bg = useColorModeValue("gray.50", "gray.900")
-  const labelColor = useColorModeValue("gray.700", "gray.200")
+  const bg = useColorModeValue('gray.50', 'gray.900')
+  const labelColor = useColorModeValue('gray.700', 'gray.200')
 
   return (
     <Box
@@ -28,8 +28,15 @@ export default function AuthLayout({
       justifyContent="center"
       p={4}
     >
-      <VStack spacing={8} w="100%" maxW="500px">
-        <VStack spacing={4} textAlign="center">
+      <VStack
+        spacing={8}
+        w="100%"
+        maxW="500px"
+      >
+        <VStack
+          spacing={4}
+          textAlign="center"
+        >
           <Text
             fontSize="3xl"
             fontWeight="bold"
@@ -52,29 +59,35 @@ export default function AuthLayout({
 
         <VStack spacing={2}>
           {showLoginLink && (
-            <Text fontSize="sm" color={labelColor}>
+            <Text
+              fontSize="sm"
+              color={labelColor}
+            >
               Já tem uma conta?{' '}
-              <Text 
-                as="a" 
-                color="teal.500" 
-                href="/user/login" 
+              <Text
+                as="a"
+                color="teal.500"
+                href="/user/login"
                 fontWeight="bold"
-                _hover={{ textDecoration: "underline" }}
+                _hover={{ textDecoration: 'underline' }}
               >
                 Faça login
               </Text>
             </Text>
           )}
-          
+
           {showRegisterLink && (
-            <Text fontSize="sm" color={labelColor}>
+            <Text
+              fontSize="sm"
+              color={labelColor}
+            >
               Não tem uma conta?{' '}
-              <Text 
-                as="a" 
-                color="teal.500" 
-                href="/user/register" 
+              <Text
+                as="a"
+                color="teal.500"
+                href="/user/register"
                 fontWeight="bold"
-                _hover={{ textDecoration: "underline" }}
+                _hover={{ textDecoration: 'underline' }}
               >
                 Cadastre-se
               </Text>
@@ -85,4 +98,3 @@ export default function AuthLayout({
     </Box>
   )
 }
-
