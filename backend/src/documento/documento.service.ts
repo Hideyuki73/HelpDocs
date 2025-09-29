@@ -8,6 +8,7 @@ import {
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateDocumentoDto } from './dto/create-documento.dto';
 import { UpdateDocumentoDto } from './dto/update-documento.dto';
+import { VersaoDocumentoService } from '../versao-documento/versao-documento.service';
 import { UploadDocumentoDto } from './dto/upload-documento.dto';
 
 @Injectable()
@@ -17,7 +18,10 @@ export class DocumentoService {
   private readonly funcionarioCollection;
   private readonly equipeCollection;
 
-  constructor(@Inject('FIRESTORE') private readonly firestore: Firestore) {
+  constructor(
+    @Inject('FIRESTORE') private readonly firestore: Firestore,
+    private readonly versaoDocumentoService: VersaoDocumentoService,
+  ) {
     this.collection = this.firestore.collection('documentos');
     this.empresaCollection = this.firestore.collection('empresas');
     this.funcionarioCollection = this.firestore.collection('funcionarios');
@@ -75,7 +79,18 @@ export class DocumentoService {
     });
 
     const doc = await docRef.get();
-    return this.mapDocumento(doc);
+    const novoDocumento = this.mapDocumento(doc);
+
+    // Cria a primeira versão do documento
+    await this.versaoDocumentoService.create({
+      documentoId: novoDocumento.id,
+      numeroVersao: novoDocumento.versao,
+      conteudo: novoDocumento.conteudo || '',
+
+      criadoPor: novoDocumento.criadoPor,
+    });
+
+    return novoDocumento;
   }
 
   async upload(data: UploadDocumentoDto) {
@@ -301,9 +316,14 @@ export class DocumentoService {
       updateData.criadoPor = this.funcionarioCollection.doc(data.criadoPor);
     }
 
-    // 🔹 Incrementa versão se houve alteração no conteúdo
-    if (data.conteudo !== undefined) {
+    // 🔹 Verifica se o conteúdo foi alterado para criar uma nova versão
+    let novaVersaoCriada = false;
+    if (
+      data.conteudo !== undefined &&
+      data.conteudo !== documentoData?.conteudo
+    ) {
       updateData.versao = (documentoData?.versao || 1) + 1;
+      novaVersaoCriada = true;
     }
 
     // 🔹 Atualiza data
@@ -312,7 +332,20 @@ export class DocumentoService {
     // 🔹 Atualiza documento no Firestore
     await docRef.update(updateData);
     const updated = await docRef.get();
-    return this.mapDocumento(updated);
+    const documentoAtualizado = this.mapDocumento(updated);
+
+    // 🔹 Se uma nova versão foi criada, registra no histórico de versões
+    if (novaVersaoCriada) {
+      await this.versaoDocumentoService.create({
+        documentoId: documentoAtualizado.id,
+        numeroVersao: documentoAtualizado.versao,
+        conteudo: documentoAtualizado.conteudo || '',
+
+        criadoPor: usuarioId, // O usuário que está atualizando o documento
+      });
+    }
+
+    return documentoAtualizado;
   }
 
   async remove(slug: string, usuarioId: string) {

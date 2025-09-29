@@ -20,7 +20,6 @@ import { UploadDocumentoDto } from './dto/upload-documento.dto';
 @Controller('documentos')
 export class DocumentoController {
   constructor(private readonly documentoService: DocumentoService) {}
-
   // 🔹 Criar documento
   @Post()
   create(@Body() createDocumentoDto: CreateDocumentoDto) {

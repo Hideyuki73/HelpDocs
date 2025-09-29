@@ -88,6 +88,14 @@ export async function compararVersoes(versaoId1: string, versaoId2: string) {
   }
 }
 
+export async function migrarVersoes() {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.post('/migrate-versions')
+}
+
 // Função auxiliar para calcular diferenças entre dois textos
 function calcularDiferencas(texto1: string, texto2: string) {
   const linhas1 = texto1.split('\n')

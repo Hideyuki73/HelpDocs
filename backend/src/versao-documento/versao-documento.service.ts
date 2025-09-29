@@ -40,8 +40,18 @@ export class VersaoDocumentoService {
     return this.mapVersao(doc);
   }
 
-  async findAll() {
-    const snapshot = await this.collection.get();
+  async findAll(documentoId?: string) {
+    let query: FirebaseFirestore.Query = this.collection;
+
+    if (documentoId) {
+      query = query.where(
+        'documentoId',
+        '==',
+        this.documentoCollection.doc(documentoId),
+      );
+    }
+
+    const snapshot = await query.get();
     return snapshot.docs.map((doc) => this.mapVersao(doc));
   }
 
