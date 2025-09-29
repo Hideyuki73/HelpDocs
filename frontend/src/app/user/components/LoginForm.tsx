@@ -1,6 +1,6 @@
 import { Box, Stack, FormControl, FormLabel, Input, Text, Button, useColorModeValue } from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
-import { object, string, InferType } from 'yup'
+import { object, string } from 'yup'
 import { LoginFormData } from '../types'
 
 const LoginSchema = object({
@@ -15,10 +15,10 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps) {
-  const bg = useColorModeValue("white", "gray.800")
-  const borderColor = useColorModeValue("gray.200", "gray.600")
-  const labelColor = useColorModeValue("gray.700", "gray.200")
-  const inputBg = useColorModeValue("white", "gray.700")
+  const bg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const labelColor = useColorModeValue('gray.700', 'gray.200')
+  const inputBg = useColorModeValue('white', 'gray.700')
 
   const handleSubmit = async (values: LoginFormData, actions: FormikHelpers<LoginFormData>) => {
     try {
@@ -31,11 +31,11 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
   const initialValues: LoginFormData = { email: '', senha: '' }
 
   return (
-    <Box 
-      p={8} 
-      borderWidth={1} 
-      borderRadius="xl" 
-      boxShadow="lg" 
+    <Box
+      p={8}
+      borderWidth={1}
+      borderRadius="xl"
+      boxShadow="lg"
       bg={bg}
       borderColor={borderColor}
       w="100%"
@@ -52,7 +52,12 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
       </Text>
 
       {error && (
-        <Text color="red.500" fontSize="sm" mb={4} textAlign="center">
+        <Text
+          color="red.500"
+          fontSize="sm"
+          mb={4}
+          textAlign="center"
+        >
           {error}
         </Text>
       )}
@@ -68,17 +73,26 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">E-mail</FormLabel>
-                    <Input 
-                      {...field} 
-                      type="email" 
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      E-mail
+                    </FormLabel>
+                    <Input
+                      {...field}
+                      type="email"
                       placeholder="seu@email.com"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "teal.500", boxShadow: "0 0 0 1px teal.500" }}
+                      _focus={{ borderColor: 'teal.500', boxShadow: '0 0 0 1px teal.500' }}
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -88,17 +102,26 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
               <Field name="senha">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Senha</FormLabel>
-                    <Input 
-                      {...field} 
-                      type="password" 
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Senha
+                    </FormLabel>
+                    <Input
+                      {...field}
+                      type="password"
                       placeholder="Digite sua senha"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "teal.500", boxShadow: "0 0 0 1px teal.500" }}
+                      _focus={{ borderColor: 'teal.500', boxShadow: '0 0 0 1px teal.500' }}
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
@@ -112,7 +135,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
                 isLoading={isSubmitting || isLoading}
                 mt={4}
                 borderRadius="md"
-                _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
                 transition="all 0.2s"
               >
                 Entrar
@@ -124,4 +147,3 @@ export default function LoginForm({ onSubmit, isLoading = false, error }: LoginF
     </Box>
   )
 }
-

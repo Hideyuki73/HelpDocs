@@ -1,6 +1,6 @@
 import { Box, Stack, Text, FormControl, FormLabel, Input, Button, useColorModeValue } from '@chakra-ui/react'
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik'
-import { object, string, InferType } from 'yup'
+import { object, string } from 'yup'
 import { RegisterFormData } from '../types'
 
 const RegisterSchema = object({
@@ -16,10 +16,10 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSubmit, isLoading = false, error }: RegisterFormProps) {
-  const bg = useColorModeValue("white", "gray.800")
-  const borderColor = useColorModeValue("gray.200", "gray.600")
-  const labelColor = useColorModeValue("gray.700", "gray.200")
-  const inputBg = useColorModeValue("white", "gray.700")
+  const bg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const labelColor = useColorModeValue('gray.700', 'gray.200')
+  const inputBg = useColorModeValue('white', 'gray.700')
 
   const handleSubmit = async (values: RegisterFormData, actions: FormikHelpers<RegisterFormData>) => {
     try {
@@ -59,7 +59,12 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
       </Text>
 
       {error && (
-        <Text color="red.500" fontSize="sm" mb={4} textAlign="center">
+        <Text
+          color="red.500"
+          fontSize="sm"
+          mb={4}
+          textAlign="center"
+        >
           {error}
         </Text>
       )}
@@ -75,16 +80,25 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
               <Field name="nome">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Nome Completo</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Nome Completo
+                    </FormLabel>
                     <Input
                       {...field}
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Digite seu nome completo"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="nome" />
                     </Text>
                   </FormControl>
@@ -94,17 +108,26 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
               <Field name="email">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">E-mail</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      E-mail
+                    </FormLabel>
                     <Input
                       {...field}
                       type="email"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="seu@email.com"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="email" />
                     </Text>
                   </FormControl>
@@ -114,17 +137,26 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
               <Field name="senha">
                 {({ field }: any) => (
                   <FormControl isRequired>
-                    <FormLabel color={labelColor} fontWeight="semibold">Senha</FormLabel>
+                    <FormLabel
+                      color={labelColor}
+                      fontWeight="semibold"
+                    >
+                      Senha
+                    </FormLabel>
                     <Input
                       {...field}
                       type="password"
                       bg={inputBg}
                       borderRadius="md"
                       borderWidth={2}
-                      _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                      _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
                       placeholder="Mínimo 6 caracteres"
                     />
-                    <Text color="red.500" fontSize="sm" mt={1}>
+                    <Text
+                      color="red.500"
+                      fontSize="sm"
+                      mt={1}
+                    >
                       <ErrorMessage name="senha" />
                     </Text>
                   </FormControl>
@@ -138,7 +170,7 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
                 colorScheme="blue"
                 borderRadius="md"
                 isLoading={isSubmitting || isLoading}
-                _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+                _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
                 transition="all 0.2s"
               >
                 Criar Conta
@@ -150,4 +182,3 @@ export default function RegisterForm({ onSubmit, isLoading = false, error }: Reg
     </Box>
   )
 }
-

@@ -15,11 +15,9 @@ import {
   Input,
   VStack,
   useToast,
-  Text,
   Select,
   Checkbox,
   CheckboxGroup,
-  Box,
   Spinner,
 } from '@chakra-ui/react'
 import { Equipe, EquipeFormData } from '../types'

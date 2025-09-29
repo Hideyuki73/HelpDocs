@@ -16,7 +16,6 @@ import {
   Select,
   VStack,
   useToast,
-  Portal,
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'

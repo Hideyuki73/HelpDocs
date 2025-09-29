@@ -44,7 +44,6 @@ import {
   FaEye,
   FaEdit,
   FaHistory,
-  FaShare,
   FaCog,
   FaExpand,
   FaCompress,
