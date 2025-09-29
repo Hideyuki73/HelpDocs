@@ -149,14 +149,16 @@ export function HistoricoVersoes({ documentoId, usuarioId, versaoAtual, onVersao
     }
   }
 
-  const formatarData = (data: Date) => {
-    return new Date(data).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+  const formatarData = (data: string | Date) => {
+    console.log(data)
+    const d = new Date(data) // aceita string ISO também
+    if (isNaN(d.getTime())) return 'Data inválida'
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')}`
   }
 
   if (loading) {
