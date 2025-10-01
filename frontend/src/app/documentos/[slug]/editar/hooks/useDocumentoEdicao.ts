@@ -58,8 +58,11 @@ export function useDocumentoEdicao() {
     }
   }
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target
+
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 

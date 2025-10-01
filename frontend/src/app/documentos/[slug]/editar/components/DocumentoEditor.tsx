@@ -38,6 +38,21 @@ import {
   Heading,
 } from '@chakra-ui/react'
 import {
+  FaSave,
+  FaArrowLeft,
+  FaRobot,
+  FaEye,
+  FaEdit,
+  FaHistory,
+  FaCog,
+  FaExpand,
+  FaCompress,
+  FaFileAlt,
+  FaClock,
+  FaListUl,
+} from 'react-icons/fa'
+import { useState, useEffect, useRef } from 'react'
+import {
   MDXEditor,
   headingsPlugin,
   listsPlugin,
@@ -53,21 +68,6 @@ import {
   Separator,
 } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'
-import {
-  FaSave,
-  FaArrowLeft,
-  FaRobot,
-  FaEye,
-  FaEdit,
-  FaHistory,
-  FaCog,
-  FaExpand,
-  FaCompress,
-  FaFileAlt,
-  FaClock,
-  FaListUl,
-} from 'react-icons/fa'
-import { useState, useEffect, useRef } from 'react'
 import { Documento, DocumentoFormData } from '../types'
 import { User } from 'firebase/auth'
 import { ChatIA } from './ChatIA'
@@ -80,7 +80,9 @@ interface DocumentoEditorProps {
   saving: boolean
   showChat: boolean
   user?: User | null
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+  onFormChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } },
+  ) => void
   onSalvar: () => void
   onPublicar: () => void
   onToggleChat: () => void
@@ -264,14 +266,14 @@ export function DocumentoEditor({
   }
 
   // Formatação rápida melhorada - só aparece no modo de edição
-  // const formatacaoRapida = [
-  //   { label: 'Título', action: () => insertTextAtCursor('# '), description: 'Adiciona um título principal' },
-  //   { label: 'Subtítulo', action: () => insertTextAtCursor('## '), description: 'Adiciona um subtítulo' },
-  //   { label: 'Lista', action: () => insertTextAtCursor('- '), description: 'Adiciona um item de lista' },
-  //   { label: 'Código', action: () => insertTextAtCursor('```\\n\\n```'), description: 'Adiciona um bloco de código' },
-  //   { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
-  //   { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
-  // ]
+  const formatacaoRapida = [
+    { label: 'Título', action: () => insertTextAtCursor('# '), description: 'Adiciona um título principal' },
+    { label: 'Subtítulo', action: () => insertTextAtCursor('## '), description: 'Adiciona um subtítulo' },
+    { label: 'Lista', action: () => insertTextAtCursor('- '), description: 'Adiciona um item de lista' },
+    { label: 'Código', action: () => insertTextAtCursor('```\\n\\n```'), description: 'Adiciona um bloco de código' },
+    { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
+    { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
+  ]
 
   const handleVersaoRestaurada = () => {
     toast({
@@ -509,7 +511,7 @@ export function DocumentoEditor({
             </Card>
 
             {/* Barra de Formatação Rápida - APENAS NO MODO DE EDIÇÃO */}
-            {/* {!previewMode && (
+            {!previewMode && (
               <Card
                 mb={4}
                 boxShadow="sm"
@@ -561,7 +563,7 @@ export function DocumentoEditor({
                   </VStack>
                 </CardBody>
               </Card>
-            )} */}
+            )}
 
             {/* Formulário de Edição */}
             <Card
@@ -605,6 +607,7 @@ export function DocumentoEditor({
                           borderRadius="lg"
                         />
                       </FormControl>
+
                       <FormControl>
                         <FormLabel
                           fontWeight="semibold"
@@ -631,6 +634,7 @@ export function DocumentoEditor({
                           resize="vertical"
                         />
                       </FormControl>
+
                       <FormControl flex={1}>
                         <FormLabel
                           fontWeight="semibold"
@@ -659,7 +663,7 @@ export function DocumentoEditor({
                             onChange={(value) =>
                               onFormChange({
                                 target: { name: 'conteudo', value },
-                              } as React.ChangeEvent<HTMLTextAreaElement>)
+                              })
                             }
                             className="w-full h-full"
                             plugins={[
@@ -685,46 +689,6 @@ export function DocumentoEditor({
                           />
                         </Box>
                       </FormControl>
-
-                      {/* OBS - Antigo editor de texto 
-                      <FormControl flex={1}>
-                        <FormLabel
-                          fontWeight="semibold"
-                          color="gray.700"
-                        >
-                          Conteúdo do Documento
-                        </FormLabel>
-                        <Textarea
-                          ref={contentRef}
-                          name="conteudo"
-                          value={formData.conteudo}
-                          onChange={onFormChange}
-                          placeholder="Digite o conteúdo do documento aqui... 
-
-Dicas de formatação Markdown:
-- Use # para títulos principais
-- Use ## para subtítulos  
-- Use - para listas
-- Use ```código``` para blocos de código
-- Use **texto** para negrito
-- Use *texto* para itálico"
-                          resize="none"
-                          h="full"
-                          fontFamily="'JetBrains Mono', 'Fira Code', monospace"
-                          fontSize="sm"
-                          lineHeight="1.6"
-                          bg="gray.50"
-                          border="2px solid"
-                          borderColor="gray.200"
-                          _focus={{
-                            bg: 'white',
-                            borderColor: 'blue.400',
-                            boxShadow: '0 0 0 1px #3182CE',
-                          }}
-                          _hover={{ borderColor: 'gray.300' }}
-                          borderRadius="lg"
-                        />
-                      </FormControl> */}
                     </>
                   ) : (
                     // Modo Preview com Renderização de Markdown
