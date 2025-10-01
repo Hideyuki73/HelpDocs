@@ -70,12 +70,6 @@ export function useDocumentoEdicao() {
     try {
       const updatedDoc = await atualizarDocumento(documento.id, formData, user.uid)
       setDocumento(updatedDoc)
-      toast({
-        title: 'Sucesso',
-        description: 'Documento salvo com sucesso',
-        status: 'success',
-        duration: 3000,
-      })
     } catch (error: any) {
       console.error('Erro ao salvar documento:', error)
       toast({
@@ -97,12 +91,6 @@ export function useDocumentoEdicao() {
       const updatedDoc = await publicarDocumentoAction(documento.id, user.uid, { ...formData, status: 'publicado' })
       setDocumento(updatedDoc)
       setFormData((prev) => ({ ...prev, status: 'publicado' }))
-      toast({
-        title: 'Sucesso',
-        description: 'Documento publicado com sucesso',
-        status: 'success',
-        duration: 3000,
-      })
     } catch (error: any) {
       console.error('Erro ao publicar documento:', error)
       toast({

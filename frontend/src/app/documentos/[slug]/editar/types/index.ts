@@ -1,3 +1,9 @@
+export interface ChecklistItem {
+  id: string
+  descricao: string
+  concluido: boolean
+}
+
 export interface Documento {
   id: string
   titulo: string
@@ -14,6 +20,7 @@ export interface Documento {
   tamanhoArquivo?: number
   criadoPor?: string
   empresaId?: string
+  checklist?: ChecklistItem[]
 }
 
 export type DocumentoFormData = {
@@ -28,4 +35,5 @@ export type DocumentoFormData = {
   criadoPor?: string
   status: 'rascunho' | 'publicado' | 'arquivado'
   arquivo?: File
+  checklist?: ChecklistItem[]
 }

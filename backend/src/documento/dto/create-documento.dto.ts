@@ -4,7 +4,11 @@ import {
   IsOptional,
   IsEnum,
   IsNumber,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { ChecklistItemDto } from './checklist-item.dto';
+import { Type } from 'class-transformer';
 
 export class CreateDocumentoDto {
   @IsString()
@@ -45,4 +49,10 @@ export class CreateDocumentoDto {
   @IsOptional()
   @IsEnum(['rascunho', 'publicado', 'arquivado'])
   status?: 'rascunho' | 'publicado' | 'arquivado' = 'rascunho';
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ChecklistItemDto)
+  checklist?: ChecklistItemDto[];
 }

@@ -16,6 +16,7 @@ import { DocumentoService } from './documento.service';
 import { CreateDocumentoDto } from './dto/create-documento.dto';
 import { UpdateDocumentoDto } from './dto/update-documento.dto';
 import { UploadDocumentoDto } from './dto/upload-documento.dto';
+import { UpdateChecklistDto } from './dto/update-checklist.dto';
 
 @Controller('documentos')
 export class DocumentoController {
@@ -163,5 +164,22 @@ export class DocumentoController {
       throw new BadRequestException('usuarioId é obrigatório');
     }
     return this.documentoService.visualizarDocumento(slug, usuarioId);
+  }
+
+  // 🔹 Atualizar checklist do documento
+  @Patch(':id/checklist')
+  updateChecklist(
+    @Param('id') id: string,
+    @Body() updateChecklistDto: UpdateChecklistDto,
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    return this.documentoService.updateChecklist(
+      id,
+      updateChecklistDto.checklist,
+      usuarioId,
+    );
   }
 }
