@@ -49,12 +49,14 @@ import {
   FaCompress,
   FaFileAlt,
   FaClock,
+  FaListUl,
 } from 'react-icons/fa'
 import { useState, useEffect, useRef } from 'react'
 import { Documento, DocumentoFormData } from '../types'
 import { User } from 'firebase/auth'
 import { ChatIA } from './ChatIA'
 import { HistoricoVersoes } from './HistoricoVersoes'
+import { ChecklistManager } from '../../../components/ChecklistManager'
 
 interface DocumentoEditorProps {
   documento: Documento
@@ -141,6 +143,7 @@ export function DocumentoEditor({
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
   const [previewMode, setPreviewMode] = useState(false)
+  const [showChecklistPanel, setShowChecklistPanel] = useState(false)
   const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure()
   const { isOpen: isHistoricoModalOpen, onOpen: onHistoricoModalOpen, onClose: onHistoricoModalClose } = useDisclosure()
   const toast = useToast()
@@ -280,7 +283,21 @@ export function DocumentoEditor({
       zIndex={isFullscreen ? 1000 : 'auto'}
     >
       <Grid
-        templateColumns={showChat ? (isFullscreen ? '1fr 400px' : '1fr minmax(350px, 400px)') : '1fr'}
+        templateColumns={
+          showChat && showChecklistPanel
+            ? isFullscreen
+              ? '1fr 350px 400px'
+              : '1fr minmax(300px, 350px) minmax(350px, 400px)'
+            : showChat
+            ? isFullscreen
+              ? '1fr 400px'
+              : '1fr minmax(350px, 400px)'
+            : showChecklistPanel
+            ? isFullscreen
+              ? '1fr 350px'
+              : '1fr minmax(300px, 350px)'
+            : '1fr'
+        }
         gap={6}
         h="full"
       >
@@ -411,6 +428,18 @@ export function DocumentoEditor({
                         size="sm"
                         onClick={toggleFullscreen}
                       />
+                    </Tooltip>
+
+                    <Tooltip label={showChecklistPanel ? 'Ocultar checklist' : 'Mostrar checklist'}>
+                      <Button
+                        leftIcon={<FaListUl />}
+                        onClick={() => setShowChecklistPanel(!showChecklistPanel)}
+                        colorScheme={showChecklistPanel ? 'purple' : 'gray'}
+                        variant={showChecklistPanel ? 'solid' : 'outline'}
+                        size="sm"
+                      >
+                        Checklist
+                      </Button>
                     </Tooltip>
 
                     <Tooltip label={showChat ? 'Ocultar assistente IA' : 'Mostrar assistente IA'}>
@@ -700,6 +729,27 @@ Dicas de formatação Markdown:
             </Card>
           </VStack>
         </GridItem>
+
+        {/* Painel da Checklist */}
+        {showChecklistPanel && (
+          <GridItem>
+            <Box
+              h="full"
+              overflowY="auto"
+            >
+              <ChecklistManager
+                documentoId={documento.id}
+                usuarioId={user?.uid || ''}
+                checklist={documento.checklist || []}
+                onChecklistUpdate={(novaChecklist) => {
+                  // Atualizar o documento com a nova checklist
+                  // Isso pode ser feito através de uma prop ou callback
+                  console.log('Checklist atualizada:', novaChecklist)
+                }}
+              />
+            </Box>
+          </GridItem>
+        )}
 
         {/* Chat IA */}
         {showChat && (

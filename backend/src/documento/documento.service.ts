@@ -76,6 +76,7 @@ export class DocumentoService {
       dataAtualizacao: new Date(),
       versao: 1,
       status: data.status || 'rascunho',
+      checklist: data.checklist || [],
     });
 
     const doc = await docRef.get();
@@ -426,6 +427,43 @@ export class DocumentoService {
     return { message: 'Documento deletado com sucesso' };
   }
 
+  async updateChecklist(slug: string, checklist: any[], usuarioId: string) {
+    const docRef = this.collection.doc(slug);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw new NotFoundException('Documento não encontrado');
+    }
+
+    const documentoData = doc.data();
+    const equipeId = documentoData?.equipeId?.id;
+
+    // Verifica se o usuário é membro da equipe
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    const equipeData = equipeDoc.data();
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
+    if (!isMembro) {
+      throw new ForbiddenException(
+        'Você não tem permissão para editar este documento.',
+      );
+    }
+
+    // 🔧 Converte DTOs para objetos literais
+    const checklistPlain = checklist.map((item) => ({ ...item }));
+
+    // Atualiza apenas a checklist
+    await docRef.update({
+      checklist: checklistPlain,
+      dataAtualizacao: new Date(),
+    });
+
+    const updated = await docRef.get();
+    return this.mapDocumento(updated);
+  }
+
   async getDocumentoStats(usuarioId: string) {
     const funcionarioDoc = await this.funcionarioCollection
       .doc(usuarioId)
@@ -509,6 +547,7 @@ export class DocumentoService {
         data?.dataAtualizacao?.toDate?.() || data?.dataAtualizacao,
       versao: data?.versao || 1,
       status: data?.status || 'rascunho',
+      checklist: data?.checklist || [],
     };
   }
 
@@ -722,39 +761,5 @@ export class DocumentoService {
       conteudo: documentoData.conteudo,
       titulo: documentoData.titulo,
     };
-  }
-
-  async updateChecklist(slug: string, checklist: any[], usuarioId: string) {
-    const docRef = this.collection.doc(slug);
-    const doc = await docRef.get();
-
-    if (!doc.exists) {
-      throw new NotFoundException('Documento não encontrado');
-    }
-
-    const documentoData = doc.data();
-    const equipeId = documentoData?.equipeId?.id;
-
-    // Verifica se o usuário é membro da equipe
-    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
-    const equipeData = equipeDoc.data();
-    const isMembro = equipeData?.membros?.some(
-      (ref: any) => ref.id === usuarioId,
-    );
-
-    if (!isMembro) {
-      throw new ForbiddenException(
-        'Você não tem permissão para editar este documento.',
-      );
-    }
-
-    // Atualiza apenas a checklist
-    await docRef.update({
-      checklist: checklist,
-      dataAtualizacao: new Date(),
-    });
-
-    const updated = await docRef.get();
-    return this.mapDocumento(updated);
   }
 }
