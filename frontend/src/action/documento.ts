@@ -12,7 +12,14 @@ export interface DocumentoParams {
   equipeId: string
   criadoPor: string
   status?: string
+  checklist?: { id: string; descricao: string; concluido: boolean }[]
   arquivo?: File
+}
+
+export interface ChecklistItem {
+  id: string
+  descricao: string
+  concluido: boolean
 }
 
 export interface Documento {
@@ -30,6 +37,7 @@ export interface Documento {
   dataAtualizacao: Date
   versao: number
   status: string
+  checklist?: ChecklistItem[]
 }
 
 export async function criarDocumento(documentoData: DocumentoParams) {
@@ -224,5 +232,20 @@ export async function substituirDocumento(documentoId: string, usuarioId: string
       'Content-Type': 'multipart/form-data',
     },
   })
+  return response.data
+}
+
+export async function atualizarChecklistDocumento(documentoId: string, checklist: ChecklistItem[], usuarioId: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Usuário não autenticado')
+  const token = await user.getIdToken()
+
+  const response = await api.patch(
+    `/documentos/${documentoId}/checklist?usuarioId=${usuarioId}`,
+    { checklist },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
   return response.data
 }

@@ -723,4 +723,38 @@ export class DocumentoService {
       titulo: documentoData.titulo,
     };
   }
+
+  async updateChecklist(slug: string, checklist: any[], usuarioId: string) {
+    const docRef = this.collection.doc(slug);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw new NotFoundException('Documento não encontrado');
+    }
+
+    const documentoData = doc.data();
+    const equipeId = documentoData?.equipeId?.id;
+
+    // Verifica se o usuário é membro da equipe
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    const equipeData = equipeDoc.data();
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
+    if (!isMembro) {
+      throw new ForbiddenException(
+        'Você não tem permissão para editar este documento.',
+      );
+    }
+
+    // Atualiza apenas a checklist
+    await docRef.update({
+      checklist: checklist,
+      dataAtualizacao: new Date(),
+    });
+
+    const updated = await docRef.get();
+    return this.mapDocumento(updated);
+  }
 }

@@ -14,4 +14,5 @@ export class Documento {
   dataAtualizacao?: Date;
   versao: number; // Controle de versão
   status: 'rascunho' | 'publicado' | 'arquivado'; // Status do documento
+  checklist?: { id: string; descricao: string; concluido: boolean }[]; // Checklist do documento
 }

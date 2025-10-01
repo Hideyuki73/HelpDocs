@@ -22,6 +22,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useDocumentos } from '../hooks/useDocumentos'
 import { DocumentoParams } from '@/action/documento'
+import { ChecklistCreator } from './ChecklistCreator'
 
 interface Equipe {
   id: string
@@ -44,6 +45,7 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSubmit }: Cria
     descricao: '',
     equipeId: '',
     conteudo: '',
+    checklist: [] as { id: string; descricao: string; concluido: boolean }[],
   })
 
   const handleSubmit = async () => {
@@ -83,7 +85,13 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSubmit }: Cria
   }
 
   const handleClose = () => {
-    setFormData({ titulo: '', descricao: '', equipeId: '', conteudo: '' })
+    setFormData({
+      titulo: '',
+      descricao: '',
+      equipeId: '',
+      conteudo: '',
+      checklist: [],
+    })
     onClose()
   }
 
@@ -143,6 +151,11 @@ export function CriarDocumentoModal({ isOpen, onClose, equipes, onSubmit }: Cria
                 onChange={(e) => setFormData({ ...formData, conteudo: e.target.value })}
                 rows={6}
               />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Checklist Inicial (opcional)</FormLabel>
+              <ChecklistCreator onChecklistChange={(checklist) => setFormData({ ...formData, checklist })} />
             </FormControl>
           </VStack>
         </ModalBody>

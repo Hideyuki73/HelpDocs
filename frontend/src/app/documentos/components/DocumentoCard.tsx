@@ -23,12 +23,14 @@ import {
   Spinner,
   Alert,
   AlertIcon,
+  Progress,
 } from '@chakra-ui/react'
 import { FaEdit, FaTrash, FaEye, FaEllipsisV, FaFile, FaUpload, FaUsers, FaUser, FaCrown } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import { redirect } from 'next/navigation'
 import { Documento } from '@/action/documento'
 import { obterEquipe, Equipe } from '@/action/equipe'
+import { CircularProgress } from './CircularProgress'
 
 interface DocumentoCardProps {
   documento: Documento
@@ -307,6 +309,41 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
 
           {/* Informações da Equipe */}
           {renderEquipeInfo()}
+
+          {documento.checklist && documento.checklist.length > 0 && (
+            <HStack
+              justify="space-between"
+              align="center"
+              w="full"
+            >
+              <VStack
+                align="start"
+                spacing={1}
+                flex={1}
+              >
+                <Text
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  color="gray.600"
+                >
+                  Progresso da Checklist:
+                </Text>
+                <Badge
+                  colorScheme="purple"
+                  variant="outline"
+                >
+                  {documento.checklist.filter((item) => item.concluido).length}/{documento.checklist.length} objetivos
+                </Badge>
+              </VStack>
+              <CircularProgress
+                value={(documento.checklist.filter((item) => item.concluido).length / documento.checklist.length) * 100}
+                size={50}
+                label={`${documento.checklist.filter((item) => item.concluido).length} de ${
+                  documento.checklist.length
+                } objetivos concluídos`}
+              />
+            </HStack>
+          )}
 
           <VStack
             align="start"
