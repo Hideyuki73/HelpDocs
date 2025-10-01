@@ -38,6 +38,22 @@ import {
   Heading,
 } from '@chakra-ui/react'
 import {
+  MDXEditor,
+  headingsPlugin,
+  listsPlugin,
+  quotePlugin,
+  codeBlockPlugin,
+  markdownShortcutPlugin,
+  toolbarPlugin,
+  BoldItalicUnderlineToggles,
+  ListsToggle,
+  BlockTypeSelect,
+  UndoRedo,
+  CodeToggle,
+  Separator,
+} from '@mdxeditor/editor'
+import '@mdxeditor/editor/style.css'
+import {
   FaSave,
   FaArrowLeft,
   FaRobot,
@@ -248,14 +264,14 @@ export function DocumentoEditor({
   }
 
   // Formatação rápida melhorada - só aparece no modo de edição
-  const formatacaoRapida = [
-    { label: 'Título', action: () => insertTextAtCursor('# '), description: 'Adiciona um título principal' },
-    { label: 'Subtítulo', action: () => insertTextAtCursor('## '), description: 'Adiciona um subtítulo' },
-    { label: 'Lista', action: () => insertTextAtCursor('- '), description: 'Adiciona um item de lista' },
-    { label: 'Código', action: () => insertTextAtCursor('```\\n\\n```'), description: 'Adiciona um bloco de código' },
-    { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
-    { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
-  ]
+  // const formatacaoRapida = [
+  //   { label: 'Título', action: () => insertTextAtCursor('# '), description: 'Adiciona um título principal' },
+  //   { label: 'Subtítulo', action: () => insertTextAtCursor('## '), description: 'Adiciona um subtítulo' },
+  //   { label: 'Lista', action: () => insertTextAtCursor('- '), description: 'Adiciona um item de lista' },
+  //   { label: 'Código', action: () => insertTextAtCursor('```\\n\\n```'), description: 'Adiciona um bloco de código' },
+  //   { label: 'Negrito', action: () => insertTextAtCursor('**texto**'), description: 'Texto em negrito' },
+  //   { label: 'Itálico', action: () => insertTextAtCursor('*texto*'), description: 'Texto em itálico' },
+  // ]
 
   const handleVersaoRestaurada = () => {
     toast({
@@ -493,7 +509,7 @@ export function DocumentoEditor({
             </Card>
 
             {/* Barra de Formatação Rápida - APENAS NO MODO DE EDIÇÃO */}
-            {!previewMode && (
+            {/* {!previewMode && (
               <Card
                 mb={4}
                 boxShadow="sm"
@@ -545,7 +561,7 @@ export function DocumentoEditor({
                   </VStack>
                 </CardBody>
               </Card>
-            )}
+            )} */}
 
             {/* Formulário de Edição */}
             <Card
@@ -589,7 +605,6 @@ export function DocumentoEditor({
                           borderRadius="lg"
                         />
                       </FormControl>
-
                       <FormControl>
                         <FormLabel
                           fontWeight="semibold"
@@ -616,7 +631,62 @@ export function DocumentoEditor({
                           resize="vertical"
                         />
                       </FormControl>
+                      <FormControl flex={1}>
+                        <FormLabel
+                          fontWeight="semibold"
+                          color="gray.700"
+                        >
+                          Conteúdo
+                        </FormLabel>
 
+                        <Box
+                          border="2px solid"
+                          borderColor="gray.200"
+                          borderRadius="lg"
+                          bg="gray.50"
+                          _focusWithin={{
+                            borderColor: 'blue.400',
+                            boxShadow: '0 0 0 1px #3182CE',
+                          }}
+                          minH="300px"
+                          maxH="400px" // altura máxima antes de aparecer scroll
+                          overflowY="auto" // ativa o scroll
+                          p={2} // espaçamento interno para evitar que o conteúdo grude na borda
+                        >
+                          <MDXEditor
+                            key="document-editor"
+                            markdown={formData.conteudo || ''}
+                            onChange={(value) =>
+                              onFormChange({
+                                target: { name: 'conteudo', value },
+                              } as React.ChangeEvent<HTMLTextAreaElement>)
+                            }
+                            className="w-full h-full"
+                            plugins={[
+                              headingsPlugin(),
+                              listsPlugin(),
+                              quotePlugin(),
+                              codeBlockPlugin(),
+                              markdownShortcutPlugin(),
+                              toolbarPlugin({
+                                toolbarContents: () => (
+                                  <>
+                                    <UndoRedo />
+                                    <Separator />
+                                    <BoldItalicUnderlineToggles />
+                                    <Separator />
+                                    <BlockTypeSelect />
+                                    <ListsToggle />
+                                    <CodeToggle />
+                                  </>
+                                ),
+                              }),
+                            ]}
+                          />
+                        </Box>
+                      </FormControl>
+
+                      {/* OBS - Antigo editor de texto 
                       <FormControl flex={1}>
                         <FormLabel
                           fontWeight="semibold"
@@ -654,7 +724,7 @@ Dicas de formatação Markdown:
                           _hover={{ borderColor: 'gray.300' }}
                           borderRadius="lg"
                         />
-                      </FormControl>
+                      </FormControl> */}
                     </>
                   ) : (
                     // Modo Preview com Renderização de Markdown
