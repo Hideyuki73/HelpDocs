@@ -617,7 +617,10 @@ export function DocumentoEditor({
                         />
                       </FormControl>
 
-                      <FormControl flex={1}>
+                      <FormControl
+                        flex={1}
+                        mb={5}
+                      >
                         <FormLabel
                           fontWeight="semibold"
                           color="gray.700"
