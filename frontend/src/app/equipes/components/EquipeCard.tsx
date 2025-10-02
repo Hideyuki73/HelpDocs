@@ -29,7 +29,8 @@ import {
 } from '@chakra-ui/react'
 import { Equipe } from '../types'
 import { useAuth } from '@/app/user/hooks/useAuth'
-import { FaBars, FaEdit, FaTrash } from 'react-icons/fa'
+import { FaBars, FaEdit, FaTrash, FaComment } from 'react-icons/fa'
+import { useRouter } from 'next/navigation'
 
 interface EquipeCardProps {
   equipe: Equipe
@@ -40,6 +41,7 @@ interface EquipeCardProps {
 
 export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCardProps) {
   const { user } = useAuth()
+  const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isDeleting, setIsDeleting] = useState(false)
   const toast = useToast()
@@ -143,6 +145,15 @@ export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCa
                     }}
                   >
                     Editar
+                  </MenuItem>
+                  <MenuItem
+                    icon={<FaComment />}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      router.push(`/equipes/${equipe.id}/chat`)
+                    }}
+                  >
+                    Abrir Chat
                   </MenuItem>
                   {canDelete && (
                     <MenuItem
