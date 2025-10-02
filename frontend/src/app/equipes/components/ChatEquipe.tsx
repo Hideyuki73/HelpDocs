@@ -89,7 +89,7 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
     try {
       const chatsData = await listarChatsEquipe(equipeId, user.uid)
       setChats(chatsData)
-      
+
       // Se não há chat ativo e há chats disponíveis, selecionar o primeiro
       if (!chatAtivo && chatsData.length > 0) {
         setChatAtivo(chatsData[0])
@@ -201,7 +201,10 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
 
   if (loading) {
     return (
-      <Box textAlign="center" py={8}>
+      <Box
+        textAlign="center"
+        py={8}
+      >
         <Spinner size="lg" />
         <Text mt={4}>Carregando chats...</Text>
       </Box>
@@ -230,7 +233,11 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
         </CardHeader>
 
         <CardBody>
-          <HStack align="start" spacing={4} h="500px">
+          <HStack
+            align="start"
+            spacing={4}
+            h="500px"
+          >
             {/* Lista de Chats */}
             <VStack
               w="250px"
@@ -242,11 +249,20 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
               borderColor="gray.200"
               pr={4}
             >
-              <Text fontSize="sm" fontWeight="bold" color="gray.600">
+              <Text
+                fontSize="sm"
+                fontWeight="bold"
+                color="gray.600"
+              >
                 Chats Disponíveis
               </Text>
               {chats.length === 0 ? (
-                <Text fontSize="sm" color="gray.500" textAlign="center" py={4}>
+                <Text
+                  fontSize="sm"
+                  color="gray.500"
+                  textAlign="center"
+                  py={4}
+                >
                   Nenhum chat criado ainda
                 </Text>
               ) : (
@@ -262,10 +278,17 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                     border="1px solid"
                     borderColor={chatAtivo?.id === chat.id ? 'blue.200' : 'gray.200'}
                   >
-                    <Text fontSize="sm" fontWeight="medium" noOfLines={1}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      noOfLines={1}
+                    >
                       {chat.nome}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text
+                      fontSize="xs"
+                      color="gray.500"
+                    >
                       {formatarDataHora(chat.dataCriacao)}
                     </Text>
                   </Box>
@@ -274,7 +297,11 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
             </VStack>
 
             {/* Área de Mensagens */}
-            <VStack flex={1} h="full" spacing={0}>
+            <VStack
+              flex={1}
+              h="full"
+              spacing={0}
+            >
               {chatAtivo ? (
                 <>
                   {/* Header do Chat */}
@@ -286,7 +313,10 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                     mb={3}
                   >
                     <Text fontWeight="bold">{chatAtivo.nome}</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       {mensagens.length} mensagens
                     </Text>
                   </Box>
@@ -303,7 +333,11 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                     borderRadius="md"
                   >
                     {mensagens.length === 0 ? (
-                      <Text textAlign="center" color="gray.500" py={8}>
+                      <Text
+                        textAlign="center"
+                        color="gray.500"
+                        py={8}
+                      >
                         Nenhuma mensagem ainda. Seja o primeiro a enviar!
                       </Text>
                     ) : (
@@ -321,8 +355,14 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                             boxShadow="sm"
                           >
                             <Text fontSize="sm">{mensagem.conteudo}</Text>
-                            <HStack justify="space-between" mt={1}>
-                              <Text fontSize="xs" opacity={0.8}>
+                            <HStack
+                              justify="space-between"
+                              mt={1}
+                            >
+                              <Text
+                                fontSize="xs"
+                                opacity={0.8}
+                              >
                                 {formatarDataHora(mensagem.dataEnvio)}
                               </Text>
                               {mensagem.editada && (
@@ -341,7 +381,10 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                   </VStack>
 
                   {/* Input de Nova Mensagem */}
-                  <HStack w="full" mt={3}>
+                  <HStack
+                    w="full"
+                    mt={3}
+                  >
                     <Input
                       placeholder="Digite sua mensagem..."
                       value={novaMensagem}
@@ -360,8 +403,15 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                   </HStack>
                 </>
               ) : (
-                <Box textAlign="center" py={8} color="gray.500">
-                  <FaComments size="48px" style={{ margin: '0 auto 16px' }} />
+                <Box
+                  textAlign="center"
+                  py={8}
+                  color="gray.500"
+                >
+                  <FaComments
+                    size="48px"
+                    style={{ margin: '0 auto 16px' }}
+                  />
                   <Text>Selecione um chat para começar a conversar</Text>
                 </Box>
               )}
@@ -371,7 +421,10 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
       </Card>
 
       {/* Modal para Criar Novo Chat */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Criar Novo Chat</ModalHeader>
@@ -379,7 +432,11 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
           <ModalBody>
             <VStack spacing={4}>
               <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium">
+                <Text
+                  mb={2}
+                  fontSize="sm"
+                  fontWeight="medium"
+                >
                   Nome do Chat
                 </Text>
                 <Input
@@ -392,7 +449,11 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={onClose}
+            >
               Cancelar
             </Button>
             <Button

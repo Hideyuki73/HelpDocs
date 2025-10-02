@@ -29,7 +29,7 @@ import { FaEdit, FaTrash, FaEye, FaEllipsisV, FaFile, FaUpload, FaUsers, FaUser,
 import { useState, useEffect } from 'react'
 import { redirect } from 'next/navigation'
 import { Documento } from '@/action/documento'
-import { obterEquipe, Equipe } from '@/action/equipe'
+import { obterEquipePorId, Equipe } from '@/action/equipe'
 import { CircularProgress } from './CircularProgress'
 
 interface DocumentoCardProps {
@@ -57,7 +57,7 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
     setLoadingEquipe(true)
     setEquipeError(false)
     try {
-      const equipeData = await obterEquipe(documento.equipeId)
+      const equipeData = await obterEquipePorId(documento.equipeId)
       setEquipe(equipeData)
     } catch (error) {
       console.error('Erro ao carregar equipe:', error)

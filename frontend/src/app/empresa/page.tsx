@@ -152,6 +152,7 @@ export default function EmpresaPage() {
           <ChatEmpresa
             empresaId={empresa.id}
             empresaNome={empresa.nome}
+            isAdmin={isUserAdmin}
           />
         </Box>
 

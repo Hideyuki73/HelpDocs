@@ -40,16 +40,16 @@ import {
   AlertDialogOverlay,
 } from '@chakra-ui/react'
 import { useState, useEffect, useRef } from 'react'
-import { 
-  FaPlus, 
-  FaComments, 
-  FaPaperPlane, 
-  FaEdit, 
-  FaClock, 
-  FaEllipsisV, 
+import {
+  FaPlus,
+  FaComments,
+  FaPaperPlane,
+  FaEdit,
+  FaClock,
+  FaEllipsisV,
   FaTrash,
   FaBuilding,
-  FaUsers
+  FaUsers,
 } from 'react-icons/fa'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
@@ -74,11 +74,7 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
   const [user] = useAuthState(auth)
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { 
-    isOpen: isDeleteOpen, 
-    onOpen: onDeleteOpen, 
-    onClose: onDeleteClose 
-  } = useDisclosure()
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
 
@@ -119,7 +115,7 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
     try {
       const chatsData = await listarChatsEmpresa(user.uid)
       setChats(chatsData)
-      
+
       // Se não há chat ativo e há chats disponíveis, selecionar o primeiro
       if (!chatAtivo && chatsData.length > 0) {
         setChatAtivo(chatsData[0])
@@ -224,7 +220,7 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
 
     try {
       await deletarMensagem(mensagemParaDeletar, user.uid)
-      setMensagens(mensagens.filter(m => m.id !== mensagemParaDeletar))
+      setMensagens(mensagens.filter((m) => m.id !== mensagemParaDeletar))
       setMensagemParaDeletar(null)
       onDeleteClose()
 
@@ -259,7 +255,10 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
 
   if (loading) {
     return (
-      <Box textAlign="center" py={8}>
+      <Box
+        textAlign="center"
+        py={8}
+      >
         <Spinner size="lg" />
         <Text mt={4}>Carregando chats...</Text>
       </Box>
@@ -274,7 +273,10 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
             <HStack>
               <FaBuilding color="green" />
               <Heading size="md">Chat da Empresa - {empresaNome}</Heading>
-              <Badge colorScheme="green" variant="outline">
+              <Badge
+                colorScheme="green"
+                variant="outline"
+              >
                 <HStack spacing={1}>
                   <FaUsers size="10px" />
                   <Text>Geral</Text>
@@ -296,7 +298,11 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
         </CardHeader>
 
         <CardBody>
-          <HStack align="start" spacing={4} h="500px">
+          <HStack
+            align="start"
+            spacing={4}
+            h="500px"
+          >
             {/* Lista de Chats */}
             <VStack
               w="250px"
@@ -308,11 +314,20 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
               borderColor="gray.200"
               pr={4}
             >
-              <Text fontSize="sm" fontWeight="bold" color="gray.600">
+              <Text
+                fontSize="sm"
+                fontWeight="bold"
+                color="gray.600"
+              >
                 Chats da Empresa
               </Text>
               {chats.length === 0 ? (
-                <Text fontSize="sm" color="gray.500" textAlign="center" py={4}>
+                <Text
+                  fontSize="sm"
+                  color="gray.500"
+                  textAlign="center"
+                  py={4}
+                >
                   {isAdmin ? 'Crie o primeiro chat da empresa' : 'Nenhum chat disponível ainda'}
                 </Text>
               ) : (
@@ -329,12 +344,24 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                     borderColor={chatAtivo?.id === chat.id ? 'green.200' : 'gray.200'}
                   >
                     <HStack>
-                      <FaBuilding size="12px" color="green" />
-                      <Text fontSize="sm" fontWeight="medium" noOfLines={1} flex={1}>
+                      <FaBuilding
+                        size="12px"
+                        color="green"
+                      />
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        noOfLines={1}
+                        flex={1}
+                      >
                         {chat.nome}
                       </Text>
                     </HStack>
-                    <Text fontSize="xs" color="gray.500" mt={1}>
+                    <Text
+                      fontSize="xs"
+                      color="gray.500"
+                      mt={1}
+                    >
                       {formatarDataHora(chat.dataCriacao)}
                     </Text>
                   </Box>
@@ -343,7 +370,11 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
             </VStack>
 
             {/* Área de Mensagens */}
-            <VStack flex={1} h="full" spacing={0}>
+            <VStack
+              flex={1}
+              h="full"
+              spacing={0}
+            >
               {chatAtivo ? (
                 <>
                   {/* Header do Chat */}
@@ -357,9 +388,17 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                     <HStack>
                       <FaBuilding color="green" />
                       <Text fontWeight="bold">{chatAtivo.nome}</Text>
-                      <Badge colorScheme="green" size="sm">Público</Badge>
+                      <Badge
+                        colorScheme="green"
+                        size="sm"
+                      >
+                        Público
+                      </Badge>
                     </HStack>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text
+                      fontSize="sm"
+                      color="gray.600"
+                    >
                       {mensagens.length} mensagens • Todos os funcionários podem participar
                     </Text>
                   </Box>
@@ -376,7 +415,11 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                     borderRadius="md"
                   >
                     {mensagens.length === 0 ? (
-                      <Text textAlign="center" color="gray.500" py={8}>
+                      <Text
+                        textAlign="center"
+                        color="gray.500"
+                        py={8}
+                      >
                         Nenhuma mensagem ainda. Seja o primeiro a enviar!
                       </Text>
                     ) : (
@@ -395,8 +438,14 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                             position="relative"
                           >
                             <Text fontSize="sm">{mensagem.conteudo}</Text>
-                            <HStack justify="space-between" mt={1}>
-                              <Text fontSize="xs" opacity={0.8}>
+                            <HStack
+                              justify="space-between"
+                              mt={1}
+                            >
+                              <Text
+                                fontSize="xs"
+                                opacity={0.8}
+                              >
                                 {formatarDataHora(mensagem.dataEnvio)}
                               </Text>
                               <HStack spacing={1}>
@@ -440,7 +489,10 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                   </VStack>
 
                   {/* Input de Nova Mensagem */}
-                  <HStack w="full" mt={3}>
+                  <HStack
+                    w="full"
+                    mt={3}
+                  >
                     <Input
                       placeholder="Digite sua mensagem para toda a empresa..."
                       value={novaMensagem}
@@ -459,10 +511,20 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                   </HStack>
                 </>
               ) : (
-                <Box textAlign="center" py={8} color="gray.500">
-                  <FaBuilding size="48px" style={{ margin: '0 auto 16px' }} />
+                <Box
+                  textAlign="center"
+                  py={8}
+                  color="gray.500"
+                >
+                  <FaBuilding
+                    size="48px"
+                    style={{ margin: '0 auto 16px' }}
+                  />
                   <Text>Selecione um chat para começar a conversar</Text>
-                  <Text fontSize="sm" mt={2}>
+                  <Text
+                    fontSize="sm"
+                    mt={2}
+                  >
                     Chats da empresa são visíveis para todos os funcionários
                   </Text>
                 </Box>
@@ -473,7 +535,10 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
       </Card>
 
       {/* Modal para Criar Novo Chat */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Criar Novo Chat da Empresa</ModalHeader>
@@ -481,7 +546,11 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
           <ModalBody>
             <VStack spacing={4}>
               <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium">
+                <Text
+                  mb={2}
+                  fontSize="sm"
+                  fontWeight="medium"
+                >
                   Nome do Chat
                 </Text>
                 <Input
@@ -490,14 +559,22 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                   onChange={(e) => setNovoChatNome(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleCriarChat()}
                 />
-                <Text fontSize="xs" color="gray.500" mt={1}>
+                <Text
+                  fontSize="xs"
+                  color="gray.500"
+                  mt={1}
+                >
                   Este chat será visível para todos os funcionários da empresa
                 </Text>
               </Box>
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={onClose}
+            >
               Cancelar
             </Button>
             <Button
@@ -520,7 +597,10 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            <AlertDialogHeader
+              fontSize="lg"
+              fontWeight="bold"
+            >
               Deletar Mensagem
             </AlertDialogHeader>
 
@@ -529,10 +609,17 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onDeleteClose}>
+              <Button
+                ref={cancelRef}
+                onClick={onDeleteClose}
+              >
                 Cancelar
               </Button>
-              <Button colorScheme="red" onClick={handleDeletarMensagem} ml={3}>
+              <Button
+                colorScheme="red"
+                onClick={handleDeletarMensagem}
+                ml={3}
+              >
                 Deletar
               </Button>
             </AlertDialogFooter>
