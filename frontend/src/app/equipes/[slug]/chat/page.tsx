@@ -4,13 +4,21 @@ import { Box, Heading, Spinner, Text } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
 import { useEquipes } from '../../hooks/useEquipes'
 import { ChatEquipe } from '../../components/ChatEquipe'
+import { useEffect, useState } from 'react'
+import { Equipe } from '@/action/equipe'
 
 export default function EquipeChatPage() {
   const params = useParams()
-  const equipeId = params.id as string
+  const equipeId = params.slug as string
 
-  const { equipes, loading } = useEquipes()
-  const equipe = equipes.find((e) => e.id === equipeId)
+  const { buscarEquipePorId, loading } = useEquipes()
+  const [equipe, setEquipe] = useState<Equipe | null>(null)
+
+  useEffect(() => {
+    if (equipeId) {
+      buscarEquipePorId(equipeId).then(setEquipe)
+    }
+  }, [])
 
   if (loading) {
     return (

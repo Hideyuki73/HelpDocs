@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateChatEquipeDto } from '../dto/create-chat-equipe.dto';
 import { CreateMensagemDto } from '../dto/create-mensagem.dto';
@@ -28,7 +33,7 @@ export class ChatEquipeService {
     }
 
     const equipeData = equipeDoc.data();
-    const empresaId = equipeData?.empresaId?.id;
+    const empresaId = equipeData?.empresaId;
 
     // Verificar se o criador é membro da equipe
     const isMembro = equipeData?.membros?.some(
@@ -138,7 +143,11 @@ export class ChatEquipeService {
     return this.mapMensagem(doc);
   }
 
-  async listarMensagens(chatId: string, usuarioId: string, limite: number = 50) {
+  async listarMensagens(
+    chatId: string,
+    usuarioId: string,
+    limite: number = 50,
+  ) {
     // Verificar permissões
     await this.obterChatEquipe(chatId, usuarioId);
 
@@ -152,16 +161,20 @@ export class ChatEquipeService {
     return snapshot.docs.map((doc) => this.mapMensagem(doc)).reverse();
   }
 
-  async editarMensagem(mensagemId: string, data: UpdateMensagemDto, usuarioId: string) {
+  async editarMensagem(
+    mensagemId: string,
+    data: UpdateMensagemDto,
+    usuarioId: string,
+  ) {
     const docRef = this.mensagemCollection.doc(mensagemId);
     const doc = await docRef.get();
-    
+
     if (!doc.exists) {
       throw new NotFoundException('Mensagem não encontrada.');
     }
 
     const mensagemData = doc.data();
-    
+
     // Verificar se o usuário é o autor da mensagem
     if (mensagemData?.autorId?.id !== usuarioId) {
       throw new ForbiddenException(

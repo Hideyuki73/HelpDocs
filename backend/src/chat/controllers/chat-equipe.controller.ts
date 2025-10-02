@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ChatEquipeService } from '../services/chat-equipe.service';
 import { CreateChatEquipeDto } from '../dto/create-chat-equipe.dto';
-import { CreateMensagemDto } from '../dto/create-mensagem.dto';
+import { CreateMensagemDto, TipoChat } from '../dto/create-mensagem.dto';
 import { UpdateMensagemDto } from '../dto/update-mensagem.dto';
 
 @Controller('chats/equipe')
@@ -54,8 +54,10 @@ export class ChatEquipeController {
     @Body() createMensagemDto: CreateMensagemDto,
   ) {
     // Garantir que o chatId da URL seja usado
+    console.log('Chat ID from URL:', chatId);
     createMensagemDto.chatId = chatId;
-    createMensagemDto.tipoChat = 'equipe';
+    createMensagemDto.tipoChat = TipoChat.EQUIPE;
+    console.log('Mensagem DTO:', createMensagemDto);
     return this.chatEquipeService.enviarMensagem(createMensagemDto);
   }
 
@@ -83,6 +85,10 @@ export class ChatEquipeController {
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
-    return this.chatEquipeService.editarMensagem(mensagemId, updateMensagemDto, usuarioId);
+    return this.chatEquipeService.editarMensagem(
+      mensagemId,
+      updateMensagemDto,
+      usuarioId,
+    );
   }
 }

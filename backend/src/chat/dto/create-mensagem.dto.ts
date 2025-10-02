@@ -1,4 +1,9 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+
+export enum TipoChat {
+  EQUIPE = 'equipe',
+  EMPRESA = 'empresa',
+}
 
 export class CreateMensagemDto {
   @IsString()
@@ -9,10 +14,11 @@ export class CreateMensagemDto {
   @IsNotEmpty()
   autorId: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  chatId: string;
+  chatId?: string;
 
-  @IsEnum(['equipe', 'empresa'])
-  tipoChat: 'equipe' | 'empresa';
+  @IsOptional()
+  @IsEnum(TipoChat)
+  tipoChat?: 'equipe' | 'empresa';
 }
