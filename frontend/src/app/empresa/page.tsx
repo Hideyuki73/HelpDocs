@@ -13,6 +13,7 @@ import ModalDeleteEmpresa from './components/ModalDeleteEmpresa'
 import EmpresaInfo from './components/EmpresaInfo'
 import ModalSairEmpresa from './components/ModalSairEmpresa'
 import { redirect } from 'next/navigation'
+import { ChatEmpresa } from './components/ChatEmpresa'
 
 export default function EmpresaPage() {
   // Estados locais
@@ -146,6 +147,14 @@ export default function EmpresaPage() {
             onGerarConvite={onGerarConvite}
           />
         </SimpleGrid>
+
+        <Box mt={8}>
+          <ChatEmpresa
+            empresaId={empresa.id}
+            empresaNome={empresa.nome}
+            isAdmin={isUserAdmin}
+          />
+        </Box>
 
         <Box
           mt={8}

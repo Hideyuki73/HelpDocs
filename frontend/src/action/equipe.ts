@@ -47,7 +47,7 @@ export async function listarEquipes() {
   return response.data
 }
 
-export async function obterEquipe(equipeId: string) {
+export async function obterEquipePorId(equipeId: string) {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()

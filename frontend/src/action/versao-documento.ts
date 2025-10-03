@@ -6,6 +6,7 @@ export interface VersaoDocumento {
   documentoId: string
   numeroVersao: number
   conteudo: string
+  nomeAutor?: string
   criadoPor: string
   dataCriacao: Date
 }

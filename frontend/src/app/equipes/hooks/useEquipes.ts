@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from 'react'
 import {
   listarEquipes,
   criarEquipe,
@@ -7,10 +6,12 @@ import {
   adicionarMembros,
   removerMembro,
   obterEstatisticasEquipes,
+  obterEquipePorId,
 } from '@/action/equipe'
 import { getMinhaEmpresa } from '@/action/empresa'
 import { getFuncionarios } from '@/action/funcionario'
 import { Equipe, EquipeFormData, EquipeStats } from '../types'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseEquipesState {
   equipes: Equipe[]
@@ -44,6 +45,28 @@ export function useEquipes() {
         loading: false,
         error: error.message || 'Erro ao carregar equipes',
       }))
+    }
+  }, [])
+
+  // 🔹 Buscar equipe por ID
+  const buscarEquipePorId = useCallback(async (equipeId: string) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }))
+    try {
+      const equipe = await obterEquipePorId(equipeId)
+      setState((prev) => ({
+        ...prev,
+        equipes: equipe ? [equipe] : [], // Se encontrar, retorna apenas essa equipe
+        loading: false,
+      }))
+      return equipe
+    } catch (error: any) {
+      console.error(`Erro ao buscar equipe ${equipeId}:`, error)
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: error.message || `Erro ao buscar equipe ${equipeId}`,
+      }))
+      return null
     }
   }, [])
 
@@ -204,6 +227,7 @@ export function useEquipes() {
     carregarEquipes,
     carregarEstatisticas,
     carregarMembrosEmpresa,
+    buscarEquipePorId,
     limparErro,
   }
 }

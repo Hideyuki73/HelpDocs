@@ -52,24 +52,10 @@ import {
   FaListUl,
 } from 'react-icons/fa'
 import { useState, useEffect, useRef } from 'react'
-import { Documento, DocumentoFormData } from '../types'
-import { User } from 'firebase/auth'
 import { ChatIA } from './ChatIA'
 import { HistoricoVersoes } from './HistoricoVersoes'
 import { ChecklistManager } from '../../../components/ChecklistManager'
-
-interface DocumentoEditorProps {
-  documento: Documento
-  formData: DocumentoFormData
-  saving: boolean
-  showChat: boolean
-  user?: User | null
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
-  onSalvar: () => void
-  onPublicar: () => void
-  onToggleChat: () => void
-  onVoltar: () => void
-}
+import { DocumentoEditorProps } from '../types'
 
 // Função simples para renderizar markdown básico
 const renderMarkdown = (text: string) => {

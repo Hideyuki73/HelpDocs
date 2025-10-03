@@ -151,7 +151,7 @@ export function HistoricoVersoes({ documentoId, usuarioId, versaoAtual, onVersao
 
   const formatarData = (data: string | Date) => {
     console.log(data)
-    const d = new Date(data) // aceita string ISO também
+    const d = new Date(data)
     if (isNaN(d.getTime())) return 'Data inválida'
     return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1)
       .toString()
@@ -263,7 +263,7 @@ export function HistoricoVersoes({ documentoId, usuarioId, versaoAtual, onVersao
                         </HStack>
                         <HStack>
                           <FaUser size="12px" />
-                          <Text>ID: {versao.criadoPor}</Text>
+                          <Text>Responsável: {versao.nomeAutor ? versao.nomeAutor : versao.criadoPor}</Text>
                         </HStack>
                       </HStack>
                     </VStack>
