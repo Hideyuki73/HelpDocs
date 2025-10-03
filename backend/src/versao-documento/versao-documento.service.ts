@@ -22,6 +22,7 @@ export class VersaoDocumentoService {
     if (!documentoDoc.exists) {
       throw new NotFoundException('Documento não encontrado.');
     }
+
     const funcionarioDoc = await this.funcionarioCollection
       .doc(data.criadoPor)
       .get();
@@ -29,13 +30,18 @@ export class VersaoDocumentoService {
       throw new NotFoundException('Funcionário criador não encontrado.');
     }
 
+    const funcionarioData = funcionarioDoc.data();
+    const nomeAutor = funcionarioData?.nome || 'Usuário';
+
     const docRef = await this.collection.add({
       documentoId: this.documentoCollection.doc(data.documentoId),
       numeroVersao: data.numeroVersao,
       conteudo: data.conteudo,
       criadoPor: this.funcionarioCollection.doc(data.criadoPor),
+      nomeAutor, // 🔹 guarda o nome do criador
       dataCriacao: new Date(),
     });
+
     const doc = await docRef.get();
     return this.mapVersao(doc);
   }
@@ -92,7 +98,8 @@ export class VersaoDocumentoService {
       numeroVersao: data?.numeroVersao,
       conteudo: data?.conteudo,
       criadoPor: data?.criadoPor?.id || null,
-      dataCriacao: data?.dataCriacao,
+      nomeAutor: data?.nomeAutor || null, // 🔹 retorna o nome do criador
+      dataCriacao: data?.dataCriacao?.toDate?.() || data?.dataCriacao,
     };
   }
 }

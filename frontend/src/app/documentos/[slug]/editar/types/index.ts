@@ -1,3 +1,5 @@
+import { User } from 'firebase/auth'
+
 export interface ChecklistItem {
   id: string
   descricao: string
@@ -36,4 +38,17 @@ export type DocumentoFormData = {
   status: 'rascunho' | 'publicado' | 'arquivado'
   arquivo?: File
   checklist?: ChecklistItem[]
+}
+
+export interface DocumentoEditorProps {
+  documento: Documento
+  formData: DocumentoFormData
+  saving: boolean
+  showChat: boolean
+  user?: User | null
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+  onSalvar: () => void
+  onPublicar: () => void
+  onToggleChat: () => void
+  onVoltar: () => void
 }
