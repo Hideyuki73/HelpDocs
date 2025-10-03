@@ -129,10 +129,19 @@ export class ChatEquipeService {
         'Você não tem permissão para enviar mensagens neste chat.',
       );
     }
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(data.autorId)
+      .get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário (autor) não encontrado.');
+    }
+    const funcionarioData = funcionarioDoc.data();
+    const nomeAutor = funcionarioData?.nome || 'Usuário';
 
     const docRef = await this.mensagemCollection.add({
       conteudo: data.conteudo,
       autorId: this.funcionarioCollection.doc(data.autorId),
+      nomeAutor,
       chatId: this.chatEquipeCollection.doc(data.chatId),
       tipoChat: 'equipe',
       dataEnvio: new Date(),
@@ -211,6 +220,7 @@ export class ChatEquipeService {
       id: doc.id,
       conteudo: data?.conteudo,
       autorId: data?.autorId?.id || null,
+      nomeAutor: data?.nomeAutor || null,
       chatId: data?.chatId?.id || null,
       tipoChat: data?.tipoChat,
       dataEnvio: data?.dataEnvio?.toDate?.() || data?.dataEnvio,

@@ -437,6 +437,13 @@ export function ChatEmpresa({ empresaId, empresaNome, isAdmin = false }: ChatEmp
                             boxShadow="sm"
                             position="relative"
                           >
+                            <Text
+                              fontSize="xs"
+                              fontWeight="bold"
+                              mb={1}
+                            >
+                              {mensagem.nomeAutor || 'Usuário Desconhecido'}
+                            </Text>
                             <Text fontSize="sm">{mensagem.conteudo}</Text>
                             <HStack
                               justify="space-between"

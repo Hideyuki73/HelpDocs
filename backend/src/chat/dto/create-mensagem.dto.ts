@@ -16,6 +16,10 @@ export class CreateMensagemDto {
 
   @IsOptional()
   @IsString()
+  nomeAutor?: string;
+
+  @IsOptional()
+  @IsString()
   chatId?: string;
 
   @IsOptional()

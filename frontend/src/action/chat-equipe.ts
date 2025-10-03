@@ -15,6 +15,7 @@ export interface Mensagem {
   id: string
   conteudo: string
   autorId: string
+  nomeAutor: string
   chatId: string
   tipoChat: 'equipe' | 'empresa'
   dataEnvio: Date
@@ -96,7 +97,11 @@ export async function listarMensagens(chatId: string, usuarioId: string, limite?
   return response.data
 }
 
-export async function editarMensagem(mensagemId: string, mensagemData: UpdateMensagemParams, usuarioId: string): Promise<Mensagem> {
+export async function editarMensagem(
+  mensagemId: string,
+  mensagemData: UpdateMensagemParams,
+  usuarioId: string,
+): Promise<Mensagem> {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()

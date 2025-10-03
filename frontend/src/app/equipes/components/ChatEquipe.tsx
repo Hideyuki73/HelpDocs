@@ -354,6 +354,13 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
                             borderRadius="lg"
                             boxShadow="sm"
                           >
+                            <Text
+                              fontSize="xs"
+                              fontWeight="bold"
+                              mb={1}
+                            >
+                              {mensagem.nomeAutor || 'Usuário Desconhecido'}
+                            </Text>
                             <Text fontSize="sm">{mensagem.conteudo}</Text>
                             <HStack
                               justify="space-between"

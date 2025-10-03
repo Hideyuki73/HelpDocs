@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { CreateChatEmpresaDto } from '../dto/create-chat-empresa.dto';
 import { CreateMensagemDto } from '../dto/create-mensagem.dto';
@@ -26,7 +31,9 @@ export class ChatEmpresaService {
     }
 
     // Verificar se o criador pertence à empresa
-    const funcionarioDoc = await this.funcionarioCollection.doc(data.criadoPor).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(data.criadoPor)
+      .get();
     if (!funcionarioDoc.exists) {
       throw new NotFoundException('Funcionário não encontrado.');
     }
@@ -60,7 +67,9 @@ export class ChatEmpresaService {
 
   async listarChatsEmpresa(usuarioId: string) {
     // Verificar se o funcionário existe e obter sua empresa
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     if (!funcionarioDoc.exists) {
       throw new NotFoundException('Funcionário não encontrado.');
     }
@@ -92,9 +101,11 @@ export class ChatEmpresaService {
     const empresaId = chatData?.empresaId?.id;
 
     // Verificar se o usuário pertence à empresa
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     const funcionarioData = funcionarioDoc.data();
-    
+
     if (funcionarioData?.empresaId !== empresaId) {
       throw new ForbiddenException(
         'Você não tem permissão para acessar este chat.',
@@ -105,7 +116,7 @@ export class ChatEmpresaService {
   }
 
   async enviarMensagem(data: CreateMensagemDto) {
-    // Verificar se o chat existe e se o usuário tem permissão
+    // Verificar se o chat existe
     const chatDoc = await this.chatEmpresaCollection.doc(data.chatId).get();
     if (!chatDoc.exists) {
       throw new NotFoundException('Chat não encontrado.');
@@ -114,19 +125,29 @@ export class ChatEmpresaService {
     const chatData = chatDoc.data();
     const empresaId = chatData?.empresaId?.id;
 
-    // Verificar se o autor pertence à empresa
-    const funcionarioDoc = await this.funcionarioCollection.doc(data.autorId).get();
+    // Buscar dados do autor
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(data.autorId)
+      .get();
+    if (!funcionarioDoc.exists) {
+      throw new NotFoundException('Funcionário não encontrado.');
+    }
+
     const funcionarioData = funcionarioDoc.data();
-    
+
+    // Verificar se pertence à empresa
     if (funcionarioData?.empresaId !== empresaId) {
       throw new ForbiddenException(
         'Você não tem permissão para enviar mensagens neste chat.',
       );
     }
 
+    const nomeAutor = funcionarioData?.nome || 'Usuário';
+
     const docRef = await this.mensagemCollection.add({
       conteudo: data.conteudo,
       autorId: this.funcionarioCollection.doc(data.autorId),
+      nomeAutor, // 🔹 salva o nome junto
       chatId: this.chatEmpresaCollection.doc(data.chatId),
       tipoChat: 'empresa',
       dataEnvio: new Date(),
@@ -137,7 +158,11 @@ export class ChatEmpresaService {
     return this.mapMensagem(doc);
   }
 
-  async listarMensagens(chatId: string, usuarioId: string, limite: number = 50) {
+  async listarMensagens(
+    chatId: string,
+    usuarioId: string,
+    limite: number = 50,
+  ) {
     // Verificar permissões
     await this.obterChatEmpresa(chatId, usuarioId);
 
@@ -151,16 +176,20 @@ export class ChatEmpresaService {
     return snapshot.docs.map((doc) => this.mapMensagem(doc)).reverse();
   }
 
-  async editarMensagem(mensagemId: string, data: UpdateMensagemDto, usuarioId: string) {
+  async editarMensagem(
+    mensagemId: string,
+    data: UpdateMensagemDto,
+    usuarioId: string,
+  ) {
     const docRef = this.mensagemCollection.doc(mensagemId);
     const doc = await docRef.get();
-    
+
     if (!doc.exists) {
       throw new NotFoundException('Mensagem não encontrada.');
     }
 
     const mensagemData = doc.data();
-    
+
     // Verificar se o usuário é o autor da mensagem
     if (mensagemData?.autorId?.id !== usuarioId) {
       throw new ForbiddenException(
@@ -181,20 +210,22 @@ export class ChatEmpresaService {
   async deletarMensagem(mensagemId: string, usuarioId: string) {
     const docRef = this.mensagemCollection.doc(mensagemId);
     const doc = await docRef.get();
-    
+
     if (!doc.exists) {
       throw new NotFoundException('Mensagem não encontrada.');
     }
 
     const mensagemData = doc.data();
-    
+
     // Verificar se o usuário é o autor da mensagem ou administrador
-    const funcionarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
+    const funcionarioDoc = await this.funcionarioCollection
+      .doc(usuarioId)
+      .get();
     const funcionarioData = funcionarioDoc.data();
-    
+
     const isAutor = mensagemData?.autorId?.id === usuarioId;
     const isAdmin = funcionarioData?.cargo === 'Administrador';
-    
+
     if (!isAutor && !isAdmin) {
       throw new ForbiddenException(
         'Você só pode deletar suas próprias mensagens ou ser administrador.',
@@ -224,6 +255,7 @@ export class ChatEmpresaService {
       id: doc.id,
       conteudo: data?.conteudo,
       autorId: data?.autorId?.id || null,
+      nomeAutor: data?.nomeAutor || null,
       chatId: data?.chatId?.id || null,
       tipoChat: data?.tipoChat,
       dataEnvio: data?.dataEnvio?.toDate?.() || data?.dataEnvio,
