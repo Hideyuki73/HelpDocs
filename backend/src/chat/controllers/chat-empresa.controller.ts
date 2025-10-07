@@ -25,8 +25,9 @@ export class ChatEmpresaController {
   }
 
   // 🔹 Listar chats da empresa do usuário
-  @Get()
+  @Get('/empresa')
   listarChatsEmpresa(@Query('usuarioId') usuarioId: string) {
+    console.log('listarChatsEmpresa', { usuarioId });
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
@@ -39,6 +40,7 @@ export class ChatEmpresaController {
     @Param('chatId') chatId: string,
     @Query('usuarioId') usuarioId: string,
   ) {
+    console.log('obterChatEmpresa', { chatId, usuarioId });
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
@@ -68,7 +70,11 @@ export class ChatEmpresaController {
       throw new BadRequestException('usuarioId é obrigatório');
     }
     const limiteNum = limite ? parseInt(limite, 10) : 50;
-    return this.chatEmpresaService.listarMensagens(chatId, usuarioId, limiteNum);
+    return this.chatEmpresaService.listarMensagens(
+      chatId,
+      usuarioId,
+      limiteNum,
+    );
   }
 
   // 🔹 Editar mensagem
@@ -81,7 +87,11 @@ export class ChatEmpresaController {
     if (!usuarioId) {
       throw new BadRequestException('usuarioId é obrigatório');
     }
-    return this.chatEmpresaService.editarMensagem(mensagemId, updateMensagemDto, usuarioId);
+    return this.chatEmpresaService.editarMensagem(
+      mensagemId,
+      updateMensagemDto,
+      usuarioId,
+    );
   }
 
   // 🔹 Deletar mensagem

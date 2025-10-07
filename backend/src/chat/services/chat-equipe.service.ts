@@ -59,6 +59,7 @@ export class ChatEquipeService {
   }
 
   async listarChatsEquipe(equipeId: string, usuarioId: string) {
+    console.log('listarChatsEquipe', { equipeId, usuarioId });
     // Verificar se o usuário é membro da equipe
     const equipeDoc = await this.equipeCollection.doc(equipeId).get();
     if (!equipeDoc.exists) {
@@ -85,6 +86,7 @@ export class ChatEquipeService {
   }
 
   async obterChatEquipe(chatId: string, usuarioId: string) {
+    console.log('obterChatEquipe', { chatId, usuarioId });
     const doc = await this.chatEquipeCollection.doc(chatId).get();
     if (!doc.exists) {
       throw new NotFoundException('Chat não encontrado.');
