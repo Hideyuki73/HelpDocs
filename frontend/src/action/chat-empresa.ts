@@ -56,7 +56,7 @@ export async function listarChatsEmpresa(usuarioId: string): Promise<ChatEmpresa
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.get('/chats/empresa/empresa', {
+  const response = await api.get('/chats/empresa', {
     params: { usuarioId },
     headers: { Authorization: `Bearer ${token}` },
   })

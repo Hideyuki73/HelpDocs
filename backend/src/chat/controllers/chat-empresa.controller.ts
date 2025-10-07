@@ -25,7 +25,7 @@ export class ChatEmpresaController {
   }
 
   // 🔹 Listar chats da empresa do usuário
-  @Get('/empresa')
+  @Get()
   listarChatsEmpresa(@Query('usuarioId') usuarioId: string) {
     console.log('listarChatsEmpresa', { usuarioId });
     if (!usuarioId) {

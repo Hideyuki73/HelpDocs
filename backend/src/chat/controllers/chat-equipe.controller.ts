@@ -24,7 +24,7 @@ export class ChatEquipeController {
   }
 
   // 🔹 Listar chats de uma equipe
-  @Get('equipe/:equipeId')
+  @Get(':equipeId')
   listarChatsEquipe(
     @Param('equipeId') equipeId: string,
     @Query('usuarioId') usuarioId: string,

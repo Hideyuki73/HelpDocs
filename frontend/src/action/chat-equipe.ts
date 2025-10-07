@@ -55,7 +55,7 @@ export async function listarChatsEquipe(equipeId: string, usuarioId: string): Pr
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  const response = await api.get(`/chats/equipe/equipe/${equipeId}`, {
+  const response = await api.get(`/chats/equipe/${equipeId}`, {
     params: { usuarioId },
     headers: { Authorization: `Bearer ${token}` },
   })
