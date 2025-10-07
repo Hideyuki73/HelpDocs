@@ -46,7 +46,7 @@ export default function EquipeChatPage() {
 
   return (
     <Box
-      maxW="900px"
+      maxW="1200px"
       mx="auto"
       mt={16}
       p={8}
@@ -55,13 +55,6 @@ export default function EquipeChatPage() {
       boxShadow="lg"
       bg="white"
     >
-      <Heading
-        size="lg"
-        mb={6}
-        textAlign="center"
-      >
-        Chat da Equipe: {equipe.nome}
-      </Heading>
       <ChatEquipe
         equipeId={equipeId}
         equipeNome={equipe.nome}
