@@ -212,7 +212,7 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
   }
 
   return (
-    <>
+    <Box>
       <Card>
         <CardHeader>
           <Flex align="center">
@@ -474,6 +474,6 @@ export function ChatEquipe({ equipeId, equipeNome }: ChatEquipeProps) {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </>
+    </Box>
   )
 }

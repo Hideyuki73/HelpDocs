@@ -17,20 +17,14 @@ import {
   IconButton,
   useColorModeValue,
   Box,
-  Avatar,
-  AvatarGroup,
-  Tooltip,
-  Spinner,
   Alert,
   AlertIcon,
-  Progress,
 } from '@chakra-ui/react'
-import { FaEdit, FaTrash, FaEye, FaEllipsisV, FaFile, FaUpload, FaUsers, FaUser, FaCrown } from 'react-icons/fa'
-import { useState, useEffect } from 'react'
+import { FaEdit, FaTrash, FaEye, FaEllipsisV, FaFile, FaUpload, FaUsers } from 'react-icons/fa'
 import { redirect } from 'next/navigation'
 import { Documento } from '@/action/documento'
-import { obterEquipePorId, Equipe } from '@/action/equipe'
 import { CircularProgress } from './CircularProgress'
+import { EquipeResponsavel } from './EquipeResponsavel'
 
 interface DocumentoCardProps {
   documento: Documento
@@ -40,32 +34,8 @@ interface DocumentoCardProps {
 }
 
 export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: DocumentoCardProps) {
-  const [equipe, setEquipe] = useState<Equipe | null>(null)
-  const [loadingEquipe, setLoadingEquipe] = useState(false)
-  const [equipeError, setEquipeError] = useState(false)
-
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
-
-  useEffect(() => {
-    if (documento.equipeId) {
-      carregarEquipe()
-    }
-  }, [documento.equipeId])
-
-  const carregarEquipe = async () => {
-    setLoadingEquipe(true)
-    setEquipeError(false)
-    try {
-      const equipeData = await obterEquipePorId(documento.equipeId)
-      setEquipe(equipeData)
-    } catch (error) {
-      console.error('Erro ao carregar equipe:', error)
-      setEquipeError(true)
-    } finally {
-      setLoadingEquipe(false)
-    }
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -98,134 +68,26 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
       )
     }
 
-    if (loadingEquipe) {
-      return (
-        <HStack spacing={2}>
-          <Spinner size="xs" />
-          <Text
-            fontSize="xs"
-            color="gray.500"
-          >
-            Carregando equipe...
-          </Text>
-        </HStack>
-      )
-    }
-
-    if (equipeError || !equipe) {
-      return (
-        <Alert
-          status="error"
-          size="sm"
-          borderRadius="md"
-        >
-          <AlertIcon boxSize={3} />
-          <Text fontSize="xs">Erro ao carregar equipe</Text>
-        </Alert>
-      )
-    }
-
     return (
-      <VStack
-        align="start"
-        spacing={2}
-        w="full"
-      >
-        <HStack
-          spacing={2}
-          w="full"
-        >
-          <FaUsers
-            size="12px"
-            color="blue"
+      <>
+        {documento.equipeId ? (
+          <EquipeResponsavel
+            equipeId={documento.equipeId}
+            onEquipeChange={(equipe) => {
+              // Callback opcional
+            }}
           />
-          <Text
-            fontSize="xs"
-            fontWeight="semibold"
-            color="blue.600"
+        ) : (
+          <Alert
+            status="warning"
+            size="sm"
+            borderRadius="md"
           >
-            Equipe Responsável:
-          </Text>
-        </HStack>
-
-        <Box
-          bg="blue.50"
-          p={2}
-          borderRadius="md"
-          w="full"
-          border="1px solid"
-          borderColor="blue.200"
-        >
-          <VStack
-            align="start"
-            spacing={2}
-          >
-            <HStack
-              justify="space-between"
-              w="full"
-            >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                color="blue.700"
-              >
-                {equipe.nome}
-              </Text>
-              <Badge
-                colorScheme="blue"
-                size="sm"
-              >
-                {equipe.membros.length} membros
-              </Badge>
-            </HStack>
-
-            {/* Avatars dos membros */}
-            <HStack spacing={1}>
-              <AvatarGroup
-                size="xs"
-                max={3}
-              >
-                {equipe.membros.slice(0, 3).map((membroId, index) => (
-                  <Tooltip
-                    key={membroId}
-                    label={`Membro ${index + 1}`}
-                  >
-                    <Avatar
-                      size="xs"
-                      name={`Membro ${index + 1}`}
-                      bg="blue.500"
-                      icon={<FaUser />}
-                    />
-                  </Tooltip>
-                ))}
-              </AvatarGroup>
-
-              {equipe.membros.length > 3 && (
-                <Text
-                  fontSize="xs"
-                  color="gray.600"
-                >
-                  +{equipe.membros.length - 3} mais
-                </Text>
-              )}
-            </HStack>
-
-            {/* Criador da equipe */}
-            <HStack spacing={1}>
-              <FaCrown
-                size="10px"
-                color="gold"
-              />
-              <Text
-                fontSize="xs"
-                color="gray.600"
-              >
-                Criador: {equipe.criadorId}
-              </Text>
-            </HStack>
-          </VStack>
-        </Box>
-      </VStack>
+            <AlertIcon boxSize={3} />
+            <Text fontSize="xs">Sem equipe atribuída</Text>
+          </Alert>
+        )}
+      </>
     )
   }
 

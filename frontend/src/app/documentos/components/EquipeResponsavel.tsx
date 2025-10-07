@@ -34,7 +34,8 @@ import {
 } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
 import { FaUsers, FaUser, FaCrown, FaCalendarAlt, FaEdit, FaPlus, FaCheckCircle } from 'react-icons/fa'
-import { obterEquipe, Equipe } from '@/action/equipe'
+import { Equipe, obterEquipePorId } from '@/action/equipe'
+import { getFuncionario } from '@/action/funcionario'
 
 interface EquipeResponsavelProps {
   equipeId: string
@@ -43,6 +44,7 @@ interface EquipeResponsavelProps {
 
 export function EquipeResponsavel({ equipeId, onEquipeChange }: EquipeResponsavelProps) {
   const [equipe, setEquipe] = useState<Equipe | null>(null)
+  const [criador, setCriador] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -61,7 +63,9 @@ export function EquipeResponsavel({ equipeId, onEquipeChange }: EquipeResponsave
     setLoading(true)
     setError(false)
     try {
-      const equipeData = await obterEquipe(equipeId)
+      const equipeData = await obterEquipePorId(equipeId)
+      const criador = await getFuncionario(equipeData.criadorId)
+      setCriador(criador.nome)
       setEquipe(equipeData)
       onEquipeChange?.(equipeData)
     } catch (error) {
@@ -309,7 +313,7 @@ export function EquipeResponsavel({ equipeId, onEquipeChange }: EquipeResponsave
                 >
                   Criador:
                 </Text>{' '}
-                {equipe.criadorId}
+                {criador}
               </Text>
             </HStack>
 
@@ -387,7 +391,7 @@ export function EquipeResponsavel({ equipeId, onEquipeChange }: EquipeResponsave
                   <HStack>
                     <FaCrown color="gold" />
                     <Text>
-                      <strong>Criador:</strong> {equipe.criadorId}
+                      <strong>Criador:</strong> {criador}
                     </Text>
                   </HStack>
                   <HStack>
