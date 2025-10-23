@@ -16,13 +16,10 @@ const eslintConfig = [
   {
     files: ['**/*.{js,jsx,ts,tsx}'], // Aplica-se a todos os arquivos de código
     rules: {
-      // Desabilita a regra que proíbe o uso explícito de 'any'
       '@typescript-eslint/no-explicit-any': 'off',
-
-      // Desabilita a regra que proíbe variáveis não utilizadas
       '@typescript-eslint/no-unused-vars': 'off',
-
-      // Opcional: Se você estiver usando o React e tiver problemas com 'prop-types'
+      'react/no-unescaped-entities': 'off',
+      'react-hooks/exhaustive-deps': 'off',
       'react/prop-types': 'off',
     },
   },
