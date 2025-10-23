@@ -617,7 +617,7 @@ export class DocumentoService {
       .where('criadoPor', '==', this.funcionarioCollection.doc(usuarioId))
       .get();
 
-    let documentos = documentosSnapshot.docs.map((doc) =>
+    const documentos = documentosSnapshot.docs.map((doc) =>
       this.mapDocumento(doc),
     );
 

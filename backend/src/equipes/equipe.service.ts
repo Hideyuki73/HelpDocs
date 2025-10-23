@@ -305,11 +305,13 @@ export class EquipeService {
   }
 
   async getEquipeStats(usuarioId: string) {
-    console.log(`[EquipeService] Tentando obter estatísticas para o usuário: ${usuarioId}`);
+    console.log(
+      `[EquipeService] Tentando obter estatísticas para o usuário: ${usuarioId}`,
+    );
     const usuarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
     if (!usuarioDoc.exists) {
       console.log(`[EquipeService] Usuário ${usuarioId} não encontrado.`);
-      throw new NotFoundException("Usuário não encontrado.");
+      throw new NotFoundException('Usuário não encontrado.');
     }
     console.log(`[EquipeService] Usuário ${usuarioId} encontrado.`);
 

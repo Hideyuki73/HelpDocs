@@ -154,7 +154,7 @@ export class FuncionarioService {
       }
       updateData.empresaId = this.empresaCollection.doc(data.empresaId);
     }
-    await docRef.update(updateData as any);
+    await docRef.update(updateData);
     const updated = await docRef.get();
     return this.mapFuncionario(updated);
   }
