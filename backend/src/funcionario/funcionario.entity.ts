@@ -1,5 +1,3 @@
-import { Empresa } from '../empresa/empresa.entity';
-
 export class Funcionario {
   id: string;
   nome: string;

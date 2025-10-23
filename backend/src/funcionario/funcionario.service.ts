@@ -164,8 +164,6 @@ export class FuncionarioService {
     if (!doc.exists) {
       throw new NotFoundException('Funcionário não encontrado');
     }
-
-    const funcionarioData = doc.data();
     const uid = doc.id; // O ID do documento é o UID do Firebase
 
     // Primeiro, tentamos deletar do Firebase Authentication

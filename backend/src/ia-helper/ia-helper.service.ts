@@ -59,7 +59,6 @@ export class IaHelperService {
   async getIaResponse(
     message: string,
     contextoDocumento: string,
-    usuarioId: string,
   ): Promise<string> {
     const prompt = `
 Você é um assistente de IA para documentação de software.

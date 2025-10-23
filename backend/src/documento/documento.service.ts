@@ -259,7 +259,7 @@ export class DocumentoService {
     // 🔹 Função utilitária para remover undefined
     const removeUndefined = (obj: Record<string, any>) => {
       return Object.fromEntries(
-        Object.entries(obj).filter(([_, v]) => v !== undefined),
+        Object.entries(obj).filter(([, v]) => v !== undefined),
       );
     };
 
