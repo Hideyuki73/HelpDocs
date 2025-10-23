@@ -1,0 +1,53 @@
+name: Backend CI/CD (NestJS to Firebase Functions)
+
+on:
+  push:
+    branches:
+      - main # Altere para o nome da sua branch principal, se necessário
+    paths:
+      - 'backend/**' # Gatilho apenas quando houver mudanças na pasta 'backend'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend # Define o diretório de trabalho para a pasta 'backend'
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use a versão do Node.js compatível com seu NestJS/Firebase Functions
+
+      - name: Instalar Dependências
+        run: npm install
+
+      # - name: 🧪 Executar Testes Unitários e de Integração
+      #   # Este passo é CRÍTICO. Se os testes falharem, o workflow para.
+      #   run: npm run test:cov # Assumindo que você tem um script 'test:cov' que executa todos os testes
+      #   env:
+      #     # Variáveis de ambiente de teste, se necessário
+      #     NODE_ENV: test
+
+      - name: 🚀 Deploy para Firebase Functions
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          # O token de serviço que você configurou no GitHub Secrets
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: 'helpdocs-46d7f' # <-- MUDAR: ID do seu projeto Firebase
+          channelId: 'live'
+          target: 'functions' # Alvo específico para o deploy do backend
+          entryPoint: './backend' # O ponto de entrada onde o firebase.json está (se for necessário)
+
+      - name: Notificar Sucesso
+        if: success()
+        run: echo "Deploy do Backend realizado com sucesso!"
+
+      - name: Notificar Falha
+        if: failure()
+        run: echo "Falha no deploy do Backend. Verifique os logs de teste."

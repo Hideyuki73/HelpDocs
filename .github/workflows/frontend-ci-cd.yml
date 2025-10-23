@@ -1,0 +1,65 @@
+name: Frontend CI/CD (Next.js to Firebase Hosting)
+
+on:
+  push:
+    branches:
+      - main # Altere para o nome da sua branch principal, se necessário
+    paths:
+      - 'frontend/**' # Gatilho apenas quando houver mudanças na pasta 'frontend'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend # Define o diretório de trabalho para a pasta 'frontend'
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use a versão do Node.js compatível com seu Next.js
+
+      - name: Instalar Dependências e Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+        run: npm install
+
+      # - name: 🧪 Executar Testes do Frontend (Unitários/E2E)
+      #   # Este passo é CRÍTICO. Se os testes falharem, o workflow para.
+      #   run: npm run test # Assumindo que você tem um script 'test' no seu package.json do frontend
+      #   env:
+      #     # Variáveis de ambiente de teste, se necessário
+      #     NODE_ENV: test
+
+      - name: 🏗️ Build do Next.js
+        run: npm run build # Cria a build de produção (geralmente na pasta .next)
+
+      - name: 🚀 Deploy para Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: 'helpdocs-46d7f' # <-- MUDAR: ID do seu projeto Firebase
+          channelId: 'live'
+          # O 'public' deve ser a pasta de saída da sua build do Next.js.
+          # Se você usar o Next.js com Firebase Hosting, a configuração no firebase.json
+          # (que deve estar na raiz do projeto) é crucial para apontar para a pasta correta.
+          # Geralmente, o Next.js usa o diretório '.next' ou 'out' (para export estático).
+          # Certifique-se de que seu firebase.json está configurado corretamente.
+          entryPoint: './frontend'
+
+      - name: Notificar Sucesso
+        if: success()
+        run: echo "Deploy do Frontend realizado com sucesso!"
+
+      - name: Notificar Falha
+        if: failure()
+        run: echo "Falha no deploy do Frontend. Verifique os logs de teste."
