@@ -75,7 +75,6 @@ export default function AuthLayout({
               </Text>
             </Text>
           )}
-
           {showRegisterLink && (
             <Text
               fontSize="sm"
