@@ -38,6 +38,6 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_TOKEN }}'
           channelId: live
-          projectId: seu-projeto-firebase-id
+          projectId: helpdocs-46d7f
           target: helpdocs-frontend
           entryPoint: ./frontend
