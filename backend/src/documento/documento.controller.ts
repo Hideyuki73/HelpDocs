@@ -166,6 +166,22 @@ export class DocumentoController {
     return this.documentoService.visualizarDocumento(slug, usuarioId);
   }
 
+  // 🔹 Reverter documento para uma versão anterior
+  @Patch(':id/reverter')
+  reverterDocumento(
+    @Param('id') id: string,
+    @Body('versaoId') versaoId: string,
+    @Query('usuarioId') usuarioId: string,
+  ) {
+    if (!usuarioId) {
+      throw new BadRequestException('usuarioId é obrigatório');
+    }
+    if (!versaoId) {
+      throw new BadRequestException('versaoId é obrigatório');
+    }
+    return this.documentoService.reverterDocumento(id, versaoId, usuarioId);
+  }
+
   // 🔹 Atualizar checklist do documento
   @Patch(':id/checklist')
   updateChecklist(
