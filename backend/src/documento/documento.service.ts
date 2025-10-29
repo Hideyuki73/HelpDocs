@@ -349,6 +349,59 @@ export class DocumentoService {
     return documentoAtualizado;
   }
 
+  async reverterDocumento(slug: string, versaoId: string, usuarioId: string) {
+    const docRef = this.collection.doc(slug);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      throw new NotFoundException('Documento não encontrado');
+    }
+
+    // 1. Buscar a versão histórica
+    const versaoHistorica = await this.versaoDocumentoService.findOne(versaoId);
+    if (!versaoHistorica) {
+      throw new NotFoundException('Versão histórica não encontrada');
+    }
+
+    // 2. Verificar permissão de edição (reutilizando a lógica de update)
+    const documentoData = doc.data();
+    const equipeId = documentoData?.equipeId?.id;
+    const equipeDoc = await this.equipeCollection.doc(equipeId).get();
+    const equipeData = equipeDoc.data();
+    const isMembro = equipeData?.membros?.some(
+      (ref: any) => ref.id === usuarioId,
+    );
+
+    if (!isMembro) {
+      throw new ForbiddenException(
+        'Você não tem permissão para reverter este documento.',
+      );
+    }
+
+    // 3. Preparar a atualização do documento principal
+    const novaVersaoNumero = (documentoData?.versao || 1) + 1;
+
+    const updateData = {
+      conteudo: versaoHistorica.conteudo, // Conteúdo da versão histórica
+      versao: novaVersaoNumero, // Novo número de versão
+      dataAtualizacao: new Date(),
+    };
+
+    // 4. Atualizar documento no Firestore
+    await docRef.update(updateData);
+    const updated = await docRef.get();
+    const documentoAtualizado = this.mapDocumento(updated);
+
+    // 5. Criar um novo registro no histórico de versões
+    await this.versaoDocumentoService.create({
+      documentoId: documentoAtualizado.id,
+      numeroVersao: documentoAtualizado.versao,
+      conteudo: documentoAtualizado.conteudo || '',
+      criadoPor: usuarioId, // O usuário que está revertendo o documento
+    });
+
+    return documentoAtualizado;
+  }
+
   async remove(slug: string, usuarioId: string) {
     console.log(
       `[DocumentoService] Tentando remover documento com SLUG: ${slug} pelo usuário: ${usuarioId}`,

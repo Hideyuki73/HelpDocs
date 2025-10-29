@@ -54,24 +54,21 @@ export async function criarVersaoDocumento(data: CreateVersaoDocumentoDto) {
   return response.data
 }
 
-// Restaurar uma versão específica (criar nova versão baseada em uma anterior)
+// Restaurar uma versão específica (chama o novo endpoint do backend)
 export async function restaurarVersaoDocumento(documentoId: string, versaoId: string, usuarioId: string) {
   const user = auth.currentUser
   if (!user) throw new Error('Usuário não autenticado')
   const token = await user.getIdToken()
 
-  // Primeiro, obter o conteúdo da versão a ser restaurada
-  const versaoAnterior = await obterVersaoDocumento(versaoId)
+  const response = await api.patch(
+    `/documentos/${documentoId}/reverter?usuarioId=${usuarioId}`,
+    { versaoId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
 
-  // Criar uma nova versão com o conteúdo da versão anterior
-  const novaVersao = await criarVersaoDocumento({
-    documentoId,
-    numeroVersao: Date.now(), // Usar timestamp como número da versão
-    conteudo: versaoAnterior.conteudo,
-    criadoPor: usuarioId,
-  })
-
-  return novaVersao
+  return response.data
 }
 
 // Comparar duas versões de um documento
