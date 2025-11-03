@@ -40,5 +40,4 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_HELPDOCS_46D7F }}'
           channelId: live
           projectId: helpdocs-46d7f
-          target: helpdocs-frontend
           entryPoint: ./frontend
