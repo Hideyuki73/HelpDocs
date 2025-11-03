@@ -226,7 +226,7 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
             colorScheme="blue"
             variant="outline"
             w="full"
-            onClick={() => redirect(`/documentos/${documento.id}/editar`)}
+            onClick={() => redirect(`/documentos/editar?slug=${documento.id}`)}
             leftIcon={<FaEye />}
           >
             Ver Documento

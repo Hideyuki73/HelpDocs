@@ -54,7 +54,7 @@ import {
 import { useState, useEffect, useRef } from 'react'
 import { ChatIA } from './ChatIA'
 import { HistoricoVersoes } from './HistoricoVersoes'
-import { ChecklistManager } from '../../../components/ChecklistManager'
+import { ChecklistManager } from '../../components/ChecklistManager'
 import { DocumentoEditorProps } from '../types'
 
 // Função simples para renderizar markdown básico

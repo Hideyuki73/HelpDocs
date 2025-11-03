@@ -36,7 +36,7 @@ import {
 } from 'react-icons/fa'
 import { useState, useRef } from 'react'
 import { Documento } from '../types'
-import { deletarDocumento, substituirDocumento } from '../../../../../action/documento'
+import { deletarDocumento, substituirDocumento } from '../../../../action/documento'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 

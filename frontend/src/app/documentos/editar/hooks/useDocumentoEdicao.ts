@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '@/config/firebase'
 import { useToast } from '@chakra-ui/react'
@@ -9,7 +9,7 @@ import { atualizarDocumento, carregarDocumentoAction, publicarDocumentoAction } 
 export function useDocumentoEdicao() {
   const [user, loadingUser] = useAuthState(auth)
   const router = useRouter()
-  const params = useParams()
+  const searchParams = useSearchParams()
   const toast = useToast()
 
   const [documento, setDocumento] = useState<Documento | null>(null)
@@ -28,10 +28,11 @@ export function useDocumentoEdicao() {
       return
     }
 
-    if (user && params.slug) {
-      fetchDocumento(params.slug as string, user.uid)
+    const slug = searchParams.get('slug')
+    if (user && slug) {
+      fetchDocumento(slug, user.uid)
     }
-  }, [user, loadingUser, params.slug, router])
+  }, [user, loadingUser, searchParams, router])
 
   const fetchDocumento = async (slug: string, userId: string) => {
     setLoadingDoc(true)

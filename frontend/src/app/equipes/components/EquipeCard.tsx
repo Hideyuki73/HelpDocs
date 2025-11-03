@@ -150,7 +150,7 @@ export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCa
                     icon={<FaComment />}
                     onClick={(e) => {
                       e.stopPropagation()
-                      router.push(`/equipes/${equipe.id}/chat`)
+                      router.push(`/equipes/chat?slug=${equipe.id}`)
                     }}
                   >
                     Abrir Chat
