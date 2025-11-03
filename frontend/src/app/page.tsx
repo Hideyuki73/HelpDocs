@@ -26,7 +26,6 @@ export default function HomePage() {
         align="center"
       >
         <Heading textAlign="center">Bem-vindo ao HelpDocs</Heading>
-
         <Text
           fontSize="lg"
           textAlign="center"
@@ -36,7 +35,6 @@ export default function HomePage() {
           Uma plataforma inteligente para documentação de software. Com suporte de IA, colaboração em equipe e
           segurança, você nunca mais vai esquecer uma etapa.
         </Text>
-
         <Stack
           direction={{ base: 'column', md: 'row' }}
           spacing={6}
@@ -59,7 +57,6 @@ export default function HomePage() {
             Criar Conta
           </Button>
         </Stack>
-
         <Box
           w="100%"
           mt={10}
@@ -102,7 +99,6 @@ export default function HomePage() {
             />
           </SimpleGrid>
         </Box>
-
         <Box
           mt={16}
           textAlign="center"
@@ -122,7 +118,6 @@ export default function HomePage() {
             desejam uma documentação mais eficiente, organizada e colaborativa.
           </Text>
         </Box>
-
         <Box
           mt={16}
           textAlign="center"
