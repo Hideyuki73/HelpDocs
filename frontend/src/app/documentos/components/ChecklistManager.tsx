@@ -30,7 +30,7 @@ import {
 } from '@chakra-ui/react'
 import { useState, useRef } from 'react'
 import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaCheckCircle, FaListUl, FaPercent } from 'react-icons/fa'
-import { ChecklistItem } from '../[slug]/editar/types'
+import { ChecklistItem } from '../editar/types'
 import { atualizarChecklistDocumento } from '@/action/documento'
 
 interface ChecklistManagerProps {
