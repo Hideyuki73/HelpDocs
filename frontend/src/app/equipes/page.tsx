@@ -37,7 +37,6 @@ export default function EquipesPage() {
   const [equipeParaEditar, setEquipeParaEditar] = useState<Equipe | null>(null)
 
   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
-
   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure()
 
   const bg = useColorModeValue('gray.50', 'gray.900')
