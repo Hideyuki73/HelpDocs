@@ -60,6 +60,8 @@ export class DocumentoService {
       );
     }
 
+    const checklistPlain = (data.checklist || []).map((item) => ({ ...item }));
+
     // Criação do documento com empresaId vindo do criador
     const docRef = await this.collection.add({
       titulo: data.titulo,
@@ -76,7 +78,7 @@ export class DocumentoService {
       dataAtualizacao: new Date(),
       versao: 1,
       status: data.status || 'rascunho',
-      checklist: data.checklist || [],
+      checklist: checklistPlain,
     });
 
     const doc = await docRef.get();
