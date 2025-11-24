@@ -204,15 +204,15 @@ export default function DocumentosPage() {
                     }}
                     gap={6}
                   >
-                    {documentos.map((documento) => (
-                      <DocumentoCard
-                        key={documento.id}
-                        documento={documento}
-                        onDelete={handleDelete}
-                        onEdit={atualizar}
-                        onAtribuir={handleAtribuirDocumento}
-                      />
-                    ))}
+                    {!!user &&
+                      documentos.map((documento) => (
+                        <DocumentoCard
+                          key={documento.id}
+                          documento={documento}
+                          onDelete={handleDelete}
+                          onAtribuir={handleAtribuirDocumento}
+                        />
+                      ))}
                   </Grid>
                 )}
               </TabPanel>

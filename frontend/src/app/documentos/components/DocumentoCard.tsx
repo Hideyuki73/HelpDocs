@@ -28,12 +28,11 @@ import { EquipeResponsavel } from './EquipeResponsavel'
 
 interface DocumentoCardProps {
   documento: Documento
-  onEdit: (id: string, dados: any, usuarioId: string) => void
   onDelete: (id: string) => void
   onAtribuir: (documento: Documento) => void
 }
 
-export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: DocumentoCardProps) {
+export function DocumentoCard({ documento, onDelete, onAtribuir }: DocumentoCardProps) {
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
@@ -71,12 +70,7 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
     return (
       <>
         {documento.equipeId ? (
-          <EquipeResponsavel
-            equipeId={documento.equipeId}
-            onEquipeChange={(equipe) => {
-              // Callback opcional
-            }}
-          />
+          <EquipeResponsavel equipeId={documento.equipeId} />
         ) : (
           <Alert
             status="warning"
@@ -114,12 +108,6 @@ export function DocumentoCard({ documento, onEdit, onDelete, onAtribuir }: Docum
               size="sm"
             />
             <MenuList>
-              <MenuItem
-                icon={<FaEdit />}
-                onClick={() => onEdit(documento.id, {}, 'user-id')}
-              >
-                Editar
-              </MenuItem>
               <MenuItem
                 icon={<FaUsers />}
                 onClick={() => onAtribuir(documento)}

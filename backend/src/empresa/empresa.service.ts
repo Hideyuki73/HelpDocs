@@ -3,7 +3,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { randomBytes } from 'crypto';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import * as admin from 'firebase-admin';
@@ -250,6 +249,8 @@ export class EmpresaService {
       cargo: admin.firestore.FieldValue.delete(),
     });
 
+    await this.removerFuncionarioDasEquipes(empresaId, funcionarioId);
+
     return { message: 'Funcionário removido da empresa com sucesso' };
   }
 
@@ -287,5 +288,38 @@ export class EmpresaService {
     });
 
     return { message: 'Você saiu da empresa com sucesso' };
+  }
+
+  private async removerFuncionarioDasEquipes(
+    empresaId: string,
+    funcionarioId: string,
+  ) {
+    const equipesSnapshot = await admin
+      .firestore()
+      .collection('equipes')
+      .where('empresaId', '==', empresaId)
+      .get();
+
+    const funcionarioRef = this.funcionarioCollection.doc(funcionarioId);
+
+    const batch = admin.firestore().batch();
+
+    equipesSnapshot.docs.forEach((doc) => {
+      const equipeData = doc.data();
+      const membros: admin.firestore.DocumentReference[] =
+        equipeData.membros || [];
+
+      // Verifica se o funcionário é membro da equipe
+      const isMembro = membros.some((ref) => ref.id === funcionarioId);
+
+      if (isMembro) {
+        // Remove a referência do funcionário do array 'membros'
+        batch.update(doc.ref, {
+          membros: admin.firestore.FieldValue.arrayRemove(funcionarioRef),
+        });
+      }
+    });
+
+    await batch.commit();
   }
 }
