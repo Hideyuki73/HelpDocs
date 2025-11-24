@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -40,7 +41,6 @@ export class EmpresaService {
     return { id: doc.id, ...doc.data() };
   }
 
-  // Entrar em empresa via convite
   async entrarPorConvite(funcionarioId: string, codigo: string) {
     const snapshot = await this.empresaCollection
       .where('conviteCodigo', '==', codigo)
@@ -53,37 +53,52 @@ export class EmpresaService {
     const empresaDoc = snapshot.docs[0];
     const empresaData = empresaDoc.data();
 
-    // Verificar se o funcionário já é membro da empresa
+    if (!empresaData.conviteExpiraEm) {
+      throw new BadRequestException(
+        'Este convite não possui data de expiração',
+      );
+    }
+
+    const agora = new Date();
+    const expiraEm = empresaData.conviteExpiraEm.toDate();
+
+    if (expiraEm < agora) {
+      await empresaDoc.ref.update({
+        conviteCodigo: null,
+        conviteExpiraEm: null,
+      });
+
+      throw new BadRequestException('O código de convite expirou');
+    }
+
     if (empresaData.membros.includes(funcionarioId)) {
-      // Se já for membro, apenas atualiza o empresaId e cargo do funcionário se necessário
       const funcionarioDoc = await this.funcionarioCollection
         .doc(funcionarioId)
         .get();
+
       if (
         funcionarioDoc.exists &&
         funcionarioDoc.data()?.empresaId !== empresaDoc.id
       ) {
         await this.funcionarioCollection.doc(funcionarioId).update({
           empresaId: empresaDoc.id,
-          cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
+          cargo: 'Desenvolvedor',
         });
       }
+
       return { id: empresaDoc.id, ...empresaData };
     }
 
-    // Adicionar funcionário à lista de membros da empresa
     await empresaDoc.ref.update({
-      membros: admin.firestore.FieldValue.arrayUnion(funcionarioId),
+      membros: [...empresaData.membros, funcionarioId],
     });
 
-    // Atualizar o campo empresaId e cargo no documento do funcionário
     await this.funcionarioCollection.doc(funcionarioId).update({
       empresaId: empresaDoc.id,
-      cargo: 'Desenvolvedor', // Cargo padrão ao entrar por convite
+      cargo: 'Desenvolvedor',
     });
 
-    const atualizado = await empresaDoc.ref.get();
-    return { id: atualizado.id, ...atualizado.data() };
+    return { id: empresaDoc.id, ...empresaData };
   }
 
   // Buscar todas empresas
@@ -153,10 +168,35 @@ export class EmpresaService {
   // Gerar código de convite
   async gerarConvite(empresaId: string) {
     const codigo = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getMinutes() + 5);
+
     await this.empresaCollection.doc(empresaId).update({
       conviteCodigo: codigo,
+      conviteExpiraEm: expiresAt,
     });
-    return { codigo };
+
+    return { codigo, expiraEm: expiresAt };
+  }
+
+  async validarConvite(codigo: string) {
+    const empresa = await this.empresaCollection
+      .where('conviteCodigo', '==', codigo)
+      .get();
+
+    if (empresa.empty) {
+      throw new Error('Código inválido');
+    }
+
+    const data = empresa.docs[0].data();
+    const agora = new Date();
+
+    if (data.conviteExpiraEm.toDate() < agora) {
+      throw new Error('Código expirado');
+    }
+
+    return data;
   }
 
   async deleteEmpresa(empresaId: string, usuarioUid: string) {
@@ -286,6 +326,8 @@ export class EmpresaService {
       empresaId: admin.firestore.FieldValue.delete(),
       cargo: admin.firestore.FieldValue.delete(),
     });
+
+    await this.removerFuncionarioDasEquipes(empresaId, funcionarioId);
 
     return { message: 'Você saiu da empresa com sucesso' };
   }
