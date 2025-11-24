@@ -127,16 +127,17 @@ export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCa
               </HStack>
             </VStack>
 
-            {canManage && (
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  icon={<FaBars />}
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <MenuList>
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<FaBars />}
+                variant="ghost"
+                size="sm"
+                onClick={(e) => e.stopPropagation()}
+              />
+
+              <MenuList>
+                {canManage && (
                   <MenuItem
                     icon={<FaEdit />}
                     onClick={(e) => {
@@ -146,30 +147,32 @@ export function EquipeCard({ equipe, onDelete, onEdit, onViewDetails }: EquipeCa
                   >
                     Editar
                   </MenuItem>
+                )}
+
+                {canDelete && (
                   <MenuItem
-                    icon={<FaComment />}
+                    icon={<FaTrash />}
+                    color="red.500"
                     onClick={(e) => {
                       e.stopPropagation()
-                      router.push(`/equipes/chat?slug=${equipe.id}`)
+                      onOpen()
                     }}
                   >
-                    Abrir Chat
+                    Apagar equipe
                   </MenuItem>
-                  {canDelete && (
-                    <MenuItem
-                      icon={<FaTrash />}
-                      color="red.500"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onOpen()
-                      }}
-                    >
-                      Apagar equipe
-                    </MenuItem>
-                  )}
-                </MenuList>
-              </Menu>
-            )}
+                )}
+
+                <MenuItem
+                  icon={<FaComment />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/equipes/chat?slug=${equipe.id}`)
+                  }}
+                >
+                  Abrir Chat
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </HStack>
         </CardHeader>
 
