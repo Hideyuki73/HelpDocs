@@ -50,6 +50,7 @@ import {
   FaFileAlt,
   FaClock,
   FaListUl,
+  FaDownload,
 } from 'react-icons/fa'
 import { useState, useEffect, useRef } from 'react'
 import { ChatIA } from './ChatIA'
@@ -199,6 +200,62 @@ export function DocumentoEditor({
         isClosable: true,
       })
     }
+  }
+
+  // Função para download do conteúdo em formato Markdown
+  const handleDownloadMarkdown = () => {
+    // Verifica se há conteúdo para baixar
+    if (!formData.conteudo || formData.conteudo.trim() === '') {
+      toast({
+        title: 'Conteúdo vazio',
+        description: 'Não há conteúdo para baixar.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
+    }
+
+    // Define o nome do arquivo baseado no título
+    const nomeArquivo = formData.titulo ? `${formData.titulo.trim().replace(/[/\\?%*:|"<>]/g, '-')}.md` : 'documento.md'
+
+    // Cria o conteúdo do arquivo com título e descrição (se existirem)
+    let conteudoCompleto = ''
+
+    if (formData.titulo) {
+      conteudoCompleto += `# ${formData.titulo}\n\n`
+    }
+
+    if (formData.descricao) {
+      conteudoCompleto += `> ${formData.descricao}\n\n---\n\n`
+    }
+
+    conteudoCompleto += formData.conteudo
+
+    // Cria um blob com o conteúdo
+    const blob = new Blob([conteudoCompleto], { type: 'text/markdown;charset=utf-8' })
+
+    // Cria um link temporário para download
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nomeArquivo
+
+    // Dispara o download
+    document.body.appendChild(link)
+    link.click()
+
+    // Limpa os recursos
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    toast({
+      title: 'Download iniciado!',
+      description: `Arquivo "${nomeArquivo}" foi baixado com sucesso.`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    })
   }
 
   const toggleFullscreen = () => {
@@ -374,6 +431,17 @@ export function DocumentoEditor({
                       orientation="vertical"
                       h="20px"
                     />
+
+                    <Tooltip label="Baixar como Markdown">
+                      <IconButton
+                        aria-label="Download Markdown"
+                        icon={<FaDownload />}
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDownloadMarkdown}
+                        colorScheme="teal"
+                      />
+                    </Tooltip>
 
                     <Tooltip label="Configurações">
                       <IconButton
@@ -619,6 +687,7 @@ export function DocumentoEditor({
                           value={formData.conteudo}
                           onChange={onFormChange}
                           placeholder="Digite o conteúdo do documento aqui... 
+
 
 Dicas de formatação Markdown:
 - Use # para títulos principais
