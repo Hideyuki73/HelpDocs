@@ -166,14 +166,12 @@ export class FuncionarioService {
     }
 
     const funcionarioData = doc.data();
-    const uid = doc.id; // O ID do documento é o UID do Firebase
+    const uid = doc.id;
 
     // Primeiro, tentamos deletar do Firebase Authentication
     try {
       await auth().deleteUser(uid);
-      console.log(
-        `Usuário ${uid} deletado do Firebase Authentication com sucesso`,
-      );
+      console.log(`Usuário deletado do Firebase Authentication com sucesso`);
     } catch (firebaseError) {
       console.error(
         'Erro ao deletar usuário do Firebase Authentication:',
@@ -197,7 +195,7 @@ export class FuncionarioService {
     // Depois deletamos do Firestore
     try {
       await docRef.delete();
-      console.log(`Funcionário ${uid} deletado do Firestore com sucesso`);
+      console.log(`Funcionário deletado do Firestore com sucesso`);
       return {
         message: 'Funcionário e usuário do Firebase deletados com sucesso',
       };
