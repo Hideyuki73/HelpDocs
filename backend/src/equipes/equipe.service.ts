@@ -305,11 +305,14 @@ export class EquipeService {
   }
 
   async getEquipeStats(usuarioId: string) {
-    console.log(`[EquipeService] Tentando obter estatísticas para o usuário: ${usuarioId}`);
+    console.log(
+      `[EquipeService] Tentando obter estatísticas para o usuário: ${usuarioId}`,
+    );
+
     const usuarioDoc = await this.funcionarioCollection.doc(usuarioId).get();
     if (!usuarioDoc.exists) {
       console.log(`[EquipeService] Usuário ${usuarioId} não encontrado.`);
-      throw new NotFoundException("Usuário não encontrado.");
+      throw new NotFoundException('Usuário não encontrado.');
     }
     console.log(`[EquipeService] Usuário ${usuarioId} encontrado.`);
 
@@ -325,6 +328,7 @@ export class EquipeService {
       );
     }
 
+    // Busca todas as equipes da empresa
     const snapshot = await this.equipeCollection
       .where('empresaId', '==', usuarioData.empresaId)
       .get();
@@ -333,14 +337,48 @@ export class EquipeService {
       snapshot.docs.map((doc) => this.mapEquipe(doc)),
     );
 
+    console.log(
+      `[EquipeService] Total de equipes encontradas: ${equipes.length}`,
+    );
+
+    // Busca documentos para TODAS as equipes em paralelo
+    const documentoCollection = this.firestore.collection('documentos');
+
+    const equipesComDocumentosChecks = await Promise.all(
+      equipes.map(async (equipe) => {
+        const documentosSnapshot = await documentoCollection
+          .where('equipeId', '==', this.equipeCollection.doc(equipe.id))
+          .get();
+
+        const temDocumentos = !documentosSnapshot.empty;
+
+        if (temDocumentos) {
+          console.log(
+            `[EquipeService] Equipe ${equipe.nome} (${equipe.id}) possui ${documentosSnapshot.size} documento(s)`,
+          );
+        } else {
+          console.log(
+            `[EquipeService] Equipe ${equipe.nome} (${equipe.id}) não possui documentos`,
+          );
+        }
+
+        return temDocumentos;
+      }),
+    );
+
+    // Conta quantas equipes têm documentos
+    const equipesComDocumento =
+      equipesComDocumentosChecks.filter(Boolean).length;
+
     const totalEquipes = equipes.length;
     const totalMembros = equipes.reduce(
       (acc, equipe) => acc + equipe.membros.length,
       0,
     );
-    const equipesComDocumento = equipes.filter(
-      (equipe) => equipe.documentoId,
-    ).length;
+
+    console.log(
+      `[EquipeService] Estatísticas finais: ${equipesComDocumento} equipes com documentos de ${totalEquipes} equipes totais`,
+    );
 
     return {
       totalEquipes,
