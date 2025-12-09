@@ -173,12 +173,6 @@ O **HelpDocs** surge como uma solução inteligente, utilizando IA para:
 
 ---
 
-## 🚧 **Status do Projeto**
-
-> 🔄 **Em desenvolvimento**
-
----
-
 ## 🤝 **Licença**
 
 Este projeto é de caráter acadêmico e não possui uma licença definida para distribuição comercial no momento.
@@ -189,7 +183,7 @@ Este projeto é de caráter acadêmico e não possui uma licença definida para 
 
 ### 🔧 **Pré-requisitos**
 
-- Node.js (versão 18.x ou superior)
+- Node.js (versão 22.x ou superior)
 - Git
 - Firebase CLI
 
