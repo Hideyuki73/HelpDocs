@@ -248,29 +248,3 @@ npm start
 
 - Realize testes de usabilidade e compatibilidade nos principais navegadores.
 
----
-
-# 📚 Referências e Fontes
-
-### Artigos e Estudos
-
--   https://moldstud.com/articles/p-the-importance-of-software-documentation\
--   https://moldstud.com/articles/p-importance-of-documentation-in-software-product-development\
--   https://www.careervira.com/advice/learn-advice/documentation-in-software-development\
--   https://arxiv.org/abs/2408.05829\
--   https://arxiv.org/abs/2308.09940
-
-### Boas Práticas e Modelos
-
--   https://github.com/mende1/guia-definitivo-de-markdown\
--   https://gist.github.com/reginadiana/e044fe93ed81aa04a10361cb841c0409\
--   https://readmegen.guilhermeft.dev\
--   https://www.markdownlang.com/pt/advanced/best-practices/\
--   https://www.dio.me/articles/modelo-de-readmemd-para-projetos-76518eb9ad2b
-
-### Engenharia de Software
-
--   IEEE Std 830-1998\
--   SWEBOK\
--   https://google.github.io/eng-practices/
-
